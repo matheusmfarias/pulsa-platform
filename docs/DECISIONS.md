@@ -200,3 +200,61 @@ This supports coverage targets, replacement deadlines, admission deadlines and i
 Benchmark analysis identified potential future domains including StaffingNeed, AdmissionProcess, TimeTrackingIntegration, Timesheet, ClientApproval, EmployeeRequest and NotificationIntegration.
 
 These concepts must be documented but not implemented speculatively.
+
+---
+
+## ADR-019 — Transaction boundary with the Supabase Data API
+
+**Status:** Accepted
+
+The Supabase JavaScript client does not expose an explicit multi-statement transaction
+boundary across independent Data API calls.
+
+Foundation Core therefore does not introduce a transaction abstraction or emulate
+atomicity with sequential requests. When the first domain mutation requires atomic
+business data, domain event and audit event writes, the default strategy will be a
+purpose-specific PostgreSQL function invoked through Supabase RPC. A direct server-side
+PostgreSQL connection may be evaluated instead if a concrete workload justifies it.
+
+---
+
+## ADR-020 — Internal RBAC boundary
+
+**Status:** Accepted
+
+Each active `organization_members` row has exactly one internal role. The role-to-permission
+matrix is defined centrally in TypeScript using `entity:action` permissions, and application
+services enforce permissions before repository access.
+
+PostgreSQL RLS remains responsible for organization isolation and active membership only.
+Roles and permissions are intentionally not duplicated in RLS policies or permission tables.
+
+---
+
+## ADR-021 — Atomic append-only business audit
+
+**Status:** Accepted
+
+Existing business mutations are executed by small entity-specific PostgreSQL functions.
+Each function changes the business row and appends its `audit_events` row in the same
+transaction. Authenticated clients cannot bypass these functions with direct writes to the
+audited business tables, and they receive no direct privileges on `audit_events`.
+
+Audit metadata stores changed field names and only the minimum safe before/after state.
+Worker PII values are never copied into metadata. Generic audit triggers, Domain Events and
+an audit UI remain outside this decision.
+
+---
+
+## ADR-022 — Minimum temporal protection for Assignments
+
+**Status:** Accepted
+
+A new Assignment requires an active Worker and an active Position in the same Organization.
+For the same Worker, date ranges are mutually exclusive while Assignments are `pending` or
+`active`; both boundary dates are inclusive. PostgreSQL enforces this invariant with an
+exclusion constraint so concurrent writes cannot bypass it.
+
+This decision does not restrict simultaneous relationships by Unit or Operation. Those rules
+remain behind the Operational Discovery gate. The current RBAC matrix gives SUPERVISOR read
+access only, following the Assignments phase definition.

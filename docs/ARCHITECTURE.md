@@ -245,7 +245,7 @@ Legenda:
 | Operations | CRUD | CRUD | R | R | R | R |
 | Units/Positions | CRUD | CRUD | R/U | R | R | R |
 | Workers | CRUD | R | R | CRUD | R | R |
-| Assignments | CRUD | CRUD | R/U | R/U | R | R |
+| Assignments | CRUD | CRUD | R | R/U | R | R |
 | Shifts | CRUD | CRUD | CRU | R | R | R |
 | Attendance | CRUD | R/U | CRU | R/U | R | R |
 | Occurrences | CRUD | CRU | CRU | R | R | R |
