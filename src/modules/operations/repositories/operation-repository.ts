@@ -7,7 +7,7 @@ import type {
 } from "../schemas/operation-schemas";
 
 const OPERATION_WITH_CONTEXT_SELECT =
-  "*, contract:contracts!inner(id, name, status, client:clients!inner(id, trade_name, status, organization_id))";
+  "*, manager:profiles(id, display_name), contract:contracts!inner(id, name, status, client:clients!inner(id, trade_name, status, organization_id))";
 
 export async function findOperations(filters: OperationListFilters) {
   const supabase = await createServerSupabaseClient();

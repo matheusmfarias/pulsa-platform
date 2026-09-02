@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { PermissionGate } from "@/modules/authorization";
 import {
   formatCpf,
-  listWorkers,
+  listWorkersWithCurrentAssignment,
   workerListFiltersSchema,
   WorkerStatusBadge,
 } from "@/modules/workers";
@@ -26,7 +26,7 @@ export default async function WorkersPage({
   });
   let workers;
   try {
-    workers = await listWorkers(filters);
+    workers = await listWorkersWithCurrentAssignment(filters);
   } catch (error) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -44,7 +44,7 @@ export default async function WorkersPage({
           <p className="text-sm font-medium text-primary">Pessoas</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">Colaboradores</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Pessoas elegíveis para futuras alocações operacionais.
+            Cadastro e situação dos colaboradores da organização.
           </p>
         </div>
         <PermissionGate permission="worker:create">
@@ -56,7 +56,7 @@ export default async function WorkersPage({
           </Button>
         </PermissionGate>
       </div>
-      <form className="mt-8 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
+      <form className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground"
@@ -87,7 +87,7 @@ export default async function WorkersPage({
         </Button>
       </form>
       {workers.length === 0 ? (
-        <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-14 text-center">
+        <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-10 text-center">
           <h2 className="font-medium">Nenhum colaborador encontrado</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Ajuste os filtros ou cadastre o primeiro colaborador.
@@ -102,12 +102,13 @@ export default async function WorkersPage({
                   <th className="px-5 py-3 font-medium">Nome</th>
                   <th className="px-5 py-3 font-medium">CPF</th>
                   <th className="px-5 py-3 font-medium">Contato</th>
+                  <th className="px-5 py-3 font-medium">Alocação atual</th>
                   <th className="px-5 py-3 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {workers.map((worker) => (
-                  <tr key={worker.id} className="hover:bg-muted/35">
+                  <tr key={worker.id} className="hover:bg-hover">
                     <td className="px-5 py-4 font-medium">
                       <Link
                         className="hover:underline"
@@ -121,6 +122,21 @@ export default async function WorkersPage({
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">
                       {worker.email ?? worker.phone ?? "Não informado"}
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground">
+                      {worker.currentAssignment ? (
+                        <>
+                          {worker.currentAssignment.position.job_role.name} · {" "}
+                          <Link
+                            className="hover:underline"
+                            href={`/app/units/${worker.currentAssignment.position.unit.id}`}
+                          >
+                            {worker.currentAssignment.position.unit.name}
+                          </Link>
+                        </>
+                      ) : (
+                        "Sem alocação"
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <WorkerStatusBadge status={worker.status} />

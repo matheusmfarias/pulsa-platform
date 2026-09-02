@@ -16,7 +16,11 @@ export type PositionWithContext = Position & {
     id: string;
     name: string;
     status: "active" | "inactive";
-    operation: { id: string; name: string };
+    operation: {
+      id: string;
+      name: string;
+      contract: { id: string; client: { id: string; trade_name: string } };
+    };
   };
 };
 
@@ -50,7 +54,11 @@ export function parsePositionWithContext(
       id: string;
       name: string;
       status: string;
-      operation: { id: string; name: string };
+      operation: {
+        id: string;
+        name: string;
+        contract: { id: string; client: { id: string; trade_name: string } };
+      };
     };
   },
 ): PositionWithContext {

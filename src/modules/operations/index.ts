@@ -21,5 +21,6 @@ export {
 export { changeOperationStatus } from "./services/change-operation-status";
 export { createOperation } from "./services/create-operation";
 export { getOperationById } from "./services/get-operation-by-id";
+export { getOperationOperationalDetail } from "./services/get-operation-operational-detail";
 export { listOperations } from "./services/list-operations";
 export { updateOperation } from "./services/update-operation";

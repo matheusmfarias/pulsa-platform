@@ -4,10 +4,10 @@ import {
 } from "../domain/worker";
 
 const STATUS_STYLES: Record<WorkerStatus, string> = {
-  onboarding: "border-blue-200 bg-blue-50 text-blue-700",
-  active: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  inactive: "border-neutral-200 bg-neutral-100 text-neutral-600",
-  terminated: "border-red-200 bg-red-50 text-red-700",
+  onboarding: "border-info/25 bg-info/10 text-info",
+  active: "border-success/25 bg-success/10 text-success",
+  inactive: "border-border bg-muted text-muted-foreground",
+  terminated: "border-danger/25 bg-danger/10 text-danger",
 };
 
 export function WorkerStatusBadge({ status }: { status: WorkerStatus }) {

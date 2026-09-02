@@ -18,7 +18,14 @@ const jobRolesMigration = readFileSync(
   ),
   "utf8",
 );
-const migration = `${rbacMigration}\n${jobRolesMigration}`;
+const administrationMigration = readFileSync(
+  new URL(
+    "../../supabase/migrations/20260901100000_administration_foundation.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const migration = `${rbacMigration}\n${jobRolesMigration}\n${administrationMigration}`;
 
 const mutationPermissions = [
   ["client", "client:create", "client:update"],

@@ -23,7 +23,12 @@ describe("authorization", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("implements representative entries from the role matrix", () => {
-    expect(ROLE_PERMISSIONS.DIRECTOR).toHaveLength(24);
+    expect(ROLE_PERMISSIONS.DIRECTOR).toHaveLength(27);
+    expect(can({ role: "DIRECTOR" }, "organization_member:read")).toBe(true);
+    expect(can({ role: "DIRECTOR" }, "organization_member:update")).toBe(true);
+    expect(can({ role: "DIRECTOR" }, "audit:read")).toBe(true);
+    expect(can({ role: "OPERATIONS_MANAGER" }, "organization_member:read")).toBe(false);
+    expect(can({ role: "ADMINISTRATIVE" }, "audit:read")).toBe(false);
     expect(can({ role: "OPERATIONS_MANAGER" }, "operation:update")).toBe(
       true,
     );

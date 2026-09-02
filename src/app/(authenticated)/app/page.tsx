@@ -105,28 +105,28 @@ export default async function InternalHomePage() {
         </article>
       </section>
 
-      <section className="mt-6 rounded-lg border bg-card px-4 py-3.5" aria-labelledby="attention-heading">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="size-4 text-muted-foreground" aria-hidden="true" />
+      <section className="mt-6 rounded-lg border bg-card" aria-labelledby="attention-heading">
+        <div className="flex items-center gap-2 border-b px-4 py-3">
+          <AlertTriangle className={`size-4 ${hasAttention ? "text-warning" : "text-muted-foreground"}`} aria-hidden="true" />
           <h2 id="attention-heading" className="font-semibold">Requer atenção</h2>
         </div>
         {hasAttention ? (
-          <div className="mt-2 divide-y">
+          <div className="divide-y px-4">
             {overview.attention.underfilledPositions > 0 ? (
-              <Link href="/app/positions" className="group flex flex-col gap-1.5 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <Link href="/app/positions" className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm font-medium transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <span className="flex items-center gap-2.5"><MapPin className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />{overview.attention.underfilledPositions} postos abaixo do efetivo base</span>
                 <span className="flex shrink-0 items-center gap-1 pl-6.5 text-xs text-muted-foreground group-hover:text-foreground sm:pl-0">Ver postos <ArrowRight className="size-3.5" aria-hidden="true" /></span>
               </Link>
             ) : null}
             {overview.attention.activeWorkersWithoutAssignment > 0 ? (
-              <Link href="/app/workers" className="group flex flex-col gap-1.5 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <Link href="/app/workers" className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm font-medium transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <span className="flex items-center gap-2.5"><Users className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />{overview.attention.activeWorkersWithoutAssignment} colaboradores ativos sem alocação ativa</span>
                 <span className="flex shrink-0 items-center gap-1 pl-6.5 text-xs text-muted-foreground group-hover:text-foreground sm:pl-0">Ver colaboradores <ArrowRight className="size-3.5" aria-hidden="true" /></span>
               </Link>
             ) : null}
           </div>
         ) : (
-          <p className="mt-2 flex items-center gap-2 py-2 text-sm text-muted-foreground"><CheckCircle2 className="size-4 text-primary" aria-hidden="true" />Nenhuma pendência operacional identificada.</p>
+          <p className="flex items-center gap-2 px-4 py-4 text-sm text-muted-foreground"><CheckCircle2 className="size-4 text-success" aria-hidden="true" />Nenhuma pendência operacional identificada.</p>
         )}
       </section>
 

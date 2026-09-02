@@ -49,14 +49,14 @@ export default async function OperationsPage() {
       </div>
 
       {operations.length === 0 ? (
-        <section className="mt-8 rounded-lg border border-dashed bg-card px-6 py-14 text-center">
+        <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-10 text-center">
           <h2 className="font-medium">Nenhuma operação encontrada</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Cadastre a primeira operação para começar.
           </p>
         </section>
       ) : (
-        <div className="mt-8 overflow-hidden rounded-lg border bg-card">
+        <div className="mt-6 overflow-hidden rounded-lg border bg-card">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="border-b bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
@@ -71,7 +71,7 @@ export default async function OperationsPage() {
               </thead>
               <tbody className="divide-y">
                 {operations.map((operation) => (
-                  <tr key={operation.id} className="hover:bg-muted/35">
+                  <tr key={operation.id} className="hover:bg-hover">
                     <td className="px-5 py-4 font-medium">
                       <Link className="hover:underline" href={`/app/operations/${operation.id}`}>
                         {operation.name}

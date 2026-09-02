@@ -16,11 +16,27 @@ import {
 
 const initialState: OperationActionState = { error: null };
 
+function transitionActionLabel(
+  currentStatus: OperationStatus,
+  targetStatus: OperationStatus,
+): string {
+  if (currentStatus === "planning" && targetStatus === "implementation") return "Avançar para implantação";
+  if (currentStatus === "suspended" && targetStatus === "active") return "Reativar operação";
+  if (currentStatus === "closing" && targetStatus === "active") return "Retomar operação";
+  if (targetStatus === "active") return "Ativar operação";
+  if (targetStatus === "suspended") return "Suspender operação";
+  if (targetStatus === "closing") return "Iniciar encerramento";
+  if (targetStatus === "closed") return "Encerrar operação";
+  return `Alterar para ${OPERATION_STATUS_LABELS[targetStatus]}`;
+}
+
 function OperationTransitionButton({
   operationId,
+  currentStatus,
   targetStatus,
 }: {
   operationId: string;
+  currentStatus: OperationStatus;
   targetStatus: OperationStatus;
 }) {
   const action = changeOperationStatusAction.bind(
@@ -34,7 +50,7 @@ function OperationTransitionButton({
     <div>
       <form action={formAction}>
         <Button type="submit" variant="outline" disabled={pending}>
-          {pending ? "Atualizando…" : OPERATION_STATUS_LABELS[targetStatus]}
+          {pending ? "Atualizando…" : transitionActionLabel(currentStatus, targetStatus)}
         </Button>
       </form>
       {state.error ? (
@@ -69,6 +85,7 @@ export function OperationStatusAction({
         <OperationTransitionButton
           key={targetStatus}
           operationId={operationId}
+          currentStatus={currentStatus}
           targetStatus={targetStatus}
         />
       ))}

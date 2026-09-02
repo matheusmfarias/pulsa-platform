@@ -1,35 +1,29 @@
 import { ArrowLeft, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
 import { Button } from "@/components/ui/button";
-import { AssignmentStatusBadge, listAssignments } from "@/modules/assignments";
+import { AssignmentStatusBadge } from "@/modules/assignments";
 import { PermissionGate } from "@/modules/authorization";
-import { getPositionById, positionIdSchema, PositionStatusAction, PositionStatusBadge } from "@/modules/positions";
+import { getPositionOperationalDetail, positionIdSchema, PositionStatusAction, PositionStatusBadge } from "@/modules/positions";
 import { unitIdSchema } from "@/modules/units";
+import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+
+function formatDate(value: string | null): string { return value ? new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "Em aberto"; }
 
 export default async function PositionDetailsPage({ params }: PageProps<"/app/units/[unitId]/positions/[positionId]">) {
-  const values = await params;
-  const unitId = unitIdSchema.safeParse(values.unitId);
-  const positionId = positionIdSchema.safeParse(values.positionId);
-  if (!unitId.success || !positionId.success) notFound();
-  const [position, assignments] = await Promise.all([
-    getPositionById(positionId.data),
-    listAssignments({ positionId: positionId.data }),
-  ]);
-  if (position.unit.id !== unitId.data) notFound();
-  return (
-    <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <Button asChild variant="outline" size="sm"><Link href={`/app/units/${unitId.data}`}><ArrowLeft className="size-4" />Voltar para unidade</Link></Button>
-      <div className="mt-6 flex items-start justify-between gap-4">
-        <div><div className="flex items-center gap-3"><h1 className="text-2xl font-semibold">{position.job_role.name}</h1><PositionStatusBadge status={position.status} /></div><p className="mt-2 text-sm text-muted-foreground">{position.unit.name}</p></div>
-        <PermissionGate permission="position:update"><Button asChild variant="outline"><Link href={`/app/units/${unitId.data}/positions/${position.id}/edit`}><Pencil className="size-4" />Editar</Link></Button></PermissionGate>
-      </div>
-      <section className="mt-8 rounded-lg border bg-card p-6"><dl className="grid gap-6 sm:grid-cols-2"><div><dt className="text-xs uppercase text-muted-foreground">Efetivo base</dt><dd className="mt-2 text-sm">{position.base_required_headcount}</dd></div><div><dt className="text-xs uppercase text-muted-foreground">Descrição</dt><dd className="mt-2 text-sm">{position.description ?? "Não informada"}</dd></div></dl><div className="mt-6"><PermissionGate permission="position:update"><PositionStatusAction positionId={position.id} currentStatus={position.status} /></PermissionGate></div></section>
-      <section className="mt-6 rounded-lg border bg-card">
-        <div className="flex items-center justify-between border-b px-6 py-4"><div><h2 className="font-semibold">Alocações</h2><p className="mt-1 text-sm text-muted-foreground">Histórico de colaboradores neste posto.</p></div>{position.status === "active" ? <PermissionGate permission="assignment:create"><Button asChild size="sm"><Link href={`/app/assignments/new?positionId=${position.id}`}><Plus className="size-4" />Nova alocação</Link></Button></PermissionGate> : null}</div>
-        {assignments.length === 0 ? <p className="p-6 text-sm text-muted-foreground">Nenhuma alocação relacionada.</p> : <ul className="divide-y">{assignments.map((assignment) => <li key={assignment.id} className="flex items-center justify-between px-6 py-4"><div><Link className="font-medium hover:underline" href={`/app/assignments/${assignment.id}`}>{assignment.worker.full_name}</Link><p className="mt-1 text-sm text-muted-foreground">{assignment.start_date} — {assignment.end_date ?? "em aberto"}</p></div><AssignmentStatusBadge status={assignment.status} /></li>)}</ul>}
-      </section>
-    </main>
-  );
+  const values = await params; const unitId = unitIdSchema.safeParse(values.unitId); const positionId = positionIdSchema.safeParse(values.positionId); if (!unitId.success || !positionId.success) notFound();
+  let detail; try { detail = await getPositionOperationalDetail(positionId.data); } catch (error) { if (isAppError(error) && error.code === "NOT_FOUND") notFound(); return <main className="mx-auto max-w-5xl px-4 py-10"><p className="text-sm text-destructive">{toPublicErrorMessage(error)}</p></main>; }
+  const { position, assignments, activeAssignments, occupancy } = detail; if (position.unit.id !== unitId.data) notFound();
+  const historicalAssignments = assignments.filter((assignment) => assignment.status !== "active");
+  return <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <Button asChild variant="outline" size="sm"><Link href={`/app/units/${unitId.data}`}><ArrowLeft className="size-4" />Voltar para unidade</Link></Button>
+    <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:justify-between"><div><div className="flex items-center gap-3"><h1 className="text-2xl font-semibold">{position.job_role.name}</h1><PositionStatusBadge status={position.status} /></div><p className="mt-2 text-sm text-muted-foreground">Cliente: <Link className="font-medium text-foreground hover:underline" href={`/app/clients/${position.unit.operation.contract.client.id}`}>{position.unit.operation.contract.client.trade_name}</Link> · Unidade: <Link className="font-medium text-foreground hover:underline" href={`/app/units/${position.unit.id}`}>{position.unit.name}</Link> · Operação: <Link className="font-medium text-foreground hover:underline" href={`/app/operations/${position.unit.operation.id}`}>{position.unit.operation.name}</Link></p></div><PermissionGate permission="position:update"><Button asChild variant="outline"><Link href={`/app/units/${unitId.data}/positions/${position.id}/edit`}><Pencil className="size-4" />Editar</Link></Button></PermissionGate></div>
+    <dl className="mt-6 grid divide-y rounded-lg border bg-card sm:grid-cols-3 sm:divide-x sm:divide-y-0"><Metric label="Efetivo base" value={occupancy.baseRequiredHeadcount} /><Metric label="Ocupação" value={`${occupancy.activeAssignments} de ${occupancy.baseRequiredHeadcount}`} /><Metric label="Déficit" value={occupancy.deficit} /></dl>
+    <section className="mt-6 rounded-lg border bg-card p-5"><Detail label="Descrição" value={position.description ?? "Não informada"} /><div className="mt-5 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Status do posto</span><PositionStatusBadge status={position.status} /></div><PermissionGate permission="position:update"><PositionStatusAction positionId={position.id} currentStatus={position.status} /></PermissionGate></div></section>
+    <section className="mt-6 rounded-lg border bg-card"><div className="flex items-center justify-between border-b px-5 py-4"><div><h2 className="font-semibold">Alocações ativas</h2><p className="mt-1 text-sm text-muted-foreground">Ocupação atual deste posto.</p></div>{position.status === "active" ? <PermissionGate permission="assignment:create"><Button asChild size="sm"><Link href={`/app/assignments/new?positionId=${position.id}`}><Plus className="size-4" />Nova alocação</Link></Button></PermissionGate> : null}</div><AssignmentList assignments={activeAssignments} empty="Não há alocações ativas neste posto." /></section>
+    <section className="mt-6 rounded-lg border bg-card"><div className="border-b px-5 py-4"><h2 className="font-semibold">Histórico de alocações</h2><p className="mt-1 text-sm text-muted-foreground">Inclui alocações pendentes, suspensas, finalizadas e canceladas.</p></div><AssignmentList assignments={historicalAssignments} empty="Não há histórico adicional de alocações." /></section>
+  </main>;
 }
+function AssignmentList({ assignments, empty }: { assignments: Awaited<ReturnType<typeof getPositionOperationalDetail>>["assignments"]; empty: string }) { return assignments.length === 0 ? <p className="px-5 py-6 text-sm text-muted-foreground">{empty}</p> : <ul className="divide-y">{assignments.map((assignment) => <li key={assignment.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><div><Link href={`/app/workers/${assignment.worker.id}`} className="font-medium hover:underline">{assignment.worker.full_name}</Link><p className="mt-1 text-sm text-muted-foreground">{formatDate(assignment.start_date)} — {formatDate(assignment.end_date)} · <Link className="hover:underline" href={`/app/assignments/${assignment.id}`}>Ver alocação</Link></p></div><AssignmentStatusBadge status={assignment.status} /></li>)}</ul>; }
+function Metric({ label, value }: { label: string; value: number | string }) { return <div className="p-4"><dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt><dd className="mt-1 text-xl font-semibold tabular-nums">{value}</dd></div>; }
+function Detail({ label, value }: { label: string; value: string }) { return <div><dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt><dd className="mt-1 text-sm">{value}</dd></div>; }

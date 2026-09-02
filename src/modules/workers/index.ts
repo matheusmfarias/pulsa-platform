@@ -8,5 +8,7 @@ export * from "./schemas/worker-schemas";
 export * from "./services/change-worker-status";
 export * from "./services/create-worker";
 export * from "./services/get-worker-by-id";
+export * from "./services/get-worker-operational-detail";
 export * from "./services/list-workers";
+export * from "./services/list-workers-with-current-assignment";
 export * from "./services/update-worker";

@@ -61,18 +61,18 @@ src/
     shared/
   modules/
     auth/
+    authorization/
     organizations/
     clients/
     contracts/
     operations/
     units/
+    job-roles/
     positions/
     workers/
     assignments/
-    scheduling/
-    attendance/
-    occurrences/
-    performance/
+    overview/
+    administration/
   shared/
     auth/
     db/
@@ -145,8 +145,6 @@ Exemplos:
 - createContract()
 - createOperation()
 - activateAssignment()
-- registerAttendance()
-- resolveOccurrence()
 
 Server Actions e Route Handlers são adapters de entrada, não o local das regras de negócio.
 
@@ -160,17 +158,12 @@ Princípio:
 
 ```txt
 business mutation
-+ domain event
 + audit event
 = same transaction
 ```
 
-A estratégia técnica concreta para transações será escolhida durante Foundation.
-
-Opções aceitáveis incluem:
-
-- PostgreSQL functions/RPCs para operações críticas;
-- conexão server-side capaz de transações explícitas.
+Na Foundation implementada, mutações críticas usam funções PostgreSQL/RPC específicas por
+entidade. Domain events são uma capacidade planejada e não integram esse caminho atual.
 
 Não simular transação com múltiplas chamadas independentes ao banco.
 
@@ -204,11 +197,16 @@ organization_members
 roles / permissions
 ```
 
+O fluxo de aplicação exige exatamente uma membership ativa: zero memberships gera erro e mais
+de uma gera conflito explícito. Não há seletor multi-org nesta fase; isso não define uma
+limitação permanente do produto.
+
 ---
 
 ## Authorization
 
-Usar permissions centralizadas.
+Permissions são centralizadas em `permissions.ts`, e os services usam `requirePermission()`
+antes do acesso aos repositórios.
 
 Evitar checks espalhados como:
 
@@ -225,7 +223,12 @@ Roles iniciais:
 - RECRUITER
 - ADMINISTRATIVE
 
-Permissões serão mapeadas explicitamente em `CODING_RULES.md`/schema de autorização.
+No banco, mutações passam por RPCs públicas protegidas por RBAC. A matriz de permissions também
+é aplicada no PostgreSQL; implementações críticas ficam no schema `private`, sem execução direta
+por `authenticated` ou `anon`. INSERT/UPDATE/DELETE diretos das entidades de domínio protegidas
+são bloqueados para esses papéis. A mutação e o audit ocorrem no mesmo caminho transacional.
+
+Autorização apenas na aplicação não é suficiente.
 
 ---
 
@@ -243,26 +246,30 @@ Legenda:
 | Clients | CRUD | CRUD | R | R | R | R |
 | Contracts | CRUD | CRUD | R | R | R | R |
 | Operations | CRUD | CRUD | R | R | R | R |
+| Job Roles | CRUD | CRUD | R | R | R | R |
 | Units/Positions | CRUD | CRUD | R/U | R | R | R |
 | Workers | CRUD | R | R | CRUD | R | R |
 | Assignments | CRUD | CRUD | R | R/U | R | R |
-| Shifts | CRUD | CRUD | CRU | R | R | R |
-| Attendance | CRUD | R/U | CRU | R/U | R | R |
-| Occurrences | CRUD | CRU | CRU | R | R | R |
+| Administration (memberships/audit) | R/U | - | - | - | - | - |
 
 Essa matriz é inicial e deve ser revisada quando a operação real definir responsabilidades.
+
+A superfície administrativa inicial usa as permissions explícitas
+`organization_member:read`, `organization_member:update` e `audit:read`, concedidas somente a
+`DIRECTOR`. Não existe editor de permissions, custom roles ou modelo IAM dinâmico.
 
 ---
 
 ## RLS
 
-RLS deve proteger dados organizacionais.
+RLS protege principalmente isolamento organizacional e leitura de linhas.
 
 RLS responde principalmente:
 
 **este usuário pode acessar esta linha?**
 
-Regras de negócio não devem ser implementadas principalmente em policies.
+Permission de mutação também é enforced no banco por wrappers RPC; RLS não é a única barreira de
+autorização. Regras de negócio não devem ser implementadas principalmente em policies.
 
 Não construir abstração de client portal antes do requisito real.
 
@@ -270,21 +277,18 @@ Policies devem ser mantidas simples, explícitas e testáveis.
 
 ---
 
-## Domain Events
+## Domain Events (planned)
 
-Fatos de negócio relevantes são registrados em `domain_events`.
-
-O registro deve ocorrer dentro da mesma transação da mutação correspondente.
-
-Não usar triggers de banco para representar semântica de domínio por padrão.
-
-Não usar brokers externos no MVP.
+`domain_events` não está implementado na Foundation atual. Continua como capacidade futura para
+fatos de negócio e possíveis integrações; não há tabela, publicação ou broker em uso.
 
 ---
 
 ## Audit
 
-Mutações críticas devem gerar audit events.
+`audit_events` existe e é produzido nas mutações críticas implementadas. Cada registro contém
+ator, organização, entidade, ação e metadata; updates usam estados anterior/novo e campos
+alterados quando aplicável. Criações podem conter metadata parcial conforme a função RPC.
 
 Formato mínimo de metadata:
 
@@ -296,9 +300,20 @@ Formato mínimo de metadata:
 }
 ```
 
-Audit responde quem/quando/o quê.
+Audit responde quem/quando/o quê. Domain Events continuam uma intenção futura, distinta do audit.
 
-Domain Event responde o que aconteceu no negócio.
+A leitura administrativa de `audit_events` usa `audit:read` e RLS por Organization. A aplicação
+não usa service-role para consultar auditoria. Mudanças de role/status de memberships passam por
+RPC auditada e preservam pelo menos um `DIRECTOR` ativo por Organization.
+
+---
+
+## Visão geral operacional
+
+A home autenticada apresenta KPIs derivados de Operations, Units, Workers, Assignments e
+Positions ativos, além de efetivo base. Ocupação considera somente `Assignment.status = active`.
+Os alertas atuais são Worker ativo sem Assignment ativa e Position abaixo de
+`base_required_headcount`; vacancy/coverage não são persistidos.
 
 ---
 

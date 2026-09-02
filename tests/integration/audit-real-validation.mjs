@@ -1,23 +1,11 @@
-import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 
 import { createClient } from "@supabase/supabase-js";
 
+import { requireIntegrationTestEnv } from "./helpers/integration-test-env.mjs";
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function readEnv() {
-  return Object.fromEntries(
-    readFileSync(new URL("../../.env", import.meta.url), "utf8")
-      .split(/\r?\n/)
-      .filter((line) => line && !line.startsWith("#"))
-      .map((line) => {
-        const separator = line.indexOf("=");
-        return [line.slice(0, separator), line.slice(separator + 1)];
-      }),
-  );
 }
 
 function makeCpf(seed) {
@@ -31,60 +19,52 @@ function makeCpf(seed) {
   return [...base, first, second].join("");
 }
 
-const env = readEnv();
-const projectRef = readFileSync(
-  new URL("../../supabase/.temp/project-ref", import.meta.url),
-  "utf8",
-).trim();
-assert(/^[a-z0-9]+$/.test(projectRef), "Invalid linked project ref");
-const cliArgs = [
-  "supabase",
-  "projects",
-  "api-keys",
-  "--project-ref",
-  projectRef,
-  "--output",
-  "json",
-];
-const apiKeysOutput =
-  process.platform === "win32"
-    ? execFileSync(
-        "powershell.exe",
-        ["-NoProfile", "-NonInteractive", "-Command", `npx ${cliArgs.join(" ")}`],
-        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
-      )
-    : execFileSync("npx", cliArgs, {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      });
-const apiKeys = JSON.parse(apiKeysOutput);
-const serviceKey = apiKeys.find((key) => key.id === "service_role")?.api_key;
-assert(serviceKey, "Service-role key was not available through the linked CLI session");
+const { supabaseUrl, publishableKey, serviceRoleKey } = requireIntegrationTestEnv();
 
 const options = { auth: { autoRefreshToken: false, persistSession: false } };
-const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, serviceKey, options);
+const admin = createClient(supabaseUrl, serviceRoleKey, options);
+const actorEmail = `audit-director-${Date.now()}-${randomUUID()}@example.invalid`;
+const { data: actorUserData, error: actorUserError } = await admin.auth.admin.createUser({
+  email: actorEmail,
+  password: randomUUID(),
+  email_confirm: true,
+});
+if (actorUserError) throw actorUserError;
+const actorUserId = actorUserData.user.id;
+const { data: organization, error: organizationError } = await admin
+  .from("organizations")
+  .insert({
+    legal_name: `Audit Validation ${Date.now()} Ltda`,
+    trade_name: "Audit Validation",
+    status: "active",
+  })
+  .select("id")
+  .single();
+if (organizationError) throw organizationError;
+const { error: actorProfileError } = await admin
+  .from("profiles")
+  .insert({ id: actorUserId, display_name: "Audit Director" });
+if (actorProfileError) throw actorProfileError;
 const { data: membership, error: membershipError } = await admin
   .from("organization_members")
+  .insert({
+    organization_id: organization.id,
+    profile_id: actorUserId,
+    role: "DIRECTOR",
+    status: "active",
+  })
   .select("organization_id, profile_id")
-  .eq("status", "active")
-  .eq("role", "DIRECTOR")
-  .limit(1)
   .single();
 if (membershipError) throw membershipError;
 
-const { data: usersData, error: usersError } = await admin.auth.admin.listUsers();
-if (usersError) throw usersError;
-const actorUser = usersData.users.find((user) => user.id === membership.profile_id);
-assert(actorUser?.email, "The active Director profile has no Auth email");
-
 const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
   type: "magiclink",
-  email: actorUser.email,
+  email: actorEmail,
 });
 if (linkError) throw linkError;
 const actor = createClient(
-  env.NEXT_PUBLIC_SUPABASE_URL,
-  env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  supabaseUrl,
+  publishableKey,
   options,
 );
 const { error: verifyError } = await actor.auth.verifyOtp({
@@ -315,11 +295,17 @@ try {
     .delete()
     .eq("id", createAudit.id);
   assert(directAuditDeleteError, "Authenticated user deleted append-only audit");
-  const { error: auditReadError } = await actor
+  const { data: readableAudit, error: auditReadError } = await actor
     .from("audit_events")
-    .select("id")
-    .limit(1);
-  assert(auditReadError, "Authenticated user read internal audit events directly");
+    .select("id, organization_id")
+    .eq("organization_id", membership.organization_id)
+    .limit(10);
+  if (auditReadError) throw auditReadError;
+  assert(readableAudit.length > 0, "DIRECTOR could not read Organization audit events");
+  assert(
+    readableAudit.every((event) => event.organization_id === membership.organization_id),
+    "Audit read escaped the active Organization",
+  );
 
   console.log(
     JSON.stringify({
@@ -331,7 +317,8 @@ try {
       failureIsAtomic: true,
       directMutationBlocked: true,
       appendOnlyBlocked: true,
-      authenticatedReadBlocked: true,
+      directorAuditReadAllowed: true,
+      auditReadOrganizationScoped: true,
       workerPiiRedacted: true,
       actorAndOrganizationCorrect: true,
     }),
@@ -358,4 +345,12 @@ try {
     await admin.from("profiles").delete().eq("id", temporaryUserId);
     await admin.auth.admin.deleteUser(temporaryUserId);
   }
+  await admin
+    .from("organization_members")
+    .delete()
+    .eq("organization_id", membership.organization_id)
+    .eq("profile_id", actorUserId);
+  await admin.from("profiles").delete().eq("id", actorUserId);
+  await admin.auth.admin.deleteUser(actorUserId);
+  await admin.from("organizations").delete().eq("id", membership.organization_id);
 }

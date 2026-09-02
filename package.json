@@ -13,6 +13,9 @@
     "test:watch": "vitest",
     "test:audit:real": "node tests/integration/audit-real-validation.mjs",
     "test:assignment:real": "node tests/integration/assignment-real-validation.mjs",
+    "test:history:real": "node tests/integration/operational-history-real-validation.mjs",
+    "test:rbac:real": "node tests/integration/rbac-hardening-real-validation.mjs",
+    "test:administration:real": "node tests/integration/administration-real-validation.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {

@@ -3,11 +3,11 @@ import { cn } from "@/shared/utils";
 import { ASSIGNMENT_STATUS_LABELS, type AssignmentStatus } from "../domain/assignment";
 
 const STYLES: Record<AssignmentStatus, string> = {
-  pending: "bg-amber-100 text-amber-900",
-  active: "bg-emerald-100 text-emerald-900",
-  suspended: "bg-orange-100 text-orange-900",
-  finished: "bg-slate-100 text-slate-800",
-  cancelled: "bg-red-100 text-red-900",
+  pending: "border border-warning/25 bg-warning/10 text-warning",
+  active: "border border-success/25 bg-success/10 text-success",
+  suspended: "border border-warning/25 bg-warning/10 text-warning",
+  finished: "border border-border bg-muted text-muted-foreground",
+  cancelled: "border border-danger/25 bg-danger/10 text-danger",
 };
 
 export function AssignmentStatusBadge({ status }: { status: AssignmentStatus }) {

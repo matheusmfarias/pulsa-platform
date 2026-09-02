@@ -7,5 +7,7 @@ export * from "./schemas/unit-schemas";
 export * from "./services/change-unit-status";
 export * from "./services/create-unit";
 export * from "./services/get-unit-by-id";
+export * from "./services/get-unit-operational-detail";
 export * from "./services/list-units";
+export * from "./services/list-unit-operational-summaries";
 export * from "./services/update-unit";

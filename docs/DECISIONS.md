@@ -211,10 +211,9 @@ The Supabase JavaScript client does not expose an explicit multi-statement trans
 boundary across independent Data API calls.
 
 Foundation Core therefore does not introduce a transaction abstraction or emulate
-atomicity with sequential requests. When the first domain mutation requires atomic
-business data, domain event and audit event writes, the default strategy will be a
-purpose-specific PostgreSQL function invoked through Supabase RPC. A direct server-side
-PostgreSQL connection may be evaluated instead if a concrete workload justifies it.
+atomicity with sequential requests. Critical implemented mutations write business data and the
+audit event through purpose-specific PostgreSQL RPCs. Domain events remain future capability;
+a direct server-side PostgreSQL connection may be evaluated if a concrete workload justifies it.
 
 ---
 
@@ -226,8 +225,9 @@ Each active `organization_members` row has exactly one internal role. The role-t
 matrix is defined centrally in TypeScript using `entity:action` permissions, and application
 services enforce permissions before repository access.
 
-PostgreSQL RLS remains responsible for organization isolation and active membership only.
-Roles and permissions are intentionally not duplicated in RLS policies or permission tables.
+PostgreSQL RLS remains responsible primarily for organization isolation and active membership.
+For critical mutations, the same permission matrix is enforced by RBAC-protected public RPC
+wrappers; private implementations are not directly executable by `authenticated` or `anon`.
 
 ---
 
@@ -258,3 +258,60 @@ exclusion constraint so concurrent writes cannot bypass it.
 This decision does not restrict simultaneous relationships by Unit or Operation. Those rules
 remain behind the Operational Discovery gate. The current RBAC matrix gives SUPERVISOR read
 access only, following the Assignments phase definition.
+
+---
+
+## ADR-023 — JobRole is separate from Position
+
+**Status:** Accepted
+
+JobRole is the reusable organizational cargo/function catalog. Position is the concrete
+operational posto in a Unit and references a required JobRole. Position no longer owns a `title`;
+JobRole.name is the source of truth and can be reused by multiple Positions.
+
+---
+
+## ADR-024 — Structural context freezes after Assignment history
+
+**Status:** Accepted
+
+After Assignment history exists, Position cannot move Unit or JobRole; Unit cannot move
+Operation; Operation cannot move Contract; and Contract cannot move Client. The intended change
+is to close/inactivate the prior structure and create a new record in the new context.
+
+---
+
+## ADR-025 — Current application context is exactly one active Organization
+
+**Status:** Accepted for the current phase
+
+The application requires exactly one active organization membership. Zero memberships fail and
+multiple active memberships produce an explicit conflict. A multi-organization selector remains
+an open future product decision.
+
+---
+
+## ADR-026 — Real integration tests fail closed
+
+**Status:** Accepted
+
+Real integration tests require explicit `SUPABASE_TEST_*` credentials plus
+`SUPABASE_TEST_CONFIRMATION=integration-test`. They never infer a linked Supabase project, read
+`.temp/project-ref`, recover service-role credentials through the CLI, or fall back to `.env`.
+
+---
+
+## ADR-027 — Administração inicial é DIRECTOR-only com permissions explícitas
+
+**Status:** Accepted
+
+A Fase 3 expõe memberships e auditoria somente a `DIRECTOR`, através de
+`organization_member:read`, `organization_member:update` e `audit:read`. A matriz continua fixa e
+sincronizada em TypeScript/PostgreSQL; não existe cadastro ou edição granular de permissions.
+
+Role/status de membership são alterados pela RPC auditada existente, agora protegida pela matriz
+RBAC e por lock transacional da Organization. A transação rejeita rebaixar ou inativar o último
+`DIRECTOR` ativo. Auditoria é lida com RLS organizacional, sem service-role na aplicação.
+
+E-mails de outros usuários ficam fora da Foundation administrativa: não há acesso apropriado a
+`auth.users` com as credenciais normais do backend e nenhuma service-role foi adicionada.

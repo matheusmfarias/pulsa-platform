@@ -18,6 +18,36 @@ export async function findAssignments(filters: AssignmentListFilters) {
   return query;
 }
 
+export async function findAssignmentsForOperation(operationId: string) {
+  const supabase = await createServerSupabaseClient();
+  return supabase
+    .from("assignments")
+    .select(ASSIGNMENT_WITH_CONTEXT_SELECT)
+    .eq("position.unit.operation_id", operationId)
+    .order("start_date", { ascending: false })
+    .order("created_at", { ascending: false });
+}
+
+export async function findAssignmentsForUnit(unitId: string) {
+  const supabase = await createServerSupabaseClient();
+  return supabase
+    .from("assignments")
+    .select(ASSIGNMENT_WITH_CONTEXT_SELECT)
+    .eq("position.unit_id", unitId)
+    .order("start_date", { ascending: false })
+    .order("created_at", { ascending: false });
+}
+
+export async function findActiveAssignmentsWithContext() {
+  const supabase = await createServerSupabaseClient();
+  return supabase
+    .from("assignments")
+    .select(ASSIGNMENT_WITH_CONTEXT_SELECT)
+    .eq("status", "active")
+    .order("start_date", { ascending: false })
+    .order("created_at", { ascending: false });
+}
+
 export async function findAssignmentById(assignmentId: string) {
   const supabase = await createServerSupabaseClient();
   return supabase

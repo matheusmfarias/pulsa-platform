@@ -1,23 +1,11 @@
-import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 
 import { createClient } from "@supabase/supabase-js";
 
+import { requireIntegrationTestEnv } from "./helpers/integration-test-env.mjs";
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function readEnv() {
-  return Object.fromEntries(
-    readFileSync(new URL("../../.env", import.meta.url), "utf8")
-      .split(/\r?\n/)
-      .filter((line) => line && !line.startsWith("#"))
-      .map((line) => {
-        const separator = line.indexOf("=");
-        return [line.slice(0, separator), line.slice(separator + 1)];
-      }),
-  );
 }
 
 function makeCpf(seed) {
@@ -30,18 +18,10 @@ function makeCpf(seed) {
   return [...base, first, digit([...base, first], 11)].join("");
 }
 
-const env = readEnv();
-const projectRef = readFileSync(new URL("../../supabase/.temp/project-ref", import.meta.url), "utf8").trim();
-assert(/^[a-z0-9]+$/.test(projectRef), "Invalid linked project ref");
-const cliArgs = ["supabase", "projects", "api-keys", "--project-ref", projectRef, "--output", "json"];
-const apiKeysOutput = process.platform === "win32"
-  ? execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", `npx ${cliArgs.join(" ")}`], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })
-  : execFileSync("npx", cliArgs, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-const serviceKey = JSON.parse(apiKeysOutput).find((key) => key.id === "service_role")?.api_key;
-assert(serviceKey, "Service-role key unavailable");
+const { supabaseUrl, publishableKey, serviceRoleKey } = requireIntegrationTestEnv();
 
 const options = { auth: { autoRefreshToken: false, persistSession: false } };
-const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, serviceKey, options);
+const admin = createClient(supabaseUrl, serviceRoleKey, options);
 const { data: membership, error: membershipError } = await admin
   .from("organization_members")
   .select("organization_id, profile_id")
@@ -54,7 +34,7 @@ if (membershipError) throw membershipError;
 async function authenticatedClientFor(user) {
   const { data: link, error: linkError } = await admin.auth.admin.generateLink({ type: "magiclink", email: user.email });
   if (linkError) throw linkError;
-  const client = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, options);
+  const client = createClient(supabaseUrl, publishableKey, options);
   const { error } = await client.auth.verifyOtp({ type: "magiclink", token_hash: link.properties.hashed_token });
   if (error) throw error;
   return client;

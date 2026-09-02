@@ -4,12 +4,12 @@ import {
 } from "../domain/operation";
 
 const STATUS_STYLES: Record<OperationStatus, string> = {
-  planning: "border-slate-200 bg-slate-50 text-slate-700",
-  implementation: "border-violet-200 bg-violet-50 text-violet-700",
-  active: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  suspended: "border-amber-200 bg-amber-50 text-amber-700",
-  closing: "border-blue-200 bg-blue-50 text-blue-700",
-  closed: "border-neutral-200 bg-neutral-100 text-neutral-600",
+  planning: "border-border bg-muted text-muted-foreground",
+  implementation: "border-info/25 bg-info/10 text-info",
+  active: "border-success/25 bg-success/10 text-success",
+  suspended: "border-warning/25 bg-warning/10 text-warning",
+  closing: "border-info/25 bg-info/10 text-info",
+  closed: "border-border bg-muted text-muted-foreground",
 };
 
 export function OperationStatusBadge({ status }: { status: OperationStatus }) {

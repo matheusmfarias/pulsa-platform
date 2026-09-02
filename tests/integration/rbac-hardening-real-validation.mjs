@@ -1,23 +1,11 @@
-import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 
 import { createClient } from "@supabase/supabase-js";
 
+import { requireIntegrationTestEnv } from "./helpers/integration-test-env.mjs";
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function readEnv() {
-  return Object.fromEntries(
-    readFileSync(new URL("../../.env", import.meta.url), "utf8")
-      .split(/\r?\n/)
-      .filter((line) => line && !line.startsWith("#"))
-      .map((line) => {
-        const separator = line.indexOf("=");
-        return [line.slice(0, separator), line.slice(separator + 1)];
-      }),
-  );
 }
 
 function generatedDocument(offset) {
@@ -25,57 +13,10 @@ function generatedDocument(offset) {
   return `${String(base + offset).padStart(12, "0")}00`;
 }
 
-const fileEnv = readEnv();
-const localTestConfiguration =
-  process.env.SUPABASE_TEST_URL &&
-  process.env.SUPABASE_TEST_PUBLISHABLE_KEY &&
-  process.env.SUPABASE_TEST_SERVICE_ROLE_KEY;
-let serviceKey = process.env.SUPABASE_TEST_SERVICE_ROLE_KEY;
-
-if (!localTestConfiguration) {
-  const projectRef = readFileSync(
-    new URL("../../supabase/.temp/project-ref", import.meta.url),
-    "utf8",
-  ).trim();
-  assert(/^[a-z0-9]+$/.test(projectRef), "Invalid linked project ref");
-  const cliArgs = [
-    "supabase",
-    "projects",
-    "api-keys",
-    "--project-ref",
-    projectRef,
-    "--output",
-    "json",
-  ];
-  const apiKeysOutput =
-    process.platform === "win32"
-      ? execFileSync(
-          "powershell.exe",
-          [
-            "-NoProfile",
-            "-NonInteractive",
-            "-Command",
-            `npx ${cliArgs.join(" ")}`,
-          ],
-          { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
-        )
-      : execFileSync("npx", cliArgs, {
-          encoding: "utf8",
-          stdio: ["ignore", "pipe", "ignore"],
-        });
-  serviceKey = JSON.parse(apiKeysOutput).find(
-    (key) => key.id === "service_role",
-  )?.api_key;
-}
-assert(serviceKey, "Service-role key unavailable");
+const { supabaseUrl, publishableKey, serviceRoleKey } = requireIntegrationTestEnv();
 
 const options = { auth: { autoRefreshToken: false, persistSession: false } };
-const supabaseUrl =
-  process.env.SUPABASE_TEST_URL ?? fileEnv.NEXT_PUBLIC_SUPABASE_URL;
-const publishableKey =
-  process.env.SUPABASE_TEST_PUBLISHABLE_KEY ??
-  fileEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const admin = createClient(supabaseUrl, serviceKey, options);
+const admin = createClient(supabaseUrl, serviceRoleKey, options);
 const createdUserIds = [];
 const createdOrganizationIds = [];
 const createdClientIds = [];

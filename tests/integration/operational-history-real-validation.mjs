@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { createClient } from "@supabase/supabase-js";
 
+import { requireIntegrationTestEnv } from "./helpers/integration-test-env.mjs";
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -10,13 +12,10 @@ function documentNumber(length, offset) {
   return String((Date.now() + offset) % 10 ** length).padStart(length, "0");
 }
 
-const supabaseUrl = process.env.SUPABASE_TEST_URL;
-const publishableKey = process.env.SUPABASE_TEST_PUBLISHABLE_KEY;
-const serviceKey = process.env.SUPABASE_TEST_SERVICE_ROLE_KEY;
-assert(supabaseUrl && publishableKey && serviceKey, "Local Supabase test credentials are required");
+const { supabaseUrl, publishableKey, serviceRoleKey } = requireIntegrationTestEnv();
 
 const options = { auth: { autoRefreshToken: false, persistSession: false } };
-const admin = createClient(supabaseUrl, serviceKey, options);
+const admin = createClient(supabaseUrl, serviceRoleKey, options);
 const created = {
   organizations: [],
   users: [],

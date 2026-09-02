@@ -25,14 +25,15 @@ Princípios:
 
 # 2. Hierarquia operacional
 
-Organization  
-└── Client  
-    └── Contract  
-        └── Operation  
-            └── Unit  
-                └── Position  
-                    └── Assignment  
-                        └── Worker
+Organization
+├── JobRole
+├── Client
+│   └── Contract
+│       └── Operation
+│           └── Unit
+│               └── Position
+│                   └── Assignment
+└── Worker
 
 A hierarquia representa contexto organizacional.
 
@@ -143,6 +144,10 @@ Status:
 
 `client_id` não é repetido em Operation porque é derivável de Contract.
 
+Quando informado em create/update, `manager_user_id` aponta para um usuário/profile com
+membership ativa na mesma Organization da Operation. Não há workflow adicional de gestor
+implementado nesta fase.
+
 ---
 
 ## Unit
@@ -176,17 +181,34 @@ Timestamps devem ser persistidos em UTC. `timezone` existe para interpretação/
 
 ---
 
-## Position
+## JobRole (Cargo)
 
-Necessidade estrutural de trabalho existente dentro de uma unidade.
+Catálogo organizacional reutilizável de cargos/funções. Pertence à Organization, não a um
+Client, Contract, Operation ou Unit.
 
-Não representa uma pessoa.
+Campos:
+
+- id
+- organization_id
+- name
+- description
+- status
+- created_at
+- updated_at
+
+Um JobRole pode ser reutilizado por vários Positions. `name` é a fonte de verdade do nome do
+cargo.
+
+## Position (Posto)
+
+Necessidade estrutural concreta de trabalho dentro de uma Unit. Não representa uma pessoa e
+exige um JobRole.
 
 Campos:
 
 - id
 - unit_id
-- title
+- job_role_id
 - description
 - base_required_headcount
 - status
@@ -198,7 +220,10 @@ Status:
 - active
 - inactive
 
-`base_required_headcount` representa necessidade estrutural/base e não substitui necessidade por turno.
+Position não possui `title` próprio; o nome do cargo é derivado de JobRole.
+
+`base_required_headcount` representa necessidade estrutural/base e não substitui escala,
+turno ou cobertura.
 
 ---
 
@@ -262,9 +287,24 @@ Não repetir `unit_id` ou `operation_id`, pois são derivados de Position.
 
 Assignments preservam histórico e não devem ser sobrescritos.
 
+### Histórico operacional implementado
+
+Enquanto não existe Assignment descendente, relações estruturais continuam corrigíveis. Após
+existir histórico de Assignment:
+
+- Position não pode mudar de Unit nem de JobRole;
+- Unit não pode mudar de Operation;
+- Operation não pode mudar de Contract;
+- Contract não pode mudar de Client.
+
+Para Assignment, `pending` permite corrigir worker, position, start_date e end_date conforme
+as validações existentes. Em `active` ou `suspended`, worker, position e start_date ficam
+imutáveis, mas end_date pode ser ajustada. Em `finished` ou `cancelled`, contexto e período não
+podem ser reescritos.
+
 ---
 
-# 4. Scheduling
+# 4. Scheduling (planejado)
 
 Scheduling possui gate de discovery operacional.
 
@@ -484,9 +524,10 @@ Campos:
 
 ---
 
-# 7. Domain Events
+# 7. Domain Events (planejado)
 
-Eventos representam fatos relevantes de negócio.
+Eventos representam uma capacidade futura para fatos relevantes de negócio. A tabela
+`domain_events` não faz parte da Foundation implementada atualmente.
 
 Exemplos:
 
@@ -514,7 +555,8 @@ Exemplos:
 - sla.at_risk
 - sla.breached
 
-Eventos de domínio devem ser registrados na mesma transação da mutação de negócio que os originou.
+Quando implementados, eventos de domínio devem ser registrados na mesma transação da mutação de
+negócio que os originou.
 
 Não usar Kafka, RabbitMQ ou event sourcing no MVP.
 
@@ -522,7 +564,8 @@ Não usar Kafka, RabbitMQ ou event sourcing no MVP.
 
 # 8. Auditoria
 
-Alterações importantes devem possuir rastreabilidade.
+`audit_events` existe e é usado nas mutações críticas implementadas. Registra ator,
+organização, entidade, ação e metadata.
 
 Entidade sugerida:
 
@@ -539,7 +582,9 @@ Campos:
 - metadata
 - created_at
 
-Formato mínimo esperado de metadata:
+Updates usam previous/new state e changes pelo helper de auditoria. Em criações, a metadata pode
+ser parcial conforme a função de mutação. O formato abaixo é o objetivo mínimo arquitetural, não
+uma garantia de metadata completa em todos os casos atuais:
 
 ```json
 {
@@ -614,7 +659,8 @@ Indicadores devem ser derivados dos dados operacionais sempre que possível.
 Regras relevantes devem ser garantidas no backend e/ou banco, não exclusivamente no frontend.
 
 ### R11
-Mutação de domínio, domain event e audit event devem participar da mesma transação quando fizerem parte da mesma operação lógica.
+Mutações críticas e seus audit events participam da mesma transação. Domain events permanecem
+planejados.
 
 ### R12
 IDs deriváveis pela hierarquia não devem ser duplicados sem necessidade comprovada.

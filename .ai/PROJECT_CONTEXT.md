@@ -40,7 +40,7 @@ Client
 → Contract
 → Operation
 → Unit
-→ Position
+→ Position (JobRole)
 → Worker
 → Assignment
 → Scheduling
@@ -160,14 +160,22 @@ Operational engagement managed under a Contract.
 ### Unit
 Physical/logical location within an Operation.
 
+### JobRole
+Reusable organizational cargo/function.
+
 ### Position
-Structural work need within a Unit.
+Concrete operational posto within a Unit; it requires a JobRole and has no own `title`.
 
 ### Worker
 Person eligible to be assigned.
 
 ### Assignment
 Temporal relationship between Worker and Position.
+
+### Scheduling candidates (planned, not implemented)
+
+The following concepts are discovery candidates only. Do not create tables, flows or rules for
+them without an explicit requirement.
 
 ### Shift
 Planned work period.
@@ -195,11 +203,10 @@ Operational exception/problem.
 - Operation belongs to Contract.
 - Contract belongs to Client.
 - Avoid redundant hierarchical IDs.
-- Shift must express demand by Position through ShiftPosition.
-- Shift is not Attendance.
 - Operational entities preserve history.
 - KPIs are derived from source data in MVP.
-- Business mutation + domain event + audit event must be atomic when part of one logical operation.
+- Critical business mutation + audit event are atomic in the current Foundation. Domain events
+  remain planned.
 
 ---
 
@@ -225,7 +232,8 @@ Open questions include:
 - supervision model;
 - temporary/intermittent-specific behavior.
 
-Foundation through Assignments may proceed before these answers.
+Foundation through JobRole, Positions, Assignments and the operational overview is implemented;
+Scheduling remains gated on these answers.
 
 ---
 
@@ -241,11 +249,12 @@ Foundation through Assignments may proceed before these answers.
 6. Workers
 7. RBAC + Audit
 8. Assignments
+9. JobRole + Positions
+10. Operational overview
 --- Operational Discovery Gate ---
-9. Scheduling
-10. Attendance
-11. Occurrences
-12. Dashboard
+11. Scheduling
+12. Attendance
+13. Occurrences
 ```
 
 ---
@@ -286,8 +295,8 @@ Do not scatter direct role comparisons in application code.
 
 ## 13. Domain Events and Audit
 
-Domain Event:
-Business fact.
+Domain Event (planned):
+Future business-fact capability; it is not implemented as `domain_events` today.
 
 Example:
 
@@ -308,7 +317,8 @@ Example metadata:
 }
 ```
 
-These are separate concerns.
+`audit_events` is implemented for critical mutations; domain events remain a separate future
+concern.
 
 ---
 
@@ -385,3 +395,26 @@ These exist to preserve architectural awareness without causing speculative code
 Attendance is currently operational and is not the formal payroll timekeeping source of truth.
 
 A future client portal may support controlled actions, not just dashboard viewing.
+
+---
+
+## 18. Current Foundation Rules
+
+- `JobRole` is the reusable organizational cargo; `Position` is the concrete posto in a `Unit`.
+  Do not use or recreate `Position.title`; display the cargo through `JobRole.name`.
+- `Worker` is not an auth user. `Unit` is an operational location, not a corporate department.
+- `Assignment` is temporal. Current occupancy counts only `Assignment.status = active`.
+- Preserve operational history: after Assignment history exists, structural context must not be
+  rewritten. Create a new record for a new context instead.
+- Critical mutations use RBAC-protected public PostgreSQL RPCs. Do not perform direct DML on
+  protected domain tables; application services still call `requirePermission()`.
+- `audit_events` is implemented for critical mutations. `domain_events` is planned, not present.
+- The current application context requires exactly one active Organization membership; there is
+  no multi-org selector yet.
+- Do not add scheduling, shifts, coverage or vacancies without an explicit requirement.
+- Real integration tests require explicit `SUPABASE_TEST_*` variables and
+  `SUPABASE_TEST_CONFIRMATION=integration-test`. Never infer or use a linked Supabase project.
+- Administration is initially `DIRECTOR`-only through fixed `organization_member:read`,
+  `organization_member:update` and `audit:read` permissions. Membership changes use the audited
+  RPC and must preserve at least one active DIRECTOR; audit reads remain Organization-scoped RLS.
+- Do not expose `auth.users` or add a service-role merely to display member e-mails.

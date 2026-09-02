@@ -10,6 +10,8 @@ export const AUTHORIZATION_ENTITIES = [
   "position",
   "worker",
   "assignment",
+  "organization_member",
+  "audit",
 ] as const;
 
 export const AUTHORIZATION_ACTIONS = ["read", "create", "update"] as const;
@@ -18,16 +20,25 @@ export type AuthorizationEntity = (typeof AUTHORIZATION_ENTITIES)[number];
 export type AuthorizationAction = (typeof AUTHORIZATION_ACTIONS)[number];
 export type Permission = `${AuthorizationEntity}:${AuthorizationAction}`;
 
-const ALL_PERMISSIONS = AUTHORIZATION_ENTITIES.flatMap((entity) =>
+const OPERATIONAL_ENTITIES = AUTHORIZATION_ENTITIES.filter(
+  (entity) => entity !== "organization_member" && entity !== "audit",
+);
+
+const ALL_OPERATIONAL_PERMISSIONS = OPERATIONAL_ENTITIES.flatMap((entity) =>
   AUTHORIZATION_ACTIONS.map((action) => `${entity}:${action}` as Permission),
 );
 
-const READ_PERMISSIONS = AUTHORIZATION_ENTITIES.map(
+const OPERATIONAL_READ_PERMISSIONS = OPERATIONAL_ENTITIES.map(
   (entity) => `${entity}:read` as Permission,
 );
 
 export const ROLE_PERMISSIONS = {
-  DIRECTOR: ALL_PERMISSIONS,
+  DIRECTOR: [
+    ...ALL_OPERATIONAL_PERMISSIONS,
+    "organization_member:read",
+    "organization_member:update",
+    "audit:read",
+  ],
   OPERATIONS_MANAGER: [
     "client:read",
     "client:create",
@@ -65,13 +76,13 @@ export const ROLE_PERMISSIONS = {
     "assignment:read",
   ],
   HR: [
-    ...READ_PERMISSIONS,
+    ...OPERATIONAL_READ_PERMISSIONS,
     "worker:create",
     "worker:update",
     "assignment:update",
   ],
-  RECRUITER: [...READ_PERMISSIONS, "worker:create"],
-  ADMINISTRATIVE: READ_PERMISSIONS,
+  RECRUITER: [...OPERATIONAL_READ_PERMISSIONS, "worker:create"],
+  ADMINISTRATIVE: OPERATIONAL_READ_PERMISSIONS,
 } satisfies Record<OrganizationRole, readonly Permission[]>;
 
 export type AuthorizationContext = { role: OrganizationRole };

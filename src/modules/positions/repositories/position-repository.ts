@@ -7,7 +7,7 @@ import type {
 } from "../schemas/position-schemas";
 
 const SELECT =
-  "*, job_role:job_roles!inner(id, name, status), unit:units!inner(id, name, status, operation:operations!inner(id, name))";
+  "*, job_role:job_roles!inner(id, name, status), unit:units!inner(id, name, status, operation:operations!inner(id, name, contract:contracts!inner(id, client:clients!inner(id, trade_name))))";
 const GLOBAL_LIST_SELECT =
   "*, job_role:job_roles!inner(id, name), unit:units!inner(id, name, operation:operations!inner(id, name, contract:contracts!inner(id, client:clients!inner(id, trade_name)))), assignments(status)";
 export async function findPositions(filters: PositionListFilters) {
@@ -16,6 +16,14 @@ export async function findPositions(filters: PositionListFilters) {
   if (filters.unitId) query = query.eq("unit_id", filters.unitId);
   if (filters.status) query = query.eq("status", filters.status);
   return query;
+}
+export async function findPositionsForOperation(operationId: string) {
+  const supabase = await createServerSupabaseClient();
+  return supabase
+    .from("positions")
+    .select(SELECT)
+    .eq("unit.operation_id", operationId)
+    .order("created_at");
 }
 export async function findPositionsForGlobalList(
   filters: PositionGlobalListFilters,
@@ -28,6 +36,14 @@ export async function findPositionsForGlobalList(
   if (filters.status) query = query.eq("status", filters.status);
   if (filters.query) query = query.ilike("job_role.name", `%${filters.query}%`);
   return query;
+}
+export async function findActivePositionOccupancyItems() {
+  const supabase = await createServerSupabaseClient();
+  return supabase
+    .from("positions")
+    .select("id, unit_id, base_required_headcount, assignments(status)")
+    .eq("status", "active")
+    .eq("assignments.status", "active");
 }
 export async function findPositionById(id: string) {
   const supabase = await createServerSupabaseClient();

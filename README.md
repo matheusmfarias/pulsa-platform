@@ -45,3 +45,38 @@ para aplicar mudanças não validadas.
 O teste E2E incluído cobre somente a renderização pública do login. Um teste de autenticação
 real depende de um projeto Supabase isolado e credenciais de teste, por isso não faz parte da
 CI nesta fase.
+
+## Testes de integração reais
+
+Os testes de integração reais exigem configuração explícita e não usam o projeto Supabase
+linkado, `.env` nem o CLI para descobrir credenciais. Configure um projeto Supabase de teste
+isolado ou uma instância local, nunca produção:
+
+```bash
+SUPABASE_TEST_URL=...
+SUPABASE_TEST_PUBLISHABLE_KEY=...
+SUPABASE_TEST_SERVICE_ROLE_KEY=...
+SUPABASE_TEST_CONFIRMATION=integration-test
+```
+
+Com as quatro variáveis definidas, execute o script necessário, por exemplo:
+
+```bash
+npm run test:assignment:real
+npm run test:audit:real
+npm run test:history:real
+npm run test:rbac:real
+npm run test:administration:real
+```
+
+## Administração
+
+As rotas `/app/admin/users` e `/app/admin/audit` são exclusivas de memberships `DIRECTOR` ativas.
+Roles e permissions permanecem fixos no código e no PostgreSQL. A aplicação não usa service-role
+para consultar auditoria ou `auth.users`; por isso, e-mails de outros membros não são exibidos
+nesta fase.
+
+## CI
+
+O GitHub Actions executa `npm ci`, lint, typecheck, unit tests e build. Os testes reais de
+integração não fazem parte do pipeline nesta fase e continuam exigindo ambiente de teste explícito.

@@ -1,16 +1,16 @@
+import Image from "next/image";
+
 export function BrandMark() {
   return (
-    <div className="flex items-center gap-3" aria-label="Pulsa Platform">
-      <span
-        className="grid size-9 place-items-center rounded-md bg-primary text-sm font-semibold text-primary-foreground"
-        aria-hidden="true"
-      >
-        P
-      </span>
-      <div>
-        <p className="text-sm font-semibold leading-tight text-foreground">Pulsa</p>
-        <p className="text-xs leading-tight text-muted-foreground">Platform</p>
-      </div>
+    <div className="flex h-7 items-center">
+      <Image
+        src="/brand/pulsa-logo-horizontal.png"
+        alt="Pulsa"
+        width={108}
+        height={36}
+        className="h-7 w-auto object-contain"
+        priority
+      />
     </div>
   );
 }

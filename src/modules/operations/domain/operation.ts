@@ -36,7 +36,9 @@ export type OperationContext = {
     };
   };
 };
-export type OperationWithContext = Operation & OperationContext;
+export type OperationWithContext = Operation & OperationContext & {
+  manager: { id: string; display_name: string | null } | null;
+};
 
 export const OPERATION_STATUS_LABELS: Record<OperationStatus, string> = {
   planning: "Planejamento",
@@ -85,6 +87,7 @@ export function parseOperationWithContext(
         status: string;
       };
     };
+    manager?: { id: string; display_name: string | null } | null;
   },
 ): OperationWithContext {
   return {
@@ -97,5 +100,6 @@ export function parseOperationWithContext(
         status: operationClientStatusSchema.parse(row.contract.client.status),
       },
     },
+    manager: row.manager ?? null,
   };
 }

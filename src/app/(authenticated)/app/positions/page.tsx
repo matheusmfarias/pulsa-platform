@@ -43,7 +43,7 @@ export default async function PositionsPage({
         </p>
       </div>
 
-      <form className="mt-8 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
+      <form className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
           <Input className="pl-9" name="q" defaultValue={filters.query} placeholder="Buscar por cargo" aria-label="Buscar postos por cargo" />
@@ -57,7 +57,7 @@ export default async function PositionsPage({
       </form>
 
       {positions.length === 0 ? (
-        <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-14 text-center">
+        <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-10 text-center">
           <h2 className="font-medium">Nenhum posto cadastrado</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Os postos representam necessidades operacionais dentro das unidades.
@@ -84,12 +84,12 @@ export default async function PositionsPage({
                   ).length;
                   const href = `/app/units/${position.unit.id}/positions/${position.id}`;
                   return (
-                    <tr key={position.id} className="hover:bg-muted/35">
+                    <tr key={position.id} className="hover:bg-hover">
                       <td className="px-5 py-4 font-medium"><Link className="hover:underline" href={href}>{position.job_role.name}</Link></td>
                       <td className="px-5 py-4 text-muted-foreground">{position.unit.name}</td>
                       <td className="px-5 py-4 text-muted-foreground">{position.unit.operation.name}</td>
                       <td className="px-5 py-4 text-muted-foreground">{position.unit.operation.contract.client.trade_name}</td>
-                      <td className="px-5 py-4 tabular-nums">{occupied} de {position.base_required_headcount}</td>
+                      <td className="px-5 py-4 tabular-nums"><span className="font-medium text-foreground">{occupied}</span> de {position.base_required_headcount}</td>
                       <td className="px-5 py-4"><PositionStatusBadge status={position.status} /></td>
                     </tr>
                   );

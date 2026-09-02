@@ -561,6 +561,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      has_organization_permission: {
+        Args: {
+          required_permission: string
+          target_organization_id: string
+        }
+        Returns: boolean
+      }
       is_active_organization_member: {
         Args: { target_organization_id: string }
         Returns: boolean
