@@ -8,6 +8,7 @@ import {
   positionGlobalListFiltersSchema,
   PositionStatusBadge,
 } from "@/modules/positions";
+import { resolveOperationalContext } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 const OCCUPYING_ASSIGNMENT_STATUS = "active";
@@ -23,7 +24,8 @@ export default async function PositionsPage({
 
   let positions;
   try {
-    positions = await listPositionsForGlobalView(filters);
+    const { context } = await resolveOperationalContext();
+    positions = await listPositionsForGlobalView(filters, context);
   } catch (error) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

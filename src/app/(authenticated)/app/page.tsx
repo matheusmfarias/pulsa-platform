@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 
 import { getOperationalOverview } from "@/modules/overview/operational-overview";
+import { resolveOperationalContext } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 const KPI_ITEMS = [
@@ -25,7 +26,8 @@ const KPI_ITEMS = [
 export default async function InternalHomePage() {
   let overview;
   try {
-    overview = await getOperationalOverview();
+    const { context } = await resolveOperationalContext();
+    overview = await getOperationalOverview(context);
   } catch (error) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

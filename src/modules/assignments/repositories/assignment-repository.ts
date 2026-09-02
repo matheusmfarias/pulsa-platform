@@ -1,11 +1,19 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import {
+  applyOperationalContextFilter,
+  OPERATIONAL_CONTEXT_QUERY_PATHS,
+  type OperationalContext,
+} from "@/modules/operational-context";
 
 import type { AssignmentInput, AssignmentListFilters } from "../schemas/assignment-schemas";
 
 const ASSIGNMENT_WITH_CONTEXT_SELECT =
   "*, worker:workers!inner(id, full_name, status, organization_id), position:positions!inner(id, status, job_role:job_roles!inner(id, name), unit:units!inner(id, name, operation:operations!inner(id, name, contract:contracts!inner(id, name, client:clients!inner(id, trade_name, organization_id)))))";
 
-export async function findAssignments(filters: AssignmentListFilters) {
+export async function findAssignments(
+  filters: AssignmentListFilters,
+  operationalContext: OperationalContext,
+) {
   const supabase = await createServerSupabaseClient();
   let query = supabase
     .from("assignments")
@@ -15,7 +23,11 @@ export async function findAssignments(filters: AssignmentListFilters) {
   if (filters.workerId) query = query.eq("worker_id", filters.workerId);
   if (filters.positionId) query = query.eq("position_id", filters.positionId);
   if (filters.status) query = query.eq("status", filters.status);
-  return query;
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
+  );
 }
 
 export async function findAssignmentsForOperation(operationId: string) {
@@ -38,14 +50,21 @@ export async function findAssignmentsForUnit(unitId: string) {
     .order("created_at", { ascending: false });
 }
 
-export async function findActiveAssignmentsWithContext() {
+export async function findActiveAssignmentsWithContext(
+  operationalContext: OperationalContext,
+) {
   const supabase = await createServerSupabaseClient();
-  return supabase
+  const query = supabase
     .from("assignments")
     .select(ASSIGNMENT_WITH_CONTEXT_SELECT)
     .eq("status", "active")
     .order("start_date", { ascending: false })
     .order("created_at", { ascending: false });
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
+  );
 }
 
 export async function findAssignmentById(assignmentId: string) {

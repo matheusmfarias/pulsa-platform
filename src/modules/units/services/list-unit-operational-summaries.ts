@@ -2,6 +2,10 @@ import {
   listActivePositionOccupancyItems,
   type ActivePositionOccupancyItem,
 } from "@/modules/positions";
+import {
+  ALL_OPERATIONAL_CONTEXT,
+  type OperationalContext,
+} from "@/modules/operational-context";
 
 import { listUnits } from "./list-units";
 
@@ -11,12 +15,14 @@ export type UnitOperationalSummary = Awaited<ReturnType<typeof listUnits>>[numbe
   baseRequiredHeadcount: number;
 };
 
-export async function listUnitOperationalSummaries(): Promise<
+export async function listUnitOperationalSummaries(
+  operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
+): Promise<
   UnitOperationalSummary[]
 > {
   const [units, positions] = await Promise.all([
-    listUnits(),
-    listActivePositionOccupancyItems(),
+    listUnits({}, operationalContext),
+    listActivePositionOccupancyItems(operationalContext),
   ]);
   const positionsByUnit = groupPositionsByUnit(positions);
 

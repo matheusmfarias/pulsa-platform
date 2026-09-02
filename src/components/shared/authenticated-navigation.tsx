@@ -22,8 +22,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { BrandMark } from "@/components/shared/brand-mark";
+import { OperationalContextSwitcher } from "@/components/shared/operational-context-switcher";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/modules/auth/actions";
+import type { OperationalContextState } from "@/modules/operational-context/domain/operational-context";
 import { cn } from "@/shared/utils";
 
 type NavigationItem = {
@@ -143,9 +145,11 @@ function AccountNavigation({ email }: { email: string }) {
 
 export function DesktopNavigation({
   email,
+  operationalContextState,
   showAdministration,
 }: {
   email: string;
+  operationalContextState: OperationalContextState;
   showAdministration: boolean;
 }) {
   return (
@@ -153,7 +157,8 @@ export function DesktopNavigation({
       <Link href="/app" className="flex h-16 items-center border-b px-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
         <BrandMark />
       </Link>
-      <div className="flex-1 overflow-y-auto px-3 py-6"><NavigationLinks showAdministration={showAdministration} /></div>
+      <div className="border-b px-3 py-3"><OperationalContextSwitcher state={operationalContextState} /></div>
+      <div className="flex-1 overflow-y-auto px-3 py-5"><NavigationLinks showAdministration={showAdministration} /></div>
       <AccountNavigation email={email} />
     </aside>
   );
@@ -161,9 +166,11 @@ export function DesktopNavigation({
 
 export function MobileNavigation({
   email,
+  operationalContextState,
   showAdministration,
 }: {
   email: string;
+  operationalContextState: OperationalContextState;
   showAdministration: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -190,7 +197,8 @@ export function MobileNavigation({
               <Link href="/app" onClick={() => setIsOpen(false)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><BrandMark /></Link>
               <Button ref={closeButtonRef} type="button" variant="outline" size="sm" className="size-10 p-0" aria-label="Fechar menu de navegação" onClick={() => setIsOpen(false)}><X className="size-5" aria-hidden="true" /></Button>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 py-6"><NavigationLinks showAdministration={showAdministration} onNavigate={() => setIsOpen(false)} /></div>
+            <div className="border-b px-3 py-3"><OperationalContextSwitcher state={operationalContextState} /></div>
+            <div className="flex-1 overflow-y-auto px-3 py-5"><NavigationLinks showAdministration={showAdministration} onNavigate={() => setIsOpen(false)} /></div>
             <AccountNavigation email={email} />
           </aside>
         </div>

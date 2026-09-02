@@ -1,4 +1,9 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import {
+  applyOperationalContextFilter,
+  OPERATIONAL_CONTEXT_QUERY_PATHS,
+  type OperationalContext,
+} from "@/modules/operational-context";
 
 import type { OperationStatus } from "../domain/operation";
 import type {
@@ -9,7 +14,10 @@ import type {
 const OPERATION_WITH_CONTEXT_SELECT =
   "*, manager:profiles(id, display_name), contract:contracts!inner(id, name, status, client:clients!inner(id, trade_name, status, organization_id))";
 
-export async function findOperations(filters: OperationListFilters) {
+export async function findOperations(
+  filters: OperationListFilters,
+  operationalContext: OperationalContext,
+) {
   const supabase = await createServerSupabaseClient();
   let query = supabase
     .from("operations")
@@ -20,7 +28,11 @@ export async function findOperations(filters: OperationListFilters) {
   if (filters.contractId) query = query.eq("contract_id", filters.contractId);
   if (filters.status) query = query.eq("status", filters.status);
 
-  return query;
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.operations,
+  );
 }
 
 export async function findOperationById(operationId: string) {

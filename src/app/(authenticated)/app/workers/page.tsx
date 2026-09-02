@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PermissionGate } from "@/modules/authorization";
+import { resolveOperationalContext } from "@/modules/operational-context";
 import {
   formatCpf,
   listWorkersWithCurrentAssignment,
@@ -26,7 +27,8 @@ export default async function WorkersPage({
   });
   let workers;
   try {
-    workers = await listWorkersWithCurrentAssignment(filters);
+    const { context } = await resolveOperationalContext();
+    workers = await listWorkersWithCurrentAssignment(filters, context);
   } catch (error) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

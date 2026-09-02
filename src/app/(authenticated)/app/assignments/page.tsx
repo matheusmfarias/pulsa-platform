@@ -8,6 +8,7 @@ import {
   listAssignments,
 } from "@/modules/assignments";
 import { PermissionGate } from "@/modules/authorization";
+import { resolveOperationalContext } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 function formatDate(value: string | null) {
@@ -22,7 +23,8 @@ export default async function AssignmentsPage({ searchParams }: PageProps<"/app/
   const filters = assignmentListFiltersSchema.parse({ status: query.status });
   let assignments;
   try {
-    assignments = await listAssignments(filters);
+    const { context } = await resolveOperationalContext();
+    assignments = await listAssignments(filters, context);
   } catch (error) {
     return <main className="mx-auto max-w-7xl px-4 py-10"><h1 className="text-2xl font-semibold">Alocações</h1><p className="mt-6 text-sm text-destructive">{toPublicErrorMessage(error)}</p></main>;
   }

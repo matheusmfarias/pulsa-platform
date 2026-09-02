@@ -1,4 +1,8 @@
 import { requirePermission } from "@/modules/authorization";
+import {
+  ALL_OPERATIONAL_CONTEXT,
+  type OperationalContext,
+} from "@/modules/operational-context";
 import { listOperations, type OperationWithContext } from "@/modules/operations";
 import { listUnits, type UnitWithContext } from "@/modules/units";
 import { listWorkers, type Worker } from "@/modules/workers";
@@ -106,14 +110,20 @@ export function buildOperationalOverview({
   };
 }
 
-export async function getOperationalOverview(): Promise<OperationalOverview> {
+export async function getOperationalOverview(
+  operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
+): Promise<OperationalOverview> {
   const [activeOperations, activeUnits, activeWorkers, assignmentResult, positionResult] =
     await Promise.all([
-      listOperations({ status: "active" }),
-      listUnits({ status: "active" }),
-      listWorkers({ query: "", status: "active" }),
-      requirePermission("assignment:read").then(findActiveAssignmentOverviewItems),
-      requirePermission("position:read").then(findActivePositionOverviewItems),
+      listOperations({ status: "active" }, operationalContext),
+      listUnits({ status: "active" }, operationalContext),
+      listWorkers({ query: "", status: "active" }, operationalContext),
+      requirePermission("assignment:read").then(() =>
+        findActiveAssignmentOverviewItems(operationalContext),
+      ),
+      requirePermission("position:read").then(() =>
+        findActivePositionOverviewItems(operationalContext),
+      ),
     ]);
 
   if (positionResult.error || assignmentResult.error) {

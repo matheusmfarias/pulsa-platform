@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PermissionGate } from "@/modules/authorization";
 import { listOperations, OperationStatusBadge } from "@/modules/operations";
+import { resolveOperationalContext } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 function formatDate(value: string | null): string {
@@ -16,7 +17,8 @@ function formatDate(value: string | null): string {
 export default async function OperationsPage() {
   let operations;
   try {
-    operations = await listOperations();
+    const { context } = await resolveOperationalContext();
+    operations = await listOperations({}, context);
   } catch (error) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

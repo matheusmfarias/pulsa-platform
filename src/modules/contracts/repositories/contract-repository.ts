@@ -1,4 +1,9 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import {
+  applyOperationalContextFilter,
+  OPERATIONAL_CONTEXT_QUERY_PATHS,
+  type OperationalContext,
+} from "@/modules/operational-context";
 
 import type { ContractStatus } from "../domain/contract";
 import type {
@@ -12,6 +17,7 @@ const CONTRACT_WITH_CLIENT_SELECT =
 export async function findContracts(
   organizationId: string,
   filters: ContractListFilters,
+  operationalContext: OperationalContext,
 ) {
   const supabase = await createServerSupabaseClient();
   let query = supabase
@@ -24,7 +30,11 @@ export async function findContracts(
   if (filters.clientId) query = query.eq("client_id", filters.clientId);
   if (filters.status) query = query.eq("status", filters.status);
 
-  return query;
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.contracts,
+  );
 }
 
 export async function findContractById(

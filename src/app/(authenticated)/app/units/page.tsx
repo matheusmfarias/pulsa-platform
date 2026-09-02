@@ -3,12 +3,16 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { PermissionGate } from "@/modules/authorization";
+import { resolveOperationalContext } from "@/modules/operational-context";
 import { listUnitOperationalSummaries, UnitStatusBadge } from "@/modules/units";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 export default async function UnitsPage() {
   let units;
-  try { units = await listUnitOperationalSummaries(); } catch (error) {
+  try {
+    const { context } = await resolveOperationalContext();
+    units = await listUnitOperationalSummaries(context);
+  } catch (error) {
     return <main className="mx-auto max-w-7xl px-4 py-10"><h1 className="text-2xl font-semibold">Unidades</h1><p className="mt-6 rounded-lg border bg-card p-6 text-sm text-destructive">{toPublicErrorMessage(error)}</p></main>;
   }
   return <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

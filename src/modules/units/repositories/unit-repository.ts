@@ -1,4 +1,9 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import {
+  applyOperationalContextFilter,
+  OPERATIONAL_CONTEXT_QUERY_PATHS,
+  type OperationalContext,
+} from "@/modules/operational-context";
 
 import type { UnitStatus } from "../domain/unit";
 import type { UnitInput, UnitListFilters } from "../schemas/unit-schemas";
@@ -6,7 +11,10 @@ import type { UnitInput, UnitListFilters } from "../schemas/unit-schemas";
 const UNIT_WITH_CONTEXT_SELECT =
   "*, operation:operations!inner(id, name, status, contract:contracts!inner(id, name, client:clients!inner(id, trade_name, organization_id)))";
 
-export async function findUnits(filters: UnitListFilters) {
+export async function findUnits(
+  filters: UnitListFilters,
+  operationalContext: OperationalContext,
+) {
   const supabase = await createServerSupabaseClient();
   let query = supabase
     .from("units")
@@ -15,7 +23,11 @@ export async function findUnits(filters: UnitListFilters) {
   if (filters.operationId)
     query = query.eq("operation_id", filters.operationId);
   if (filters.status) query = query.eq("status", filters.status);
-  return query;
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.units,
+  );
 }
 
 export async function findUnitById(unitId: string) {

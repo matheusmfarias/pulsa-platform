@@ -1,4 +1,9 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import {
+  applyOperationalContextFilter,
+  OPERATIONAL_CONTEXT_QUERY_PATHS,
+  type OperationalContext,
+} from "@/modules/operational-context";
 
 import type { WorkerStatus } from "../domain/worker";
 import type { WorkerInput, WorkerListFilters } from "../schemas/worker-schemas";
@@ -10,11 +15,16 @@ function sanitizeSearchTerm(value: string): string {
 export async function findWorkers(
   organizationId: string,
   filters: WorkerListFilters,
+  operationalContext: OperationalContext,
 ) {
   const supabase = await createServerSupabaseClient();
-  let query = supabase
-    .from("workers")
-    .select("*")
+  const workers = supabase.from("workers");
+  let query = operationalContext.type === "all"
+    ? workers.select("*")
+    : workers.select(
+        "*, assignments!inner(id, position:positions!inner(unit:units!inner(operation:operations!inner(contract:contracts!inner(id, client_id)))))",
+      );
+  query = query
     .eq("organization_id", organizationId)
     .order("full_name", { ascending: true });
 
@@ -26,7 +36,11 @@ export async function findWorkers(
     if (digits) clauses.push(`document_number.ilike.%${digits}%`);
     query = query.or(clauses.join(","));
   }
-  return query;
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.workers,
+  );
 }
 
 export async function findWorkerById(

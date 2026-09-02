@@ -918,3 +918,29 @@ sistema documental genérico;
 ferramenta genérica de comunicação.
 
 A plataforma deve concentrar-se naquilo que representa a realidade e a inteligência operacional da Pulsa.
+
+26. Contexto operacional do Backoffice
+
+`OperationalContext` é uma preferência persistente de navegação e visualização do Pulsa
+Backoffice. A primeira versão admite três estados: todos os clientes, um Client com todos os
+seus Contracts, ou um Contract específico daquele Client. O valor fica em cookie legível no
+servidor e é validado novamente contra os Clients e Contracts acessíveis da Organization ativa;
+um valor antigo, inválido ou incompatível volta silenciosamente para todos os clientes.
+
+Esse contexto não é autorização, tenancy, impersonation, login como cliente nem Pulsa Client.
+`Organization` continua sendo a proprietária dos dados, Client continua sendo uma empresa
+atendida pela Pulsa, e RBAC, `requirePermission()` e RLS permanecem como controles de acesso.
+Uma rota direta autorizada resolve a entidade independentemente do filtro persistido. Quando a
+entidade e o contexto divergem, a página de detalhe exibe o contexto relacional real da entidade
+sem alterar ou usar a preferência como barreira de acesso.
+
+O contexto filtra a visão geral, Contracts, Operations, Units, Positions, Assignments e Workers.
+No recorte de Client/Contract, Worker relacionado significa Worker com ao menos uma Assignment
+histórica ou atual naquele recorte; a alocação exibida como atual continua exigindo Assignment
+ativa no mesmo recorte. No estado consolidado, a lista de Workers mantém todos os Workers da
+Organization. Clients, JobRoles, usuários administrativos e auditoria permanecem globais no
+escopo da Organization.
+
+A troca de contexto mantém listagens compatíveis na rota atual e leva detail/edit/new de
+entidades operacionais para a listagem segura correspondente. O contexto não é incluído em todas
+as URLs e não cria tabela, preferência no banco ou nova entidade persistida.

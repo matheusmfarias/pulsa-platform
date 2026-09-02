@@ -1,4 +1,9 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import {
+  applyOperationalContextFilter,
+  OPERATIONAL_CONTEXT_QUERY_PATHS,
+  type OperationalContext,
+} from "@/modules/operational-context";
 import type { PositionStatus } from "../domain/position";
 import type {
   PositionInput,
@@ -27,6 +32,7 @@ export async function findPositionsForOperation(operationId: string) {
 }
 export async function findPositionsForGlobalList(
   filters: PositionGlobalListFilters,
+  operationalContext: OperationalContext,
 ) {
   const supabase = await createServerSupabaseClient();
   let query = supabase
@@ -35,15 +41,26 @@ export async function findPositionsForGlobalList(
     .order("created_at");
   if (filters.status) query = query.eq("status", filters.status);
   if (filters.query) query = query.ilike("job_role.name", `%${filters.query}%`);
-  return query;
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.positions,
+  );
 }
-export async function findActivePositionOccupancyItems() {
+export async function findActivePositionOccupancyItems(
+  operationalContext: OperationalContext,
+) {
   const supabase = await createServerSupabaseClient();
-  return supabase
+  const query = supabase
     .from("positions")
-    .select("id, unit_id, base_required_headcount, assignments(status)")
+    .select("id, unit_id, base_required_headcount, assignments(status), unit:units!inner(operation:operations!inner(contract:contracts!inner(id, client_id)))")
     .eq("status", "active")
     .eq("assignments.status", "active");
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.positions,
+  );
 }
 export async function findPositionById(id: string) {
   const supabase = await createServerSupabaseClient();
