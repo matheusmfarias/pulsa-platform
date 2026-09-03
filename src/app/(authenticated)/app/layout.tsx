@@ -26,10 +26,26 @@ export default async function AuthenticatedLayout({
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-muted/50">
-      <DesktopNavigation email={email} operationalContextState={operationalContextState} showAdministration={showAdministration} />
-      <div className="min-w-0 lg:pl-64">
+      <DesktopNavigation
+        email={email}
+        operationalContextState={operationalContextState}
+        showAdministration={showAdministration}
+      />
+      <div
+        className="
+    min-w-0
+    transition-[padding] duration-300
+    ease-[cubic-bezier(0.22,1,0.36,1)]
+    lg:pl-64
+    peer-data-[collapsed=true]:lg:pl-[4.25rem]
+  "
+      >
         <div className="flex h-16 items-center px-4 sm:px-6 lg:hidden">
-          <MobileNavigation email={email} operationalContextState={operationalContextState} showAdministration={showAdministration} />
+          <MobileNavigation
+            email={email}
+            operationalContextState={operationalContextState}
+            showAdministration={showAdministration}
+          />
         </div>
         {children}
       </div>
