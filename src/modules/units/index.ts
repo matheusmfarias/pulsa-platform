@@ -2,6 +2,7 @@ export * from "./actions";
 export * from "./components/unit-form";
 export * from "./components/unit-status-action";
 export * from "./components/unit-status-badge";
+export * from "./components/unit-table";
 export * from "./domain/unit";
 export * from "./schemas/unit-schemas";
 export * from "./services/change-unit-status";

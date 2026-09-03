@@ -2,6 +2,8 @@ export * from "./actions";
 export * from "./components/position-form";
 export * from "./components/position-status-action";
 export * from "./components/position-status-badge";
+export * from "./components/position-filter-bar";
+export * from "./components/position-table";
 export * from "./domain/position";
 export * from "./schemas/position-schemas";
 export * from "./services/change-position-status";

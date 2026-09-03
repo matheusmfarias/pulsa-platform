@@ -45,7 +45,7 @@ export default async function EditWorkerPage({
           </Link>
         </Button>
         <PageHeader
-          className="mt-6"
+          className="mt-5 sm:mt-6"
           description="Atualize somente os dados cadastrais do colaborador."
           eyebrow="Colaboradores"
           metadata={<span className="font-medium text-foreground">{worker.full_name}</span>}

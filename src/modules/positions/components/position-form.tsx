@@ -1,95 +1,144 @@
 "use client";
+
+import Link from "next/link";
 import { useActionState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import type { JobRole } from "@/modules/job-roles";
+
 import type { Position } from "../domain/position";
 import {
   createPositionAction,
   type PositionActionState,
   updatePositionAction,
 } from "../actions";
+
 const initialState: PositionActionState = { error: null };
-function ErrorText({ errors }: { errors?: string[] }) {
-  return errors?.[0] ? (
-    <p className="text-sm text-destructive">{errors[0]}</p>
-  ) : null;
-}
+
 export function PositionForm({
   unitId,
   jobRoles,
   position,
+  cancelHref,
 }: {
   unitId: string;
   jobRoles: JobRole[];
   position?: Position;
+  cancelHref: string;
 }) {
   const handler = position
     ? updatePositionAction.bind(null, position.id)
     : createPositionAction;
+
   const [state, action, pending] = useActionState(handler, initialState);
+
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <form action={action} className="space-y-8" noValidate>
       <input type="hidden" name="unit_id" value={unitId} />
-      <div className="space-y-2">
-        <Label htmlFor="job_role_id">Cargo</Label>
-        <select
-          id="job_role_id"
-          name="job_role_id"
-          defaultValue={position?.job_role_id ?? ""}
-          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-          required
-        >
-          <option value="" disabled>Selecione um cargo</option>
-          {jobRoles.map((jobRole) => (
-            <option key={jobRole.id} value={jobRole.id}>
-              {jobRole.name}{jobRole.status === "inactive" ? " (inativo)" : ""}
-            </option>
-          ))}
-        </select>
-        <ErrorText errors={state.fieldErrors?.job_role_id} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="description">Descrição</Label>
-        <textarea
-          id="description"
-          name="description"
-          defaultValue={position?.description ?? ""}
-          maxLength={2000}
-          rows={5}
-          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
-        <ErrorText errors={state.fieldErrors?.description} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="base_required_headcount">Efetivo base necessário</Label>
-        <Input
-          id="base_required_headcount"
-          name="base_required_headcount"
-          type="number"
-          min={0}
-          step={1}
-          defaultValue={position?.base_required_headcount ?? 0}
-          required
-        />
-        <ErrorText errors={state.fieldErrors?.base_required_headcount} />
-      </div>
+
+      <section aria-labelledby="position-structure-heading">
+        <div>
+          <h2 className="font-semibold" id="position-structure-heading">
+            Estrutura do posto
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Defina o cargo associado e o efetivo base necessário para este
+            posto.
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-5">
+          <Field
+            id="job_role_id"
+            label="Cargo"
+            error={state.fieldErrors?.job_role_id}
+            required
+          >
+            <Select
+              defaultValue={position?.job_role_id ?? ""}
+              name="job_role_id"
+            >
+              <option disabled value="">
+                Selecione um cargo
+              </option>
+
+              {jobRoles.map((jobRole) => (
+                <option key={jobRole.id} value={jobRole.id}>
+                  {jobRole.name}
+                  {jobRole.status === "inactive" ? " (inativo)" : ""}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field
+            id="base_required_headcount"
+            label="Efetivo base necessário"
+            error={state.fieldErrors?.base_required_headcount}
+            required
+          >
+            <Input
+              defaultValue={position?.base_required_headcount ?? 0}
+              min={0}
+              name="base_required_headcount"
+              step={1}
+              type="number"
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="position-details-heading"
+        className="border-t border-border-default pt-8"
+      >
+        <div>
+          <h2 className="font-semibold" id="position-details-heading">
+            Informações adicionais
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Acrescente uma descrição quando houver orientação específica sobre o
+            posto.
+          </p>
+        </div>
+
+        <div className="mt-5">
+          <Field
+            id="description"
+            label="Descrição"
+            error={state.fieldErrors?.description}
+            optional
+          >
+            <Textarea
+              defaultValue={position?.description ?? ""}
+              maxLength={2000}
+              name="description"
+              rows={5}
+            />
+          </Field>
+        </div>
+      </section>
+
       {state.error ? (
-        <p
-          className="rounded-md border border-destructive/25 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-          role="alert"
-        >
-          {state.error}
-        </p>
+        <FeedbackMessage variant="danger">{state.error}</FeedbackMessage>
       ) : null}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
+
+      <div className="flex flex-col-reverse gap-3 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
+        <Button asChild variant="ghost">
+          <Link href={cancelHref}>Cancelar</Link>
+        </Button>
+
+        <Button disabled={pending} type="submit">
           {pending
             ? "Salvando…"
             : position
               ? "Salvar alterações"
-              : "Cadastrar posição"}
+              : "Cadastrar posto"}
         </Button>
       </div>
     </form>

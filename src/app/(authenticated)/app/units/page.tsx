@@ -1,22 +1,98 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
+import {
+  ContentContainer,
+  PageHeader,
+  PageShell,
+} from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
 import { resolveOperationalContext } from "@/modules/operational-context";
-import { listUnitOperationalSummaries, UnitStatusBadge } from "@/modules/units";
+import {
+  listUnitOperationalSummaries,
+  UnitTable,
+} from "@/modules/units";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 export default async function UnitsPage() {
   let units;
+
   try {
     const { context } = await resolveOperationalContext();
     units = await listUnitOperationalSummaries(context);
   } catch (error) {
-    return <main className="mx-auto max-w-7xl px-4 py-10"><h1 className="text-2xl font-semibold">Unidades</h1><p className="mt-6 rounded-lg border bg-card p-6 text-sm text-destructive">{toPublicErrorMessage(error)}</p></main>;
+    return (
+      <PageShell>
+        <ContentContainer size="list">
+          <PageHeader
+            description="Locais vinculados às operações."
+            eyebrow="Estrutura operacional"
+            title="Unidades"
+          />
+
+          <FeedbackMessage className="mt-6" variant="danger">
+            {toPublicErrorMessage(error)}
+          </FeedbackMessage>
+        </ContentContainer>
+      </PageShell>
+    );
   }
-  return <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-    <div className="flex items-end justify-between"><div><p className="text-sm font-medium text-primary">Estrutura operacional</p><h1 className="mt-1 text-2xl font-semibold">Unidades</h1><p className="mt-2 text-sm text-muted-foreground">Locais vinculados às operações.</p></div><PermissionGate permission="unit:create"><Button asChild><Link href="/app/units/new"><Plus className="size-4" />Nova unidade</Link></Button></PermissionGate></div>
-    {units.length === 0 ? <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-10 text-center">Nenhuma unidade encontrada.</section> : <div className="mt-6 overflow-hidden rounded-lg border bg-card"><div className="overflow-x-auto"><table className="w-full min-w-[980px] text-left text-sm"><thead className="border-b bg-muted/60 text-xs uppercase text-muted-foreground"><tr><th className="px-5 py-3">Nome</th><th className="px-5 py-3">Código</th><th className="px-5 py-3">Operação</th><th className="px-5 py-3">Cliente</th><th className="px-5 py-3">Postos</th><th className="px-5 py-3">Ocupação</th><th className="px-5 py-3">Status</th></tr></thead><tbody className="divide-y">{units.map((unit) => <tr key={unit.id} className="hover:bg-hover"><td className="px-5 py-4 font-medium"><Link href={`/app/units/${unit.id}`} className="hover:underline">{unit.name}</Link></td><td className="px-5 py-4 text-muted-foreground">{unit.code ?? "—"}</td><td className="px-5 py-4"><Link href={`/app/operations/${unit.operation.id}`} className="hover:underline">{unit.operation.name}</Link></td><td className="px-5 py-4 text-muted-foreground">{unit.operation.contract.client.trade_name}</td><td className="px-5 py-4 tabular-nums">{unit.activePositions}</td><td className="px-5 py-4 tabular-nums"><span className="font-medium text-foreground">{unit.activeAssignments}</span> de {unit.baseRequiredHeadcount}</td><td className="px-5 py-4"><UnitStatusBadge status={unit.status} /></td></tr>)}</tbody></table></div></div>}
-  </main>;
+
+  return (
+    <PageShell>
+      <ContentContainer size="list">
+        <PageHeader
+          actions={
+            <PermissionGate permission="unit:create">
+              <Button asChild>
+                <Link href="/app/units/new">
+                  <Plus aria-hidden="true" className="size-4" />
+                  Nova unidade
+                </Link>
+              </Button>
+            </PermissionGate>
+          }
+          description="Locais vinculados às operações."
+          eyebrow="Estrutura operacional"
+          title="Unidades"
+        />
+
+        <div className="mt-5 sm:mt-6">
+          {units.length > 0 ? (
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium tabular-nums text-foreground">
+                {units.length}
+              </span>{" "}
+              {units.length === 1
+                ? "unidade encontrada"
+                : "unidades encontradas"}
+            </p>
+          ) : null}
+
+          {units.length === 0 ? (
+            <section className="rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:mt-4 sm:py-10">
+              <h2 className="font-medium">Nenhuma unidade cadastrada</h2>
+
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                As unidades representam os locais vinculados às operações.
+              </p>
+
+              <PermissionGate permission="unit:create">
+                <Button asChild className="mt-5">
+                  <Link href="/app/units/new">
+                    <Plus aria-hidden="true" className="size-4" />
+                    Nova unidade
+                  </Link>
+                </Button>
+              </PermissionGate>
+            </section>
+          ) : (
+            <UnitTable units={units} />
+          )}
+        </div>
+      </ContentContainer>
+    </PageShell>
+  );
 }

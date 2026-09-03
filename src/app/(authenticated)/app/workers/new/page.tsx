@@ -16,7 +16,7 @@ export default function NewWorkerPage() {
           </Link>
         </Button>
         <PageHeader
-          className="mt-6"
+          className="mt-5 sm:mt-6"
           eyebrow="Colaboradores"
           title="Novo colaborador"
           description="Cadastre os dados operacionais mínimos da pessoa."

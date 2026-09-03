@@ -1,10 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import type { OperationWithContext } from "@/modules/operations";
+
 import {
   createUnitAction,
   type UnitActionState,
@@ -13,131 +18,204 @@ import {
 import type { Unit } from "../domain/unit";
 
 const initialState: UnitActionState = { error: null };
-function ErrorText({ errors }: { errors?: string[] }) {
-  return errors?.[0] ? (
-    <p className="text-sm text-destructive">{errors[0]}</p>
-  ) : null;
-}
 
 export function UnitForm({
   operations,
   unit,
   defaultOperationId,
+  cancelHref,
 }: {
   operations: OperationWithContext[];
   unit?: Unit;
   defaultOperationId?: string;
+  cancelHref: string;
 }) {
   const handler = unit
     ? updateUnitAction.bind(null, unit.id)
     : createUnitAction;
+
   const [state, action, pending] = useActionState(handler, initialState);
+
   return (
-    <form action={action} className="space-y-6" noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="operation_id">Operação</Label>
-        <select
-          id="operation_id"
-          name="operation_id"
-          defaultValue={unit?.operation_id ?? defaultOperationId ?? ""}
-          required
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-        >
-          <option value="" disabled>
-            Selecione uma operação
-          </option>
-          {operations.map((operation) => (
-            <option
-              key={operation.id}
-              value={operation.id}
-              disabled={
-                operation.status === "closed" &&
-                operation.id !== unit?.operation_id
+    <form action={action} className="space-y-8" noValidate>
+      <section aria-labelledby="unit-context-heading">
+        <div>
+          <h2 className="font-semibold" id="unit-context-heading">
+            Contexto operacional
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Defina a operação à qual esta unidade pertence e sua identificação.
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-5">
+          <Field
+            error={state.fieldErrors?.operation_id}
+            id="operation_id"
+            label="Operação"
+            required
+          >
+            <Select
+              defaultValue={
+                unit?.operation_id ?? defaultOperationId ?? ""
               }
+              name="operation_id"
             >
-              {operation.contract.client.trade_name} — {operation.name}
-              {operation.status === "closed" ? " (encerrada)" : ""}
-            </option>
-          ))}
-        </select>
-        <ErrorText errors={state.fieldErrors?.operation_id} />
-      </div>
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nome</Label>
-          <Input
-            id="name"
-            name="name"
-            defaultValue={unit?.name}
-            required
-            maxLength={160}
-          />
-          <ErrorText errors={state.fieldErrors?.name} />
+              <option disabled value="">
+                Selecione uma operação
+              </option>
+
+              {operations.map((operation) => (
+                <option
+                  disabled={
+                    operation.status === "closed" &&
+                    operation.id !== unit?.operation_id
+                  }
+                  key={operation.id}
+                  value={operation.id}
+                >
+                  {operation.contract.client.trade_name} — {operation.name}
+                  {operation.status === "closed" ? " (encerrada)" : ""}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={state.fieldErrors?.name}
+              id="name"
+              label="Nome"
+              required
+            >
+              <Input
+                defaultValue={unit?.name ?? ""}
+                maxLength={160}
+                name="name"
+              />
+            </Field>
+
+            <Field
+              error={state.fieldErrors?.code}
+              id="code"
+              label="Código"
+              optional
+            >
+              <Input
+                defaultValue={unit?.code ?? ""}
+                maxLength={40}
+                name="code"
+              />
+            </Field>
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="code">Código</Label>
-          <Input
-            id="code"
-            name="code"
-            defaultValue={unit?.code ?? ""}
-            maxLength={40}
-          />
-          <ErrorText errors={state.fieldErrors?.code} />
+      </section>
+
+      <section
+        aria-labelledby="unit-location-heading"
+        className="border-t border-border-default pt-8"
+      >
+        <div>
+          <h2 className="font-semibold" id="unit-location-heading">
+            Localização
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Informe os dados de localização usados para identificar a unidade.
+          </p>
         </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="address">Endereço</Label>
-        <Input
-          id="address"
-          name="address"
-          defaultValue={unit?.address ?? ""}
-          maxLength={300}
-        />
-        <ErrorText errors={state.fieldErrors?.address} />
-      </div>
-      <div className="grid gap-6 sm:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="city">Cidade</Label>
-          <Input
-            id="city"
-            name="city"
-            defaultValue={unit?.city ?? ""}
-            maxLength={120}
-          />
-          <ErrorText errors={state.fieldErrors?.city} />
+
+        <div className="mt-5 space-y-5">
+          <Field
+            error={state.fieldErrors?.address}
+            id="address"
+            label="Endereço"
+            optional
+          >
+            <Input
+              autoComplete="street-address"
+              defaultValue={unit?.address ?? ""}
+              maxLength={300}
+              name="address"
+            />
+          </Field>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={state.fieldErrors?.city}
+              id="city"
+              label="Cidade"
+              optional
+            >
+              <Input
+                autoComplete="address-level2"
+                defaultValue={unit?.city ?? ""}
+                maxLength={120}
+                name="city"
+              />
+            </Field>
+
+            <Field
+              error={state.fieldErrors?.state}
+              id="state"
+              label="Estado"
+              optional
+            >
+              <Input
+                autoComplete="address-level1"
+                defaultValue={unit?.state ?? ""}
+                maxLength={80}
+                name="state"
+              />
+            </Field>
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="state">Estado</Label>
-          <Input
-            id="state"
-            name="state"
-            defaultValue={unit?.state ?? ""}
-            maxLength={80}
-          />
-          <ErrorText errors={state.fieldErrors?.state} />
+      </section>
+
+      <section
+        aria-labelledby="unit-settings-heading"
+        className="border-t border-border-default pt-8"
+      >
+        <div>
+          <h2 className="font-semibold" id="unit-settings-heading">
+            Configuração
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Defina o fuso horário usado como referência operacional desta unidade.
+          </p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="timezone">Timezone</Label>
-          <Input
+
+        <div className="mt-5">
+          <Field
+            description="Use um identificador IANA, como America/Sao_Paulo."
+            error={state.fieldErrors?.timezone}
             id="timezone"
-            name="timezone"
-            defaultValue={unit?.timezone ?? "America/Sao_Paulo"}
+            label="Fuso horário"
             required
-            maxLength={100}
-          />
-          <ErrorText errors={state.fieldErrors?.timezone} />
+          >
+            <Input
+              defaultValue={unit?.timezone ?? "America/Sao_Paulo"}
+              maxLength={100}
+              name="timezone"
+            />
+          </Field>
         </div>
-      </div>
+      </section>
+
       {state.error ? (
-        <p
-          className="rounded-md border border-destructive/25 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-          role="alert"
-        >
+        <FeedbackMessage variant="danger">
           {state.error}
-        </p>
+        </FeedbackMessage>
       ) : null}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
+
+      <div className="flex flex-col-reverse gap-3 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
+        <Button asChild variant="ghost">
+          <Link href={cancelHref}>Cancelar</Link>
+        </Button>
+
+        <Button disabled={pending} type="submit">
           {pending
             ? "Salvando…"
             : unit

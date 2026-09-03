@@ -41,8 +41,8 @@ export type PositionGlobalListItem = Position & {
   assignments: Array<{ status: string }>;
 };
 export const POSITION_STATUS_LABELS: Record<PositionStatus, string> = {
-  active: "Ativa",
-  inactive: "Inativa",
+  active: "Ativo",
+  inactive: "Inativo",
 };
 export function parsePosition(row: Tables<"positions">): Position {
   return { ...row, status: positionStatusSchema.parse(row.status) };
