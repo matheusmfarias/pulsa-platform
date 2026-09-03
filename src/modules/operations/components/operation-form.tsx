@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -23,108 +24,185 @@ export function OperationForm({
   contracts,
   operation,
   defaultContractId,
+  cancelHref,
 }: {
   contracts: ContractWithClient[];
   operation?: Operation;
   defaultContractId?: string;
+  cancelHref: string;
 }) {
   const action = operation
     ? updateOperationAction.bind(null, operation.id)
     : createOperationAction;
+
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-6" noValidate>
-      <Field
-        id="contract_id"
-        label="Contrato"
-        error={state.fieldErrors?.contract_id}
-        required
-      >
-        <Select
-          name="contract_id"
-          defaultValue={operation?.contract_id ?? defaultContractId ?? ""}
-        >
-          <option value="" disabled>Selecione um contrato</option>
-          {contracts.map((contract) => (
-            <option
-              key={contract.id}
-              value={contract.id}
-              disabled={contract.status !== "active" && contract.id !== operation?.contract_id}
+    <form action={formAction} className="space-y-8" noValidate>
+      <section aria-labelledby="operation-context-heading">
+        <div>
+          <h2 className="font-semibold" id="operation-context-heading">
+            Contexto contratual
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Defina o contrato ao qual esta operação pertence e sua identificação.
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-5">
+          <Field
+            error={state.fieldErrors?.contract_id}
+            id="contract_id"
+            label="Contrato"
+            required
+          >
+            <Select
+              defaultValue={
+                operation?.contract_id ?? defaultContractId ?? ""
+              }
+              name="contract_id"
             >
-              {contract.client.trade_name} — {contract.name}
-              {contract.status !== "active" ? " (não ativo)" : ""}
-            </option>
-          ))}
-        </Select>
-      </Field>
+              <option disabled value="">
+                Selecione um contrato
+              </option>
 
-      <Field id="name" label="Nome" error={state.fieldErrors?.name} required>
-        <Input name="name" defaultValue={operation?.name} maxLength={160} />
-      </Field>
+              {contracts.map((contract) => (
+                <option
+                  disabled={
+                    contract.status !== "active" &&
+                    contract.id !== operation?.contract_id
+                  }
+                  key={contract.id}
+                  value={contract.id}
+                >
+                  {contract.client.trade_name} — {contract.name}
+                  {contract.status !== "active" ? " (não ativo)" : ""}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
-      <Field
-        id="description"
-        label="Descrição"
-        error={state.fieldErrors?.description}
-        optional
+          <Field
+            error={state.fieldErrors?.name}
+            id="name"
+            label="Nome"
+            required
+          >
+            <Input
+              defaultValue={operation?.name ?? ""}
+              maxLength={160}
+              name="name"
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="operation-period-heading"
+        className="border-t border-border-default pt-8"
       >
-        <Textarea
-          name="description"
-          defaultValue={operation?.description ?? ""}
-          maxLength={2000}
-          rows={5}
-        />
-      </Field>
+        <div>
+          <h2 className="font-semibold" id="operation-period-heading">
+            Período
+          </h2>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <Field
-          id="start_date"
-          label="Data inicial"
-          error={state.fieldErrors?.start_date}
-          required
-        >
-          <Input
-            name="start_date"
-            type="date"
-            defaultValue={operation?.start_date}
-          />
-        </Field>
-        <Field
-          id="end_date"
-          label="Data final"
-          error={state.fieldErrors?.end_date}
-          optional
-        >
-          <Input
-            name="end_date"
-            type="date"
-            defaultValue={operation?.end_date ?? ""}
-          />
-        </Field>
-      </div>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Informe quando a operação inicia e, quando aplicável, sua data prevista ou efetiva de término.
+          </p>
+        </div>
 
-      <Field
-        id="manager_user_id"
-        label="ID do gestor responsável"
-        description="O gestor deve possuir membership ativa na organização."
-        error={state.fieldErrors?.manager_user_id}
-        optional
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          <Field
+            error={state.fieldErrors?.start_date}
+            id="start_date"
+            label="Data inicial"
+            required
+          >
+            <Input
+              defaultValue={operation?.start_date ?? ""}
+              name="start_date"
+              type="date"
+            />
+          </Field>
+
+          <Field
+            error={state.fieldErrors?.end_date}
+            id="end_date"
+            label="Data final"
+            optional
+          >
+            <Input
+              defaultValue={operation?.end_date ?? ""}
+              name="end_date"
+              type="date"
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="operation-details-heading"
+        className="border-t border-border-default pt-8"
       >
-        <Input
-          name="manager_user_id"
-          defaultValue={operation?.manager_user_id ?? ""}
-          placeholder="UUID de um membro ativo"
-        />
-      </Field>
+        <div>
+          <h2 className="font-semibold" id="operation-details-heading">
+            Informações adicionais
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Registre informações complementares necessárias para compreender esta operação.
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-5">
+          <Field
+            error={state.fieldErrors?.description}
+            id="description"
+            label="Descrição"
+            optional
+          >
+            <Textarea
+              defaultValue={operation?.description ?? ""}
+              maxLength={2000}
+              name="description"
+              rows={5}
+            />
+          </Field>
+
+          <Field
+            description="Informe o identificador de um membro ativo da organização."
+            error={state.fieldErrors?.manager_user_id}
+            id="manager_user_id"
+            label="Identificador do gestor responsável"
+            optional
+          >
+            <Input
+              defaultValue={operation?.manager_user_id ?? ""}
+              name="manager_user_id"
+              placeholder="UUID de um membro ativo"
+            />
+          </Field>
+        </div>
+      </section>
 
       {state.error ? (
-        <FeedbackMessage variant="danger">{state.error}</FeedbackMessage>
+        <FeedbackMessage variant="danger">
+          {state.error}
+        </FeedbackMessage>
       ) : null}
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Salvando…" : operation ? "Salvar alterações" : "Cadastrar operação"}
+      <div className="flex flex-col-reverse gap-3 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
+        <Button asChild variant="ghost">
+          <Link href={cancelHref}>Cancelar</Link>
+        </Button>
+
+        <Button disabled={pending} type="submit">
+          {pending
+            ? "Salvando…"
+            : operation
+              ? "Salvar alterações"
+              : "Cadastrar operação"}
         </Button>
       </div>
     </form>

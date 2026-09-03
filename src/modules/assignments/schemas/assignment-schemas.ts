@@ -14,12 +14,12 @@ const optionalDateSchema = z.preprocess(
   dateSchema.nullable(),
 );
 
-export const assignmentIdSchema = z.uuid("Assignment inválida.");
+export const assignmentIdSchema = z.uuid("Alocação inválida.");
 
 export const assignmentInputSchema = z
   .object({
-    worker_id: z.uuid("Selecione um Worker válido."),
-    position_id: z.uuid("Selecione uma Position válida."),
+    worker_id: z.uuid("Selecione um colaborador válido."),
+position_id: z.uuid("Selecione um posto válido."),
     start_date: dateSchema,
     end_date: optionalDateSchema,
   })

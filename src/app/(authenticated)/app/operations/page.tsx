@@ -1,104 +1,87 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
+import {
+  ContentContainer,
+  PageHeader,
+  PageShell,
+} from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
-import { listOperations, OperationStatusBadge } from "@/modules/operations";
+import { listOperations, OperationTable } from "@/modules/operations";
 import { resolveOperationalContext } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
-function formatDate(value: string | null): string {
-  if (!value) return "Sem data final";
-  return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
-    new Date(`${value}T00:00:00Z`),
-  );
-}
-
 export default async function OperationsPage() {
   let operations;
+
   try {
     const { context } = await resolveOperationalContext();
     operations = await listOperations({}, context);
   } catch (error) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold">Operações</h1>
-        <p className="mt-6 rounded-lg border bg-card p-6 text-sm text-destructive" role="alert">
-          {toPublicErrorMessage(error)}
-        </p>
-      </main>
+      <PageShell>
+        <ContentContainer size="list">
+          <PageHeader
+            description="Engajamentos operacionais administrados pela Pulsa."
+            eyebrow="Execução"
+            title="Operações"
+          />
+
+          <FeedbackMessage className="mt-6" variant="danger">
+            {toPublicErrorMessage(error)}
+          </FeedbackMessage>
+        </ContentContainer>
+      </PageShell>
     );
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Execução</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Operações</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Engajamentos operacionais administrados pela Pulsa.
-          </p>
-        </div>
-        <PermissionGate permission="operation:create">
-          <Button asChild>
-            <Link href="/app/operations/new">
-              <Plus className="size-4" aria-hidden="true" />
-              Nova operação
-            </Link>
-          </Button>
-        </PermissionGate>
-      </div>
+    <PageShell>
+      <ContentContainer size="list">
+        <PageHeader
+          actions={
+            <PermissionGate permission="operation:create">
+              <Button asChild>
+                <Link href="/app/operations/new">
+                  <Plus aria-hidden="true" className="size-4" />
+                  Nova operação
+                </Link>
+              </Button>
+            </PermissionGate>
+          }
+          description="Engajamentos operacionais administrados pela Pulsa."
+          eyebrow="Execução"
+          title="Operações"
+        />
 
-      {operations.length === 0 ? (
-        <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-10 text-center">
-          <h2 className="font-medium">Nenhuma operação encontrada</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Cadastre a primeira operação para começar.
-          </p>
-        </section>
-      ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border bg-card">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3 font-medium">Nome</th>
-                  <th className="px-5 py-3 font-medium">Cliente</th>
-                  <th className="px-5 py-3 font-medium">Contrato</th>
-                  <th className="px-5 py-3 font-medium">Início</th>
-                  <th className="px-5 py-3 font-medium">Fim</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {operations.map((operation) => (
-                  <tr key={operation.id} className="hover:bg-hover">
-                    <td className="px-5 py-4 font-medium">
-                      <Link className="hover:underline" href={`/app/operations/${operation.id}`}>
-                        {operation.name}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground">
-                      <Link className="hover:underline" href={`/app/clients/${operation.contract.client.id}`}>
-                        {operation.contract.client.trade_name}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground">
-                      <Link className="hover:underline" href={`/app/contracts/${operation.contract.id}`}>
-                        {operation.contract.name}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-4 tabular-nums text-muted-foreground">{formatDate(operation.start_date)}</td>
-                    <td className="px-5 py-4 tabular-nums text-muted-foreground">{formatDate(operation.end_date)}</td>
-                    <td className="px-5 py-4"><OperationStatusBadge status={operation.status} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="mt-5 sm:mt-6">
+          {operations.length > 0 ? (
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium tabular-nums text-foreground">
+                {operations.length}
+              </span>{" "}
+              {operations.length === 1
+                ? "operação encontrada"
+                : "operações encontradas"}
+            </p>
+          ) : null}
+
+          {operations.length === 0 ? (
+            <section className="rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:mt-4 sm:py-10">
+              <h2 className="font-medium">Nenhuma operação cadastrada</h2>
+
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                As operações representam os engajamentos executados pela Pulsa
+                dentro dos contratos.
+              </p>
+            </section>
+          ) : (
+            <OperationTable operations={operations} />
+          )}
         </div>
-      )}
-    </main>
+      </ContentContainer>
+    </PageShell>
   );
 }

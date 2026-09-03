@@ -2,6 +2,8 @@ export * from "./actions";
 export * from "./components/assignment-form";
 export * from "./components/assignment-status-action";
 export * from "./components/assignment-status-badge";
+export * from "./components/assignment-filter-bar";
+export * from "./components/assignment-table";
 export * from "./domain/assignment";
 export * from "./domain/operational-metrics";
 export * from "./schemas/assignment-schemas";

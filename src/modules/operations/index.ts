@@ -1,6 +1,7 @@
 export { OperationForm } from "./components/operation-form";
 export { OperationStatusAction } from "./components/operation-status-action";
 export { OperationStatusBadge } from "./components/operation-status-badge";
+export * from "./components/operation-table";
 export {
   OPERATION_STATUS_LABELS,
   OPERATION_STATUS_TRANSITIONS,

@@ -2,7 +2,13 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import {
+  ContentContainer,
+  PageHeader,
+  PageShell,
+} from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { listContracts } from "@/modules/contracts";
 import {
   getOperationById,
@@ -15,42 +21,77 @@ export default async function EditOperationPage({
   params,
 }: PageProps<"/app/operations/[operationId]/edit">) {
   const route = operationIdSchema.safeParse((await params).operationId);
+
   if (!route.success) notFound();
 
   let operation;
   let contracts;
+
   try {
     [operation, contracts] = await Promise.all([
       getOperationById(route.data),
       listContracts(),
     ]);
   } catch (error) {
-    if (isAppError(error) && error.code === "NOT_FOUND") notFound();
+    if (isAppError(error) && error.code === "NOT_FOUND") {
+      notFound();
+    }
+
     return (
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold">Editar operação</h1>
-        <p className="mt-6 rounded-lg border bg-card p-6 text-sm text-destructive" role="alert">
-          {toPublicErrorMessage(error)}
-        </p>
-      </main>
+      <PageShell>
+        <ContentContainer size="form">
+          <PageHeader
+            description="Atualize os dados e o período desta operação."
+            eyebrow="Operações"
+            title="Editar operação"
+          />
+
+          <FeedbackMessage className="mt-6" variant="danger">
+            {toPublicErrorMessage(error)}
+          </FeedbackMessage>
+        </ContentContainer>
+      </PageShell>
     );
   }
 
+  const detailHref = `/app/operations/${operation.id}`;
+
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <Button asChild variant="outline" size="sm">
-        <Link href={`/app/operations/${operation.id}`}>
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Voltar
-        </Link>
-      </Button>
-      <div className="mt-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Editar operação</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{operation.name}</p>
-      </div>
-      <section className="mt-8 rounded-lg border bg-card p-6 shadow-sm sm:p-8">
-        <OperationForm contracts={contracts} operation={operation} />
-      </section>
-    </main>
+    <PageShell>
+      <ContentContainer size="form">
+        <Button asChild size="sm" variant="ghost">
+          <Link href={detailHref}>
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            Voltar
+          </Link>
+        </Button>
+
+        <PageHeader
+          className="mt-5 sm:mt-6"
+          description="Atualize o contexto contratual, o período e as informações desta operação."
+          eyebrow="Operações"
+          metadata={
+            <span>
+              Operação:{" "}
+              <span className="font-medium text-foreground">
+                {operation.name}
+              </span>
+            </span>
+          }
+          title="Editar operação"
+        />
+
+        <section
+          aria-label="Formulário de edição da operação"
+          className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8"
+        >
+          <OperationForm
+            cancelHref={detailHref}
+            contracts={contracts}
+            operation={operation}
+          />
+        </section>
+      </ContentContainer>
+    </PageShell>
   );
 }
