@@ -1,10 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import type { Client } from "@/modules/clients";
 
 import {
@@ -16,132 +19,171 @@ import type { Contract } from "../domain/contract";
 
 const initialState: ContractActionState = { error: null };
 
-function FieldError({ errors, id }: { errors?: string[]; id: string }) {
-  if (!errors?.length) return null;
-  return (
-    <p id={id} className="text-sm text-destructive">
-      {errors[0]}
-    </p>
-  );
-}
-
 export function ContractForm({
   clients,
   contract,
   defaultClientId,
+  cancelHref,
 }: {
   clients: Client[];
   contract?: Contract;
   defaultClientId?: string;
+  cancelHref: string;
 }) {
   const action = contract
     ? updateContractAction.bind(null, contract.id)
     : createContractAction;
+
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-6" noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="client_id">Cliente</Label>
-        <select
-          id="client_id"
-          name="client_id"
-          defaultValue={contract?.client_id ?? defaultClientId ?? ""}
-          required
-          aria-invalid={Boolean(state.fieldErrors?.client_id)}
-          aria-describedby={state.fieldErrors?.client_id ? "client-error" : undefined}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <option value="" disabled>
-            Selecione um cliente
-          </option>
-          {clients.map((client) => (
-            <option
-              key={client.id}
-              value={client.id}
-              disabled={client.status === "inactive" && client.id !== contract?.client_id}
-            >
-              {client.trade_name}
-              {client.status === "inactive" ? " (inativo)" : ""}
-            </option>
-          ))}
-        </select>
-        <FieldError errors={state.fieldErrors?.client_id} id="client-error" />
-      </div>
+    <form action={formAction} className="space-y-8" noValidate>
+      <section aria-labelledby="contract-context-heading">
+        <div>
+          <h2 className="font-semibold" id="contract-context-heading">
+            Vínculo comercial
+          </h2>
 
-      <div className="space-y-2">
-        <Label htmlFor="name">Nome</Label>
-        <Input
-          id="name"
-          name="name"
-          defaultValue={contract?.name}
-          maxLength={160}
-          required
-          aria-invalid={Boolean(state.fieldErrors?.name)}
-          aria-describedby={state.fieldErrors?.name ? "name-error" : undefined}
-        />
-        <FieldError errors={state.fieldErrors?.name} id="name-error" />
-      </div>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Defina o cliente ao qual este contrato pertence e sua identificação.
+          </p>
+        </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="start_date">Data inicial</Label>
-          <Input
-            id="start_date"
-            name="start_date"
-            type="date"
-            defaultValue={contract?.start_date}
+        <div className="mt-5 space-y-5">
+          <Field
+            error={state.fieldErrors?.client_id}
+            id="client_id"
+            label="Cliente"
             required
-            aria-invalid={Boolean(state.fieldErrors?.start_date)}
-            aria-describedby={state.fieldErrors?.start_date ? "start-date-error" : undefined}
-          />
-          <FieldError errors={state.fieldErrors?.start_date} id="start-date-error" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="end_date">Data final</Label>
-          <Input
-            id="end_date"
-            name="end_date"
-            type="date"
-            defaultValue={contract?.end_date ?? ""}
-            aria-invalid={Boolean(state.fieldErrors?.end_date)}
-            aria-describedby={state.fieldErrors?.end_date ? "end-date-error" : undefined}
-          />
-          <FieldError errors={state.fieldErrors?.end_date} id="end-date-error" />
-        </div>
-      </div>
+          >
+            <Select
+              defaultValue={
+                contract?.client_id ?? defaultClientId ?? ""
+              }
+              name="client_id"
+            >
+              <option disabled value="">
+                Selecione um cliente
+              </option>
 
-      <div className="space-y-2">
-        <Label htmlFor="external_reference">Referência externa</Label>
-        <Input
-          id="external_reference"
-          name="external_reference"
-          defaultValue={contract?.external_reference ?? ""}
-          maxLength={160}
-          aria-invalid={Boolean(state.fieldErrors?.external_reference)}
-          aria-describedby={
-            state.fieldErrors?.external_reference
-              ? "external-reference-error"
-              : undefined
-          }
-        />
-        <FieldError
-          errors={state.fieldErrors?.external_reference}
-          id="external-reference-error"
-        />
-      </div>
+              {clients.map((client) => (
+                <option
+                  disabled={
+                    client.status === "inactive" &&
+                    client.id !== contract?.client_id
+                  }
+                  key={client.id}
+                  value={client.id}
+                >
+                  {client.trade_name}
+                  {client.status === "inactive"
+                    ? " (inativo)"
+                    : ""}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field
+            error={state.fieldErrors?.name}
+            id="name"
+            label="Nome do contrato"
+            required
+          >
+            <Input
+              defaultValue={contract?.name ?? ""}
+              maxLength={160}
+              name="name"
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="contract-period-heading"
+        className="border-t border-border-default pt-8"
+      >
+        <div>
+          <h2 className="font-semibold" id="contract-period-heading">
+            Período
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Informe quando o contrato começa e, quando aplicável, sua data de término.
+          </p>
+        </div>
+
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          <Field
+            error={state.fieldErrors?.start_date}
+            id="start_date"
+            label="Data inicial"
+            required
+          >
+            <Input
+              defaultValue={contract?.start_date ?? ""}
+              name="start_date"
+              type="date"
+            />
+          </Field>
+
+          <Field
+            error={state.fieldErrors?.end_date}
+            id="end_date"
+            label="Data final"
+            optional
+          >
+            <Input
+              defaultValue={contract?.end_date ?? ""}
+              name="end_date"
+              type="date"
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="contract-reference-heading"
+        className="border-t border-border-default pt-8"
+      >
+        <div>
+          <h2 className="font-semibold" id="contract-reference-heading">
+            Referência
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Registre uma identificação externa quando este contrato também existir em outro sistema ou documento.
+          </p>
+        </div>
+
+        <div className="mt-5">
+          <Field
+            error={state.fieldErrors?.external_reference}
+            id="external_reference"
+            label="Referência externa"
+            optional
+          >
+            <Input
+              defaultValue={contract?.external_reference ?? ""}
+              maxLength={160}
+              name="external_reference"
+            />
+          </Field>
+        </div>
+      </section>
 
       {state.error ? (
-        <p
-          className="rounded-md border border-destructive/25 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-          role="alert"
-        >
+        <FeedbackMessage variant="danger">
           {state.error}
-        </p>
+        </FeedbackMessage>
       ) : null}
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
+      <div className="flex flex-col-reverse gap-3 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
+        <Button asChild variant="ghost">
+          <Link href={cancelHref}>Cancelar</Link>
+        </Button>
+
+        <Button disabled={pending} type="submit">
           {pending
             ? "Salvando…"
             : contract

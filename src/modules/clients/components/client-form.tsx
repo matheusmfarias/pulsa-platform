@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import {
   createClientAction,
@@ -16,89 +18,98 @@ import { formatDocumentNumber } from "../domain/document-number";
 
 const initialState: ClientActionState = { error: null };
 
-function FieldError({ errors, id }: { errors?: string[]; id: string }) {
-  if (!errors?.length) return null;
-
-  return (
-    <p id={id} className="text-sm text-destructive">
-      {errors[0]}
-    </p>
-  );
-}
-
-export function ClientForm({ client }: { client?: Client }) {
+export function ClientForm({
+  client,
+  cancelHref,
+}: {
+  client?: Client;
+  cancelHref: string;
+}) {
   const action = client
     ? updateClientAction.bind(null, client.id)
     : createClientAction;
+
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-6" noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="legal_name">Razão social</Label>
-        <Input
-          id="legal_name"
-          name="legal_name"
-          defaultValue={client?.legal_name}
-          maxLength={160}
-          required
-          aria-invalid={Boolean(state.fieldErrors?.legal_name)}
-          aria-describedby={state.fieldErrors?.legal_name ? "legal-name-error" : undefined}
-        />
-        <FieldError errors={state.fieldErrors?.legal_name} id="legal-name-error" />
-      </div>
+    <form action={formAction} className="space-y-8" noValidate>
+      <section aria-labelledby="client-identification-heading">
+        <div>
+          <h2 className="font-semibold" id="client-identification-heading">
+            Identificação da empresa
+          </h2>
 
-      <div className="space-y-2">
-        <Label htmlFor="trade_name">Nome fantasia</Label>
-        <Input
-          id="trade_name"
-          name="trade_name"
-          defaultValue={client?.trade_name}
-          maxLength={160}
-          required
-          aria-invalid={Boolean(state.fieldErrors?.trade_name)}
-          aria-describedby={state.fieldErrors?.trade_name ? "trade-name-error" : undefined}
-        />
-        <FieldError errors={state.fieldErrors?.trade_name} id="trade-name-error" />
-      </div>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Informe os dados jurídicos e comerciais usados para identificar o cliente.
+          </p>
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="document_number">CNPJ</Label>
-        <Input
-          id="document_number"
-          name="document_number"
-          inputMode="numeric"
-          defaultValue={client ? formatDocumentNumber(client.document_number) : undefined}
-          placeholder="00.000.000/0000-00"
-          required
-          aria-invalid={Boolean(state.fieldErrors?.document_number)}
-          aria-describedby={
-            state.fieldErrors?.document_number
-              ? "document-number-error"
-              : "document-number-hint"
-          }
-        />
-        <p id="document-number-hint" className="text-xs text-muted-foreground">
-          A pontuação é removida antes do armazenamento.
-        </p>
-        <FieldError
-          errors={state.fieldErrors?.document_number}
-          id="document-number-error"
-        />
-      </div>
+        <div className="mt-5 space-y-5">
+          <Field
+            error={state.fieldErrors?.legal_name}
+            id="legal_name"
+            label="Razão social"
+            required
+          >
+            <Input
+              autoComplete="organization"
+              defaultValue={client?.legal_name ?? ""}
+              maxLength={160}
+              name="legal_name"
+            />
+          </Field>
+
+          <Field
+            error={state.fieldErrors?.trade_name}
+            id="trade_name"
+            label="Nome fantasia"
+            required
+          >
+            <Input
+              defaultValue={client?.trade_name ?? ""}
+              maxLength={160}
+              name="trade_name"
+            />
+          </Field>
+
+          <Field
+            description="A pontuação pode ser informada normalmente e é removida antes do armazenamento."
+            error={state.fieldErrors?.document_number}
+            id="document_number"
+            label="CNPJ"
+            required
+          >
+            <Input
+              defaultValue={
+                client
+                  ? formatDocumentNumber(client.document_number)
+                  : ""
+              }
+              inputMode="numeric"
+              name="document_number"
+              placeholder="00.000.000/0000-00"
+            />
+          </Field>
+        </div>
+      </section>
 
       {state.error ? (
-        <p
-          className="rounded-md border border-destructive/25 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-          role="alert"
-        >
+        <FeedbackMessage variant="danger">
           {state.error}
-        </p>
+        </FeedbackMessage>
       ) : null}
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Salvando…" : client ? "Salvar alterações" : "Cadastrar cliente"}
+      <div className="flex flex-col-reverse gap-3 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
+        <Button asChild variant="ghost">
+          <Link href={cancelHref}>Cancelar</Link>
+        </Button>
+
+        <Button disabled={pending} type="submit">
+          {pending
+            ? "Salvando…"
+            : client
+              ? "Salvar alterações"
+              : "Cadastrar cliente"}
         </Button>
       </div>
     </form>

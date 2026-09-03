@@ -1,6 +1,7 @@
 export { ContractForm } from "./components/contract-form";
 export { ContractStatusAction } from "./components/contract-status-action";
 export { ContractStatusBadge } from "./components/contract-status-badge";
+export { ContractTable } from "./components/contract-table";
 export {
   CONTRACT_STATUS_LABELS,
   CONTRACT_STATUS_TRANSITIONS,

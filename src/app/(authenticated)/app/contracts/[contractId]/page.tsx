@@ -1,8 +1,15 @@
 import { ArrowLeft, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
+import {
+  ContentContainer,
+  PageHeader,
+  PageShell,
+} from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
 import {
   ContractStatusAction,
@@ -17,156 +24,324 @@ import {
 } from "@/modules/operations";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 
+const relationLinkClass =
+  "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
+
 function formatDate(value: string | null): string {
-  if (!value) return "Não informada";
-  return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
-    new Date(`${value}T00:00:00Z`),
+  if (!value) return "Em aberto";
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "UTC",
+  }).format(new Date(value + "T00:00:00Z"));
+}
+
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
+
+      <dd className="mt-1 text-sm leading-6">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function DetailSection({
+  id,
+  title,
+  description,
+  actions,
+  children,
+}: {
+  id: string;
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id} className="py-6">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="font-semibold" id={id}>
+            {title}
+          </h2>
+
+          {description ? (
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
+        </div>
+
+        {actions ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {actions}
+          </div>
+        ) : null}
+      </header>
+
+      <div className="mt-5">
+        {children}
+      </div>
+    </section>
   );
 }
 
 export default async function ContractDetailsPage({
   params,
 }: PageProps<"/app/contracts/[contractId]">) {
-  const route = contractIdSchema.safeParse((await params).contractId);
-  if (!route.success) notFound();
+  const route = contractIdSchema.safeParse(
+    (await params).contractId,
+  );
+
+  if (!route.success) {
+    notFound();
+  }
 
   let contract;
+
   try {
     contract = await getContractById(route.data);
   } catch (error) {
-    if (isAppError(error) && error.code === "NOT_FOUND") notFound();
+    if (isAppError(error) && error.code === "NOT_FOUND") {
+      notFound();
+    }
+
     return (
-      <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold">Contrato</h1>
-        <p className="mt-6 rounded-lg border bg-card p-6 text-sm text-destructive" role="alert">
-          {toPublicErrorMessage(error)}
-        </p>
-      </main>
+      <PageShell>
+        <ContentContainer size="detail-wide">
+          <PageHeader
+            eyebrow="Contratos"
+            title="Detalhe do contrato"
+          />
+
+          <FeedbackMessage
+            className="mt-6"
+            variant="danger"
+          >
+            {toPublicErrorMessage(error)}
+          </FeedbackMessage>
+        </ContentContainer>
+      </PageShell>
     );
   }
 
   let operations: OperationWithContext[];
   let operationsError: string | null = null;
+
   try {
-    operations = await listOperations({ contractId: contract.id });
+    operations = await listOperations({
+      contractId: contract.id,
+    });
   } catch (error) {
     operations = [];
     operationsError = toPublicErrorMessage(error);
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-      <Button asChild variant="outline" size="sm">
-        <Link href="/app/contracts">
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Voltar para contratos
-        </Link>
-      </Button>
+    <PageShell>
+      <ContentContainer size="detail-wide">
+        <Button asChild size="sm" variant="ghost">
+          <Link href="/app/contracts">
+            <ArrowLeft
+              aria-hidden="true"
+              className="size-4"
+            />
+            Voltar para contratos
+          </Link>
+        </Button>
 
-      <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{contract.name}</h1>
-            <ContractStatusBadge status={contract.status} />
-          </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Cliente:{" "}
-            <Link className="font-medium text-foreground hover:underline" href={`/app/clients/${contract.client.id}`}>
-              {contract.client.trade_name}
-            </Link>
-          </p>
-        </div>
-        <PermissionGate permission="contract:update">
-          <Button asChild variant="outline">
-            <Link href={`/app/contracts/${contract.id}/edit`}>
-              <Pencil className="size-4" aria-hidden="true" />
-              Editar
-            </Link>
-          </Button>
-        </PermissionGate>
-      </div>
-
-      <section className="mt-8 rounded-lg border bg-card shadow-sm">
-        <div className="border-b px-6 py-4">
-          <h2 className="font-semibold">Dados do contrato</h2>
-        </div>
-        <dl className="grid gap-x-8 gap-y-6 p-6 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Cliente</dt>
-            <dd className="mt-2 text-sm">{contract.client.trade_name}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Referência externa</dt>
-            <dd className="mt-2 text-sm">{contract.external_reference ?? "Não informada"}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Data inicial</dt>
-            <dd className="mt-2 text-sm tabular-nums">{formatDate(contract.start_date)}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Data final</dt>
-            <dd className="mt-2 text-sm tabular-nums">{formatDate(contract.end_date)}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="mt-6 rounded-lg border bg-card shadow-sm">
-        <div className="flex flex-col gap-4 border-b px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-semibold">Operações</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Engajamentos operacionais vinculados a este contrato.
-            </p>
-          </div>
-          {contract.status === "active" ? (
-            <PermissionGate permission="operation:create">
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/app/operations/new?contractId=${contract.id}`}>
-                  <Plus className="size-4" aria-hidden="true" />
-                  Nova operação
+        <PageHeader
+          actions={
+            <PermissionGate permission="contract:update">
+              <Button asChild variant="outline">
+                <Link
+                  href={`/app/contracts/${contract.id}/edit`}
+                >
+                  <Pencil
+                    aria-hidden="true"
+                    className="size-4"
+                  />
+                  Editar
                 </Link>
               </Button>
             </PermissionGate>
-          ) : null}
-        </div>
-        {operationsError ? (
-          <p className="p-6 text-sm text-destructive" role="alert">
-            {operationsError}
-          </p>
-        ) : operations.length === 0 ? (
-          <p className="p-6 text-sm text-muted-foreground">
-            Nenhuma operação cadastrada para este contrato.
-          </p>
-        ) : (
-          <ul className="divide-y">
-            {operations.map((operation) => (
-              <li key={operation.id} className="flex items-center justify-between gap-4 px-6 py-4">
-                <div>
-                  <Link className="text-sm font-medium hover:underline" href={`/app/operations/${operation.id}`}>
-                    {operation.name}
-                  </Link>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Início: {formatDate(operation.start_date)}
-                  </p>
-                </div>
-                <OperationStatusBadge status={operation.status} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          }
+          className="mt-5 sm:mt-6"
+          description="Vínculo comercial, período e operações associadas a este contrato."
+          eyebrow="Contratos"
+          metadata={
+            <div className="flex flex-wrap items-center gap-3">
+              <ContractStatusBadge
+                status={contract.status}
+              />
 
-      <section className="mt-6 rounded-lg border bg-card p-6">
-        <h2 className="font-semibold">Status do contrato</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          As alterações são explícitas e estados finais preservam o histórico.
-        </p>
-        <div className="mt-4">
+              <span>
+                Cliente:{" "}
+                <Link
+                  className={relationLinkClass}
+                  href={`/app/clients/${contract.client.id}`}
+                >
+                  {contract.client.trade_name}
+                </Link>
+              </span>
+            </div>
+          }
+          title={contract.name}
+        />
+
+        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+          <DetailSection
+            description="Informações comerciais que identificam este contrato e seu período de vigência."
+            id="contract-data"
+            title="Dados do contrato"
+          >
+            <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+              <DetailItem
+                label="Cliente"
+                value={
+                  <Link
+                    className={relationLinkClass}
+                    href={`/app/clients/${contract.client.id}`}
+                  >
+                    {contract.client.trade_name}
+                  </Link>
+                }
+              />
+
+              <DetailItem
+                label="Referência externa"
+                value={
+                  contract.external_reference ??
+                  "Não informada"
+                }
+              />
+
+              <DetailItem
+                label="Data inicial"
+                value={
+                  <span className="tabular-nums">
+                    {formatDate(contract.start_date)}
+                  </span>
+                }
+              />
+
+              <DetailItem
+                label="Data final"
+                value={
+                  <span className="tabular-nums">
+                    {formatDate(contract.end_date)}
+                  </span>
+                }
+              />
+            </dl>
+          </DetailSection>
+
+          <DetailSection
+            actions={
+              contract.status === "active" ? (
+                <PermissionGate permission="operation:create">
+                  <Button
+                    asChild
+                    className="w-fit"
+                    size="sm"
+                  >
+                    <Link
+                      href={`/app/operations/new?contractId=${contract.id}`}
+                    >
+                      <Plus
+                        aria-hidden="true"
+                        className="size-4"
+                      />
+                      Nova operação
+                    </Link>
+                  </Button>
+                </PermissionGate>
+              ) : null
+            }
+            description="Engajamentos operacionais vinculados a este contrato."
+            id="contract-operations"
+            title="Operações"
+          >
+            {operationsError ? (
+              <FeedbackMessage variant="danger">
+                {operationsError}
+              </FeedbackMessage>
+            ) : operations.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Este contrato ainda não possui operações cadastradas.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border-default">
+                {operations.map((operation) => (
+                  <li
+                    className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                    key={operation.id}
+                  >
+                    <div className="min-w-0">
+                      <Link
+                        className={relationLinkClass}
+                        href={`/app/operations/${operation.id}`}
+                      >
+                        {operation.name}
+                      </Link>
+
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        {formatDate(operation.start_date)}
+                        <span aria-hidden="true"> — </span>
+                        {formatDate(operation.end_date)}
+                      </p>
+                    </div>
+
+                    <div className="w-fit self-start sm:self-auto">
+                      <OperationStatusBadge
+                        status={operation.status}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </DetailSection>
+
           <PermissionGate permission="contract:update">
-            <ContractStatusAction contractId={contract.id} currentStatus={contract.status} />
+            <DetailSection
+              description="Altere somente a situação do contrato. Os vínculos e o histórico comercial permanecem preservados."
+              id="contract-status"
+              title="Situação do contrato"
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground">
+                    Situação atual
+                  </span>
+
+                  <ContractStatusBadge
+                    status={contract.status}
+                  />
+                </div>
+
+                <div className="w-fit">
+                  <ContractStatusAction
+                    contractId={contract.id}
+                    currentStatus={contract.status}
+                  />
+                </div>
+              </div>
+            </DetailSection>
           </PermissionGate>
         </div>
-      </section>
-    </main>
+      </ContentContainer>
+    </PageShell>
   );
 }
