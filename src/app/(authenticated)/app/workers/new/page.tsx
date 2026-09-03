@@ -1,27 +1,30 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
 import { WorkerForm } from "@/modules/workers";
 
 export default function NewWorkerPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <Button asChild variant="outline" size="sm">
-        <Link href="/app/workers">
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Voltar
-        </Link>
-      </Button>
-      <div className="mt-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Novo colaborador</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Cadastre os dados operacionais mínimos da pessoa.
-        </p>
-      </div>
-      <section className="mt-8 rounded-lg border bg-card p-6 shadow-sm sm:p-8">
-        <WorkerForm />
-      </section>
-    </main>
+    <PageShell>
+      <ContentContainer size="form">
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/app/workers">
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            Voltar
+          </Link>
+        </Button>
+        <PageHeader
+          className="mt-6"
+          eyebrow="Colaboradores"
+          title="Novo colaborador"
+          description="Cadastre os dados operacionais mínimos da pessoa."
+        />
+        <section className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8">
+          <WorkerForm />
+        </section>
+      </ContentContainer>
+    </PageShell>
   );
 }

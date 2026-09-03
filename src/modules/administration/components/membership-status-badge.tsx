@@ -1,21 +1,15 @@
-import { cn } from "@/shared/utils";
+import { StatusBadge, type StatusPresentationMap } from "@/components/ui/status-badge";
 
 import {
   MEMBERSHIP_STATUS_LABELS,
   type MembershipStatus,
 } from "../domain/organization-member";
 
+const STATUS_PRESENTATION = {
+  active: { category: "success", label: MEMBERSHIP_STATUS_LABELS.active },
+  inactive: { category: "neutral", label: MEMBERSHIP_STATUS_LABELS.inactive },
+} satisfies StatusPresentationMap<MembershipStatus>;
+
 export function MembershipStatusBadge({ status }: { status: MembershipStatus }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
-        status === "active"
-          ? "border border-success/25 bg-success/10 text-success"
-          : "border border-border bg-muted text-muted-foreground",
-      )}
-    >
-      {MEMBERSHIP_STATUS_LABELS[status]}
-    </span>
-  );
+  return <StatusBadge status={status} {...STATUS_PRESENTATION[status]} />;
 }

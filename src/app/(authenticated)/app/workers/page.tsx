@@ -1,19 +1,63 @@
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
+import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
 import { resolveOperationalContext } from "@/modules/operational-context";
 import {
-  formatCpf,
+  hasActiveWorkerFilters,
   listWorkersWithCurrentAssignment,
   workerListFiltersSchema,
-  WorkerStatusBadge,
+  WorkerFilterBar,
+  WorkerTable,
 } from "@/modules/workers";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 type SearchParams = Promise<{ q?: string; status?: string }>;
+
+function NewWorkerButton() {
+  return (
+    <PermissionGate permission="worker:create">
+      <Button asChild>
+        <Link href="/app/workers/new">
+          <Plus aria-hidden="true" className="size-4" />
+          Novo colaborador
+        </Link>
+      </Button>
+    </PermissionGate>
+  );
+}
+
+function WorkersEmptyState({ filtered }: { filtered: boolean }) {
+  return (
+    <section
+      aria-labelledby="workers-empty-title"
+      className="mt-4 border-y border-dashed border-border-strong px-4 py-10 text-center"
+    >
+      <h2 className="font-medium" id="workers-empty-title">
+        {filtered
+          ? "Nenhum colaborador corresponde aos filtros"
+          : "Nenhum colaborador cadastrado"}
+      </h2>
+      <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
+        {filtered
+          ? "Limpe ou ajuste a busca e o status para ampliar os resultados."
+          : "Cadastre o primeiro colaborador para iniciar sua gestão operacional."}
+      </p>
+      <div className="mt-5 flex justify-center">
+        {filtered ? (
+          <Button asChild variant="outline">
+            <Link href="/app/workers">Limpar filtros</Link>
+          </Button>
+        ) : (
+          <NewWorkerButton />
+        )}
+      </div>
+    </section>
+  );
+}
 
 export default async function WorkersPage({
   searchParams,
@@ -25,131 +69,65 @@ export default async function WorkersPage({
     query: parameters.q,
     status: parameters.status,
   });
+
   let workers;
   try {
     const { context } = await resolveOperationalContext();
     workers = await listWorkersWithCurrentAssignment(filters, context);
   } catch (error) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold">Colaboradores</h1>
-        <p className="mt-6 rounded-lg border bg-card p-6 text-sm text-destructive">
-          {toPublicErrorMessage(error)}
-        </p>
-      </main>
+      <PageShell>
+        <ContentContainer size="list">
+          <PageHeader
+            eyebrow="Pessoas"
+            title="Colaboradores"
+            description="Cadastro, situação e contexto operacional dos colaboradores."
+          />
+          <FeedbackMessage className="mt-6" variant="danger">
+            <p className="font-medium">Não foi possível carregar os colaboradores.</p>
+            <p className="mt-1">{toPublicErrorMessage(error)}</p>
+          </FeedbackMessage>
+          <Button asChild className="mt-4" variant="outline">
+            <Link href="/app/workers">Tentar novamente</Link>
+          </Button>
+        </ContentContainer>
+      </PageShell>
     );
   }
+
+  const filtered = hasActiveWorkerFilters(filters);
+
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Pessoas</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Colaboradores</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Cadastro e situação dos colaboradores da organização.
-          </p>
-        </div>
-        <PermissionGate permission="worker:create">
-          <Button asChild>
-            <Link href="/app/workers/new">
-              <Plus className="size-4" aria-hidden="true" />
-              Novo colaborador
-            </Link>
-          </Button>
-        </PermissionGate>
-      </div>
-      <form className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            className="pl-9"
-            name="q"
-            defaultValue={filters.query}
-            placeholder="Buscar por nome ou CPF"
-            aria-label="Buscar colaboradores por nome ou CPF"
-          />
-        </div>
-        <select
-          name="status"
-          defaultValue={filters.status}
-          aria-label="Filtrar colaboradores por status"
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+    <PageShell>
+      <ContentContainer size="list">
+        <PageHeader
+          actions={<NewWorkerButton />}
+          description="Cadastro, situação e contexto operacional dos colaboradores."
+          eyebrow="Pessoas"
+          title="Colaboradores"
+        />
+
+        <WorkerFilterBar filters={filters} />
+
+        <div
+          aria-live="polite"
+          className="mt-5 flex min-h-6 items-center justify-between gap-4 text-sm"
         >
-          <option value="all">Todos os status</option>
-          <option value="onboarding">Em onboarding</option>
-          <option value="active">Ativos</option>
-          <option value="inactive">Inativos</option>
-          <option value="terminated">Encerrados</option>
-        </select>
-        <Button type="submit" variant="outline">
-          Filtrar
-        </Button>
-      </form>
-      {workers.length === 0 ? (
-        <section className="mt-6 rounded-lg border border-dashed bg-card px-6 py-10 text-center">
-          <h2 className="font-medium">Nenhum colaborador encontrado</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Ajuste os filtros ou cadastre o primeiro colaborador.
+          <p>
+            <span className="font-semibold tabular-nums">{workers.length}</span>{" "}
+            <span className="text-muted-foreground">
+              {workers.length === 1 ? "colaborador encontrado" : "colaboradores encontrados"}
+              {filtered ? " com os filtros aplicados" : ""}
+            </span>
           </p>
-        </section>
-      ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border bg-card">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left text-sm">
-              <thead className="border-b bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3 font-medium">Nome</th>
-                  <th className="px-5 py-3 font-medium">CPF</th>
-                  <th className="px-5 py-3 font-medium">Contato</th>
-                  <th className="px-5 py-3 font-medium">Alocação atual</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {workers.map((worker) => (
-                  <tr key={worker.id} className="hover:bg-hover">
-                    <td className="px-5 py-4 font-medium">
-                      <Link
-                        className="hover:underline"
-                        href={`/app/workers/${worker.id}`}
-                      >
-                        {worker.full_name}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-4 tabular-nums text-muted-foreground">
-                      {formatCpf(worker.document_number)}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground">
-                      {worker.email ?? worker.phone ?? "Não informado"}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground">
-                      {worker.currentAssignment ? (
-                        <>
-                          {worker.currentAssignment.position.job_role.name} · {" "}
-                          <Link
-                            className="hover:underline"
-                            href={`/app/units/${worker.currentAssignment.position.unit.id}`}
-                          >
-                            {worker.currentAssignment.position.unit.name}
-                          </Link>
-                        </>
-                      ) : (
-                        "Sem alocação"
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <WorkerStatusBadge status={worker.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
-      )}
-    </main>
+
+        {workers.length === 0 ? (
+          <WorkersEmptyState filtered={filtered} />
+        ) : (
+          <WorkerTable workers={workers} />
+        )}
+      </ContentContainer>
+    </PageShell>
   );
 }

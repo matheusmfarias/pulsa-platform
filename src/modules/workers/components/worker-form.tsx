@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import {
   createWorkerAction,
@@ -16,114 +18,131 @@ import type { Worker } from "../domain/worker";
 
 const initialState: WorkerActionState = { error: null };
 
-function FieldError({ errors, id }: { errors?: string[]; id: string }) {
-  if (!errors?.length) return null;
-  return (
-    <p id={id} className="text-sm text-destructive">
-      {errors[0]}
-    </p>
-  );
-}
-
-export function WorkerForm({ worker }: { worker?: Worker }) {
+export function WorkerForm({
+  worker,
+  cancelHref = "/app/workers",
+}: {
+  worker?: Worker;
+  cancelHref?: string;
+}) {
   const action = worker
     ? updateWorkerAction.bind(null, worker.id)
     : createWorkerAction;
   const [state, formAction, pending] = useActionState(action, initialState);
+
   return (
     <form action={formAction} className="space-y-6" noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="full_name">Nome completo</Label>
-        <Input
-          id="full_name"
-          name="full_name"
-          defaultValue={worker?.full_name}
-          maxLength={160}
-          required
-          aria-invalid={Boolean(state.fieldErrors?.full_name)}
-        />
-        <FieldError errors={state.fieldErrors?.full_name} id="name-error" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="document_number">CPF</Label>
-        <Input
-          id="document_number"
-          name="document_number"
-          inputMode="numeric"
-          defaultValue={worker ? formatCpf(worker.document_number) : undefined}
-          placeholder="000.000.000-00"
-          required
-          aria-invalid={Boolean(state.fieldErrors?.document_number)}
-        />
-        <p className="text-xs text-muted-foreground">
-          A pontuação é removida antes do armazenamento.
+      <fieldset>
+        <legend className="text-sm font-semibold">Identificação</legend>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          Dados usados para localizar e identificar o colaborador.
         </p>
-        <FieldError
-          errors={state.fieldErrors?.document_number}
-          id="document-error"
-        />
-      </div>
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="email">E-mail</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            defaultValue={worker?.email ?? ""}
-            maxLength={254}
-          />
-          <FieldError errors={state.fieldErrors?.email} id="email-error" />
+        <div className="mt-5 space-y-5">
+          <Field
+            error={state.fieldErrors?.full_name}
+            id="full_name"
+            label="Nome completo"
+            required
+          >
+            <Input
+              autoComplete="name"
+              defaultValue={worker?.full_name}
+              maxLength={160}
+              name="full_name"
+            />
+          </Field>
+
+          <Field
+            description="A pontuação é removida antes do armazenamento."
+            error={state.fieldErrors?.document_number}
+            id="document_number"
+            label="CPF"
+            required
+          >
+            <Input
+              defaultValue={worker ? formatCpf(worker.document_number) : undefined}
+              inputMode="numeric"
+              name="document_number"
+              placeholder="000.000.000-00"
+            />
+          </Field>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">Telefone</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            defaultValue={worker?.phone ?? ""}
-            maxLength={30}
-          />
-          <FieldError errors={state.fieldErrors?.phone} id="phone-error" />
+      </fieldset>
+
+      <fieldset className="border-t border-border-default pt-6">
+        <legend className="px-1 text-sm font-semibold">Contato e vínculo</legend>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          Informações complementares para contato e período de relacionamento.
+        </p>
+        <div className="mt-5 space-y-5">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={state.fieldErrors?.email}
+              id="email"
+              label="E-mail"
+              optional
+            >
+              <Input
+                autoComplete="email"
+                defaultValue={worker?.email ?? ""}
+                maxLength={254}
+                name="email"
+                type="email"
+              />
+            </Field>
+            <Field
+              error={state.fieldErrors?.phone}
+              id="phone"
+              label="Telefone"
+              optional
+            >
+              <Input
+                autoComplete="tel"
+                defaultValue={worker?.phone ?? ""}
+                maxLength={30}
+                name="phone"
+                type="tel"
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={state.fieldErrors?.engagement_start_date}
+              id="engagement_start_date"
+              label="Início do vínculo"
+              optional
+            >
+              <Input
+                defaultValue={worker?.engagement_start_date ?? ""}
+                name="engagement_start_date"
+                type="date"
+              />
+            </Field>
+            <Field
+              error={state.fieldErrors?.engagement_end_date}
+              id="engagement_end_date"
+              label="Fim do vínculo"
+              optional
+            >
+              <Input
+                defaultValue={worker?.engagement_end_date ?? ""}
+                name="engagement_end_date"
+                type="date"
+              />
+            </Field>
+          </div>
         </div>
-      </div>
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="engagement_start_date">Início do vínculo</Label>
-          <Input
-            id="engagement_start_date"
-            name="engagement_start_date"
-            type="date"
-            defaultValue={worker?.engagement_start_date ?? ""}
-          />
-          <FieldError
-            errors={state.fieldErrors?.engagement_start_date}
-            id="start-date-error"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="engagement_end_date">Fim do vínculo</Label>
-          <Input
-            id="engagement_end_date"
-            name="engagement_end_date"
-            type="date"
-            defaultValue={worker?.engagement_end_date ?? ""}
-          />
-          <FieldError
-            errors={state.fieldErrors?.engagement_end_date}
-            id="end-date-error"
-          />
-        </div>
-      </div>
+      </fieldset>
+
       {state.error ? (
-        <p
-          className="rounded-md border border-destructive/25 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-          role="alert"
-        >
-          {state.error}
-        </p>
+        <FeedbackMessage variant="danger">{state.error}</FeedbackMessage>
       ) : null}
-      <div className="flex justify-end">
+
+      <div className="flex flex-col-reverse gap-2 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
+        <Button asChild variant="ghost">
+          <Link href={cancelHref}>Cancelar</Link>
+        </Button>
         <Button type="submit" disabled={pending}>
           {pending
             ? "Salvando…"

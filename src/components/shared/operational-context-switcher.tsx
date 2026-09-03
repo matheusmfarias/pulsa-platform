@@ -209,7 +209,7 @@ export function OperationalContextSwitcher({
           <div role="listbox" aria-label="Contextos operacionais" className="max-h-[min(22rem,55vh)] overflow-y-auto p-1.5 [scrollbar-gutter:stable]">
             <ContextOption context={{ type: "all" }} label="Todos os clientes" variant="all" isPending={isPending} onSelect={selectContext} selectedKey={selectedKey} />
             {visibleOptions.length > 0 ? (
-              <p className="mb-1 mt-2 px-2.5 text-[0.625rem] font-semibold uppercase tracking-[0.11em] text-muted-foreground">Clientes</p>
+              <p className="mb-1 mt-2 px-2.5 text-[0.625rem] font-semibold uppercase tracking-[0.11em] text-muted-foreground"></p>
             ) : null}
             {visibleOptions.map((client) => (
               <div key={client.id} className="mb-1.5 border-t pt-1.5 first:border-t-0 first:pt-0">

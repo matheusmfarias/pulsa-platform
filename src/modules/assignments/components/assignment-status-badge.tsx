@@ -1,19 +1,15 @@
-import { cn } from "@/shared/utils";
+import { StatusBadge, type StatusPresentationMap } from "@/components/ui/status-badge";
 
 import { ASSIGNMENT_STATUS_LABELS, type AssignmentStatus } from "../domain/assignment";
 
-const STYLES: Record<AssignmentStatus, string> = {
-  pending: "border border-warning/25 bg-warning/10 text-warning",
-  active: "border border-success/25 bg-success/10 text-success",
-  suspended: "border border-warning/25 bg-warning/10 text-warning",
-  finished: "border border-border bg-muted text-muted-foreground",
-  cancelled: "border border-danger/25 bg-danger/10 text-danger",
-};
+const STATUS_PRESENTATION = {
+  pending: { category: "warning", label: ASSIGNMENT_STATUS_LABELS.pending },
+  active: { category: "success", label: ASSIGNMENT_STATUS_LABELS.active },
+  suspended: { category: "warning", label: ASSIGNMENT_STATUS_LABELS.suspended },
+  finished: { category: "neutral", label: ASSIGNMENT_STATUS_LABELS.finished },
+  cancelled: { category: "danger", label: ASSIGNMENT_STATUS_LABELS.cancelled },
+} satisfies StatusPresentationMap<AssignmentStatus>;
 
 export function AssignmentStatusBadge({ status }: { status: AssignmentStatus }) {
-  return (
-    <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", STYLES[status])}>
-      {ASSIGNMENT_STATUS_LABELS[status]}
-    </span>
-  );
+  return <StatusBadge status={status} {...STATUS_PRESENTATION[status]} />;
 }

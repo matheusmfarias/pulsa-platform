@@ -1,25 +1,330 @@
 import { ArrowLeft, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
+
+import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { AssignmentStatusBadge } from "@/modules/assignments";
 import { PermissionGate } from "@/modules/authorization";
-import { formatCpf, getWorkerOperationalDetail, workerIdSchema, WorkerStatusAction, WorkerStatusBadge } from "@/modules/workers";
+import {
+  formatCpf,
+  getWorkerOperationalDetail,
+  WorkerStatusAction,
+  WorkerStatusBadge,
+  workerIdSchema,
+} from "@/modules/workers";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 
-function formatDate(value: string | null): string { return value ? new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "Em aberto"; }
+const relationLinkClass =
+  "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
 
-export default async function WorkerDetailsPage({ params }: PageProps<"/app/workers/[workerId]">) {
-  const route = workerIdSchema.safeParse((await params).workerId); if (!route.success) notFound();
-  let detail; try { detail = await getWorkerOperationalDetail(route.data); } catch (error) { if (isAppError(error) && error.code === "NOT_FOUND") notFound(); return <main className="mx-auto max-w-5xl px-4 py-10"><p className="text-sm text-destructive">{toPublicErrorMessage(error)}</p></main>; }
-  const { worker, assignments, activeAssignment } = detail;
-  return <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-    <Button asChild variant="outline" size="sm"><Link href="/app/workers"><ArrowLeft className="size-4" />Voltar para colaboradores</Link></Button>
-    <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:justify-between"><div><div className="flex flex-wrap items-center gap-3"><h1 className="text-2xl font-semibold">{worker.full_name}</h1><WorkerStatusBadge status={worker.status} /></div><p className="mt-2 text-sm text-muted-foreground tabular-nums">{formatCpf(worker.document_number)}</p></div><PermissionGate permission="worker:update"><Button asChild variant="outline"><Link href={`/app/workers/${worker.id}/edit`}><Pencil className="size-4" />Editar</Link></Button></PermissionGate></div>
-    <dl className="mt-6 grid gap-x-5 gap-y-4 rounded-lg border bg-card p-4 sm:grid-cols-2"><Detail label="E-mail" value={worker.email ?? "Não informado"} /><Detail label="Telefone" value={worker.phone ?? "Não informado"} /><Detail label="Início do vínculo" value={formatDate(worker.engagement_start_date)} /><Detail label="Fim do vínculo" value={formatDate(worker.engagement_end_date)} /></dl>
-    <section className="mt-6 rounded-lg border bg-card"><div className="border-b px-5 py-4"><h2 className="font-semibold">Alocação atual</h2></div>{activeAssignment ? <div className="grid gap-4 px-5 py-5 sm:grid-cols-2"><Detail label="Cargo" value={activeAssignment.position.job_role.name} /><Detail label="Posto" value={activeAssignment.position.job_role.name} /><Detail label="Unidade" value={activeAssignment.position.unit.name} /><Detail label="Operação" value={activeAssignment.position.unit.operation.name} /><Detail label="Cliente" value={activeAssignment.position.unit.operation.contract.client.trade_name} /><Detail label="Período" value={`${formatDate(activeAssignment.start_date)} — ${formatDate(activeAssignment.end_date)}`} /><div className="sm:col-span-2 text-sm"><Link href={`/app/assignments/${activeAssignment.id}`} className="font-medium hover:underline">Ver alocação</Link><span className="mx-2 text-muted-foreground">·</span><Link href={`/app/units/${activeAssignment.position.unit.id}/positions/${activeAssignment.position.id}`} className="font-medium hover:underline">Ver posto</Link><span className="mx-2 text-muted-foreground">·</span><Link href={`/app/units/${activeAssignment.position.unit.id}`} className="font-medium hover:underline">Ver unidade</Link></div></div> : <p className="px-5 py-6 text-sm text-muted-foreground">Sem alocação ativa.</p>}</section>
-    <section className="mt-6 rounded-lg border bg-card"><div className="flex items-center justify-between border-b px-5 py-4"><div><h2 className="font-semibold">Histórico de alocações</h2><p className="mt-1 text-sm text-muted-foreground">Mais recentes primeiro, incluindo todos os status.</p></div>{worker.status === "active" ? <PermissionGate permission="assignment:create"><Button asChild size="sm"><Link href={`/app/assignments/new?workerId=${worker.id}`}><Plus className="size-4" />Nova alocação</Link></Button></PermissionGate> : null}</div>{assignments.length === 0 ? <p className="px-5 py-6 text-sm text-muted-foreground">Nenhuma alocação relacionada.</p> : <ul className="divide-y">{assignments.map((assignment) => <li key={assignment.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><div><Link href={`/app/assignments/${assignment.id}`} className="font-medium hover:underline">{assignment.position.job_role.name}</Link><p className="mt-1 text-sm text-muted-foreground"><Link href={`/app/units/${assignment.position.unit.id}`} className="hover:underline">{assignment.position.unit.name}</Link> · <Link href={`/app/operations/${assignment.position.unit.operation.id}`} className="hover:underline">{assignment.position.unit.operation.name}</Link> · {formatDate(assignment.start_date)} — {formatDate(assignment.end_date)}</p></div><AssignmentStatusBadge status={assignment.status} /></li>)}</ul>}</section>
-    <PermissionGate permission="worker:update"><section className="mt-6 border-t pt-5"><WorkerStatusAction workerId={worker.id} currentStatus={worker.status} /></section></PermissionGate>
-  </main>;
+function formatDate(value: string | null): string {
+  return value
+    ? new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
+        new Date(value + "T00:00:00Z"),
+      )
+    : "Em aberto";
 }
-function Detail({ label, value }: { label: string; value: string }) { return <div><dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt><dd className="mt-1 text-sm">{value}</dd></div>; }
+
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-1 text-sm leading-6">{value}</dd>
+    </div>
+  );
+}
+
+function DetailSection({
+  id,
+  title,
+  description,
+  actions,
+  children,
+}: {
+  id: string;
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id} className="py-6">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="font-semibold" id={id}>{title}</h2>
+          {description ? (
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
+        </div>
+        {actions ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+        ) : null}
+      </header>
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
+
+export default async function WorkerDetailsPage({
+  params,
+}: PageProps<"/app/workers/[workerId]">) {
+  const route = workerIdSchema.safeParse((await params).workerId);
+  if (!route.success) notFound();
+
+  let detail;
+  try {
+    detail = await getWorkerOperationalDetail(route.data);
+  } catch (error) {
+    if (isAppError(error) && error.code === "NOT_FOUND") notFound();
+
+    return (
+      <PageShell>
+        <ContentContainer size="detail-wide">
+          <PageHeader eyebrow="Colaboradores" title="Detalhe do colaborador" />
+          <FeedbackMessage className="mt-6" variant="danger">
+            {toPublicErrorMessage(error)}
+          </FeedbackMessage>
+        </ContentContainer>
+      </PageShell>
+    );
+  }
+
+  const { worker, assignments, activeAssignment } = detail;
+
+  return (
+    <PageShell>
+      <ContentContainer size="detail-wide">
+        <Button asChild size="sm" variant="ghost">
+          <Link href="/app/workers">
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            Voltar para colaboradores
+          </Link>
+        </Button>
+
+        <PageHeader
+          actions={
+            <PermissionGate permission="worker:update">
+              <Button asChild variant="outline">
+                <Link href={"/app/workers/" + worker.id + "/edit"}>
+                  <Pencil aria-hidden="true" className="size-4" />
+                  Editar
+                </Link>
+              </Button>
+            </PermissionGate>
+          }
+          className="mt-6"
+          description="Dados cadastrais e contexto operacional do colaborador."
+          eyebrow="Colaboradores"
+          metadata={
+            <div className="flex flex-wrap items-center gap-3">
+              <WorkerStatusBadge status={worker.status} />
+              <span className="tabular-nums">CPF {formatCpf(worker.document_number)}</span>
+            </div>
+          }
+          title={worker.full_name}
+        />
+
+        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+          <DetailSection
+            description="Registro operacional da pessoa; não representa uma conta de acesso ao sistema."
+            id="worker-data"
+            title="Dados do colaborador"
+          >
+            <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+              <DetailItem label="E-mail" value={worker.email ?? "Não informado"} />
+              <DetailItem label="Telefone" value={worker.phone ?? "Não informado"} />
+              <DetailItem
+                label="Início do vínculo"
+                value={formatDate(worker.engagement_start_date)}
+              />
+              <DetailItem
+                label="Fim do vínculo"
+                value={formatDate(worker.engagement_end_date)}
+              />
+            </dl>
+          </DetailSection>
+
+          <DetailSection
+            description="A alocação registra a relação temporal vigente entre o colaborador e um posto."
+            id="current-assignment"
+            title="Alocação atual"
+          >
+            {activeAssignment ? (
+              <>
+                <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailItem
+                    label="Cargo"
+                    value={activeAssignment.position.job_role.name}
+                  />
+                  <DetailItem
+                    label="Unidade"
+                    value={
+                      <Link
+                        className={relationLinkClass}
+                        href={"/app/units/" + activeAssignment.position.unit.id}
+                      >
+                        {activeAssignment.position.unit.name}
+                      </Link>
+                    }
+                  />
+                  <DetailItem
+                    label="Operação"
+                    value={
+                      <Link
+                        className={relationLinkClass}
+                        href={
+                          "/app/operations/" +
+                          activeAssignment.position.unit.operation.id
+                        }
+                      >
+                        {activeAssignment.position.unit.operation.name}
+                      </Link>
+                    }
+                  />
+                  <DetailItem
+                    label="Cliente"
+                    value={
+                      <Link
+                        className={relationLinkClass}
+                        href={
+                          "/app/clients/" +
+                          activeAssignment.position.unit.operation.contract.client.id
+                        }
+                      >
+                        {
+                          activeAssignment.position.unit.operation.contract.client
+                            .trade_name
+                        }
+                      </Link>
+                    }
+                  />
+                  <DetailItem
+                    label="Período"
+                    value={
+                      formatDate(activeAssignment.start_date) +
+                      " — " +
+                      formatDate(activeAssignment.end_date)
+                    }
+                  />
+                </dl>
+                <nav
+                  aria-label="Relações da alocação atual"
+                  className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-border-default pt-4 text-sm"
+                >
+                  <Link
+                    className={relationLinkClass}
+                    href={"/app/assignments/" + activeAssignment.id}
+                  >
+                    Ver alocação
+                  </Link>
+                  <Link
+                    className={relationLinkClass}
+                    href={
+                      "/app/units/" +
+                      activeAssignment.position.unit.id +
+                      "/positions/" +
+                      activeAssignment.position.id
+                    }
+                  >
+                    Ver posto
+                  </Link>
+                </nav>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Este colaborador não possui alocação ativa.
+              </p>
+            )}
+          </DetailSection>
+
+          <DetailSection
+            actions={
+              worker.status === "active" ? (
+                <PermissionGate permission="assignment:create">
+                  <Button asChild size="sm">
+                    <Link href={"/app/assignments/new?workerId=" + worker.id}>
+                      <Plus aria-hidden="true" className="size-4" />
+                      Nova alocação
+                    </Link>
+                  </Button>
+                </PermissionGate>
+              ) : null
+            }
+            description="Relações anteriores e vigentes, da mais recente para a mais antiga."
+            id="assignment-history"
+            title="Histórico de alocações"
+          >
+            {assignments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma alocação relacionada.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border-default">
+                {assignments.map((assignment) => (
+                  <li
+                    className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                    key={assignment.id}
+                  >
+                    <div className="min-w-0">
+                      <Link
+                        className={relationLinkClass}
+                        href={"/app/assignments/" + assignment.id}
+                      >
+                        {assignment.position.job_role.name}
+                      </Link>
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        <Link
+                          className="rounded-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                          href={"/app/units/" + assignment.position.unit.id}
+                        >
+                          {assignment.position.unit.name}
+                        </Link>
+                        <span aria-hidden="true"> · </span>
+                        <Link
+                          className="rounded-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                          href={"/app/operations/" + assignment.position.unit.operation.id}
+                        >
+                          {assignment.position.unit.operation.name}
+                        </Link>
+                        <span aria-hidden="true"> · </span>
+                        {formatDate(assignment.start_date)} —{" "}
+                        {formatDate(assignment.end_date)}
+                      </p>
+                    </div>
+                    <AssignmentStatusBadge status={assignment.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </DetailSection>
+
+          <PermissionGate permission="worker:update">
+            <DetailSection
+              description="Altere somente a situação do colaborador. O histórico operacional é preservado."
+              id="worker-status-actions"
+              title="Situação do colaborador"
+            >
+              <WorkerStatusAction
+                currentStatus={worker.status}
+                workerId={worker.id}
+              />
+            </DetailSection>
+          </PermissionGate>
+        </div>
+      </ContentContainer>
+    </PageShell>
+  );
+}

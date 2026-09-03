@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 
 import {
   changeMembershipStatusAction,
@@ -34,8 +35,12 @@ export function MembershipStatusAction({
               : "Ativar membership"}
         </Button>
       </form>
-      {state.error ? <p className="mt-2 text-sm text-destructive" role="alert">{state.error}</p> : null}
-      {state.success ? <p className="mt-2 text-sm text-emerald-700" role="status">{state.success}</p> : null}
+      {state.error ? (
+        <FeedbackMessage className="mt-2" variant="danger">{state.error}</FeedbackMessage>
+      ) : null}
+      {state.success ? (
+        <FeedbackMessage className="mt-2" variant="success">{state.success}</FeedbackMessage>
+      ) : null}
     </div>
   );
 }
