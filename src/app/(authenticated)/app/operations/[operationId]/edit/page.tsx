@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -7,7 +5,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { listContracts } from "@/modules/contracts";
 import {
@@ -42,7 +40,7 @@ export default async function EditOperationPage({
         <ContentContainer size="form">
           <PageHeader
             description="Atualize os dados e o período desta operação."
-            eyebrow="Operações"
+            breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações", href: "/app/operations" }]} />}
             title="Editar operação"
           />
 
@@ -59,25 +57,9 @@ export default async function EditOperationPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={detailHref}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações", href: "/app/operations" }, { label: operation.name, href: detailHref }, { label: "Editar" }]} />}
           description="Atualize o contexto contratual, o período e as informações desta operação."
-          eyebrow="Operações"
-          metadata={
-            <span>
-              Operação:{" "}
-              <span className="font-medium text-foreground">
-                {operation.name}
-              </span>
-            </span>
-          }
           title="Editar operação"
         />
 

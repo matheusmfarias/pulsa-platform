@@ -1,4 +1,4 @@
-import { ArrowLeft, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -23,6 +23,7 @@ import {
   type OperationWithContext,
 } from "@/modules/operations";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const relationLinkClass =
   "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -35,22 +36,14 @@ function formatDate(value: string | null): string {
   }).format(new Date(value + "T00:00:00Z"));
 }
 
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: ReactNode;
-}) {
+function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
 
-      <dd className="mt-1 text-sm leading-6">
-        {value}
-      </dd>
+      <dd className="mt-1 text-sm leading-6">{value}</dd>
     </div>
   );
 }
@@ -90,9 +83,7 @@ function DetailSection({
         ) : null}
       </header>
 
-      <div className="mt-5">
-        {children}
-      </div>
+      <div className="mt-5">{children}</div>
     </section>
   );
 }
@@ -100,9 +91,7 @@ function DetailSection({
 export default async function ContractDetailsPage({
   params,
 }: PageProps<"/app/contracts/[contractId]">) {
-  const route = contractIdSchema.safeParse(
-    (await params).contractId,
-  );
+  const route = contractIdSchema.safeParse((await params).contractId);
 
   if (!route.success) {
     notFound();
@@ -121,14 +110,13 @@ export default async function ContractDetailsPage({
       <PageShell>
         <ContentContainer size="detail-wide">
           <PageHeader
-            eyebrow="Contratos"
+            breadcrumb={
+              <Breadcrumb items={[{ label: "Comercial" }, { label: "Contratos" }]} />
+            }
             title="Detalhe do contrato"
           />
 
-          <FeedbackMessage
-            className="mt-6"
-            variant="danger"
-          >
+          <FeedbackMessage className="mt-6" variant="danger">
             {toPublicErrorMessage(error)}
           </FeedbackMessage>
         </ContentContainer>
@@ -151,52 +139,37 @@ export default async function ContractDetailsPage({
   return (
     <PageShell>
       <ContentContainer size="detail-wide">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/contracts">
-            <ArrowLeft
-              aria-hidden="true"
-              className="size-4"
-            />
-            Voltar para contratos
-          </Link>
-        </Button>
-
         <PageHeader
           actions={
             <PermissionGate permission="contract:update">
               <Button asChild variant="outline">
-                <Link
-                  href={`/app/contracts/${contract.id}/edit`}
-                >
-                  <Pencil
-                    aria-hidden="true"
-                    className="size-4"
-                  />
+                <Link href={`/app/contracts/${contract.id}/edit`}>
+                  <Pencil aria-hidden="true" className="size-4" />
                   Editar
                 </Link>
               </Button>
             </PermissionGate>
           }
-          className="mt-5 sm:mt-6"
-          description="Vínculo comercial, período e operações associadas a este contrato."
-          eyebrow="Contratos"
-          metadata={
-            <div className="flex flex-wrap items-center gap-3">
-              <ContractStatusBadge
-                status={contract.status}
-              />
-
-              <span>
-                Cliente:{" "}
-                <Link
-                  className={relationLinkClass}
-                  href={`/app/clients/${contract.client.id}`}
-                >
-                  {contract.client.trade_name}
-                </Link>
-              </span>
-            </div>
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Comercial" },
+                {
+                  label: "Clientes",
+                  href: "/app/clients",
+                },
+                {
+                  label: contract.client.trade_name,
+                  href: `/app/clients/${contract.client.id}`,
+                },
+                {
+                  label: contract.name,
+                },
+              ]}
+            />
           }
+          description="Vínculo comercial, período e operações associadas a este contrato."
+          metadata={<ContractStatusBadge status={contract.status} />}
           title={contract.name}
         />
 
@@ -221,10 +194,7 @@ export default async function ContractDetailsPage({
 
               <DetailItem
                 label="Referência externa"
-                value={
-                  contract.external_reference ??
-                  "Não informada"
-                }
+                value={contract.external_reference ?? "Não informada"}
               />
 
               <DetailItem
@@ -251,18 +221,11 @@ export default async function ContractDetailsPage({
             actions={
               contract.status === "active" ? (
                 <PermissionGate permission="operation:create">
-                  <Button
-                    asChild
-                    className="w-fit"
-                    size="sm"
-                  >
+                  <Button asChild className="w-fit" size="sm">
                     <Link
                       href={`/app/operations/new?contractId=${contract.id}`}
                     >
-                      <Plus
-                        aria-hidden="true"
-                        className="size-4"
-                      />
+                      <Plus aria-hidden="true" className="size-4" />
                       Nova operação
                     </Link>
                   </Button>
@@ -304,9 +267,7 @@ export default async function ContractDetailsPage({
                     </div>
 
                     <div className="w-fit self-start sm:self-auto">
-                      <OperationStatusBadge
-                        status={operation.status}
-                      />
+                      <OperationStatusBadge status={operation.status} />
                     </div>
                   </li>
                 ))}
@@ -326,9 +287,7 @@ export default async function ContractDetailsPage({
                     Situação atual
                   </span>
 
-                  <ContractStatusBadge
-                    status={contract.status}
-                  />
+                  <ContractStatusBadge status={contract.status} />
                 </div>
 
                 <div className="w-fit">

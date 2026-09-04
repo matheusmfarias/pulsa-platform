@@ -172,19 +172,18 @@ Person eligible to be assigned.
 ### Assignment
 Temporal relationship between Worker and Position.
 
-### Scheduling candidates (planned, not implemented)
+### Scheduling Foundation
 
-The following concepts are discovery candidates only. Do not create tables, flows or rules for
-them without an explicit requirement.
+Scheduling is implemented as the versioned planned-work chain below. Its normative contract is
+`docs/SCHEDULING_DOMAIN.md`.
 
-### Shift
-Planned work period.
+```text
+Operation → Schedule → ScheduleRevision → ScheduleEntry → Assignment
+```
 
-### ShiftPosition
-Required Position/headcount inside a Shift.
-
-### ShiftAssignment
-Assignment scheduled into a ShiftPosition.
+Schedule periods do not overlap inside one Operation. ScheduleEntry stores an exact UTC interval
+anchored to an eligible Assignment and interpreted through the derived Unit timezone. Published
+revisions are immutable; critical transitions revalidate eligibility and Worker conflicts.
 
 ### Attendance
 Operational record of expected/present/late/absent execution.
@@ -210,30 +209,15 @@ Operational exception/problem.
 
 ---
 
-## 9. Scheduling Gate
+## 9. Scheduling Boundary
 
-DO NOT implement Scheduling from assumptions.
+The Phase 4A.1 Scheduling Domain Foundation is implemented from the validated contract in
+`docs/SCHEDULING_DOMAIN.md`. It includes schema, revisions, exact entries, lifecycle, critical
+conflicts, RBAC-protected RPCs, RLS and audit.
 
-Before Scheduling, real Pulsa operating rules must be validated.
-
-Open questions include:
-
-- fixed vs variable schedules;
-- hourly/shift/day granularity;
-- multiple units per worker;
-- multiple operations per worker;
-- substitutions;
-- reserve workers;
-- recurring schedules;
-- intervals;
-- relationship with external time clock;
-- definition of coverage;
-- definition of absenteeism;
-- supervision model;
-- temporary/intermittent-specific behavior.
-
-Foundation through JobRole, Positions, Assignments and the operational overview is implemented;
-Scheduling remains gated on these answers.
+Do not extend that foundation from assumptions. Recurrence, substitutions, reserve workers,
+temporal staffing requirements, Attendance, acknowledgement, availability, formal timekeeping
+and worker communication remain explicit future domains.
 
 ---
 
@@ -411,7 +395,8 @@ A future client portal may support controlled actions, not just dashboard viewin
 - `audit_events` is implemented for critical mutations. `domain_events` is planned, not present.
 - The current application context requires exactly one active Organization membership; there is
   no multi-org selector yet.
-- Do not add scheduling, shifts, coverage or vacancies without an explicit requirement.
+- Do not extend Scheduling or add coverage, vacancies, Attendance or recurrence without an
+  explicit requirement. `docs/SCHEDULING_DOMAIN.md` is the Scheduling contract.
 - Real integration tests require explicit `SUPABASE_TEST_*` variables and
   `SUPABASE_TEST_CONFIRMATION=integration-test`. Never infer or use a linked Supabase project.
 - Administration is initially `DIRECTOR`-only through fixed `organization_member:read`,

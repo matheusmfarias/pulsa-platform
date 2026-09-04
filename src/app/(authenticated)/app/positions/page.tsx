@@ -1,9 +1,14 @@
+import { Plus } from "lucide-react";
+import Link from "next/link";
+
 import {
   ContentContainer,
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Button } from "@/components/ui/button";
+import { PermissionGate } from "@/modules/authorization";
 import {
   hasActivePositionFilters,
   listPositionsForGlobalView,
@@ -13,6 +18,7 @@ import {
 } from "@/modules/positions";
 import { resolveOperationalContext } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default async function PositionsPage({
   searchParams,
@@ -35,8 +41,12 @@ export default async function PositionsPage({
       <PageShell>
         <ContentContainer size="list">
           <PageHeader
+            breadcrumb={
+              <Breadcrumb
+                items={[{ label: "Operação" }, { label: "Postos" }]}
+              />
+            }
             description="Postos operacionais definidos nas unidades."
-            eyebrow="Operação"
             title="Postos"
           />
 
@@ -54,8 +64,20 @@ export default async function PositionsPage({
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
+          actions={
+            <PermissionGate permission="position:create">
+              <Button asChild>
+                <Link href="/app/positions/new">
+                  <Plus aria-hidden="true" className="size-4" />
+                  Novo posto
+                </Link>
+              </Button>
+            </PermissionGate>
+          }
+          breadcrumb={
+            <Breadcrumb items={[{ label: "Operação" }, { label: "Postos" }]} />
+          }
           description="Postos operacionais definidos nas unidades."
-          eyebrow="Operação"
           title="Postos"
         />
 

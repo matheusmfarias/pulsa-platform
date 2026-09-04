@@ -304,87 +304,32 @@ podem ser reescritos.
 
 ---
 
-# 4. Scheduling (planejado)
+# 4. Scheduling
 
-Scheduling possui gate de discovery operacional.
+A Foundation de Scheduling implementa programação concreta de trabalho sem confundi-la com
+alocação estrutural, demanda temporal ou presença real. O contrato completo está em
+`docs/SCHEDULING_DOMAIN.md`.
 
-Sua modelagem conceitual inicial é:
+```text
+Operation
+└── Schedule
+    └── ScheduleRevision
+        └── ScheduleEntry
+            └── Assignment
+```
 
-Shift  
-└── ShiftPosition  
-    └── ShiftAssignment  
-        └── Attendance
+`Schedule` define um período civil explícito e não sobreposto dentro de uma `Operation`.
+`ScheduleRevision` preserva versões e o lifecycle `draft → pending_approval → approved →
+published`; revisões publicadas são imutáveis. `ScheduleEntry` registra um intervalo UTC
+ancorado a uma `Assignment` elegível e é interpretado pela timezone da `Unit` derivada.
 
-## Shift
+As transições críticas, a cópia de revisão publicada e as mutações de entradas usam RPCs
+RBAC-protected e auditoria atômica. Conflitos do mesmo `Worker` são revalidados antes de
+submissão, aprovação e publicação, inclusive contra revisões relevantes de outras Schedules da
+Organization.
 
-Representa um período de trabalho planejado em uma unidade.
-
-Campos conceituais:
-
-- id
-- unit_id
-- start_at
-- end_at
-- status
-- created_at
-- updated_at
-
-Status:
-
-- planned
-- open
-- covered
-- in_progress
-- completed
-- cancelled
-
----
-
-## ShiftPosition
-
-Representa a necessidade de determinada Position dentro de um Shift.
-
-Campos:
-
-- id
-- shift_id
-- position_id
-- required_headcount
-- created_at
-- updated_at
-
-Exemplo:
-
-Turno manhã:
-- 2 promotores
-- 1 repositor
-
-Isso deve resultar em dois ShiftPositions distintos.
-
----
-
-## ShiftAssignment
-
-Relaciona uma Assignment válida a uma necessidade de ShiftPosition.
-
-Campos:
-
-- id
-- shift_position_id
-- assignment_id
-- status
-- created_at
-- updated_at
-
-Status:
-
-- scheduled
-- confirmed
-- absent
-- replaced
-- completed
-
-Não duplicar `organization_id` inicialmente. O contexto é derivável pela cadeia relacional.
+Não existem nesta Foundation `Shift`, `ShiftPosition`, `ShiftAssignment`, demanda temporal,
+recorrência, acknowledgement ou Attendance.
 
 ---
 
@@ -673,7 +618,7 @@ Estas regras serão refinadas conforme o domínio real amadurecer:
 
 - Client inactive → não permite novos contratos/operações ativas.
 - Contract suspended → operações não podem avançar normalmente sem decisão explícita.
-- Operation closed → não permite novos assignments ou shifts.
+- Operation closed → não permite novos assignments.
 - Worker terminated → não permite novos assignments e exige encerramento dos vínculos ativos.
 
 Não implementar cascatas destrutivas automáticas sem regra explícita de negócio.
@@ -682,25 +627,21 @@ Não implementar cascatas destrutivas automáticas sem regra explícita de negó
 
 # 13. OPEN QUESTIONS
 
-Antes de Scheduling:
+Questões remanescentes para evoluções posteriores à Scheduling Foundation:
 
-1. Escalas são fixas ou variáveis?
-2. São modeladas por horário, turno ou dia?
-3. Um worker pode trabalhar em múltiplas unidades na mesma semana?
-4. Um worker pode estar em múltiplas operações simultaneamente?
-5. Como funciona substituição?
-6. Existe pool de reserva/folguistas?
-7. A escala é definida pela Pulsa ou recebida do cliente?
-8. Existe recorrência de escala?
-9. Como funcionam intervalos?
-10. Controle será apenas operacional ou também formal de jornada?
-11. Qual a definição de cobertura?
-12. Qual a definição de absenteísmo?
-13. Quais SLAs serão efetivamente contratados?
-14. Como temporários e intermitentes diferem no domínio?
-15. Supervisor responde por unidade, operação ou região?
-16. Quais integrações trabalhistas serão necessárias?
-17. Quais documentos pertencem à pessoa, vínculo, operação ou alocação?
+1. Como funciona substituição?
+2. Existe pool de reserva/folguistas?
+3. A escala é definida pela Pulsa ou recebida do cliente?
+4. Como padrões de recorrência poderão auxiliar a geração sem substituir `ScheduleEntry` como
+   fonte de verdade?
+5. Controle será apenas operacional ou também formal de jornada?
+6. Qual a definição de cobertura?
+7. Qual a definição de absenteísmo?
+8. Quais SLAs serão efetivamente contratados?
+9. Como temporários e intermitentes diferem no domínio?
+10. Supervisor responde por unidade, operação ou região?
+11. Quais integrações trabalhistas serão necessárias?
+12. Quais documentos pertencem à pessoa, vínculo, operação ou alocação?
 
 
 ---

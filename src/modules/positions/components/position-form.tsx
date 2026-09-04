@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { JobRole } from "@/modules/job-roles";
+import type { UnitWithContext } from "@/modules/units";
 
 import type { Position } from "../domain/position";
 import {
@@ -22,14 +23,18 @@ const initialState: PositionActionState = { error: null };
 
 export function PositionForm({
   unitId,
+  units,
   jobRoles,
   position,
   cancelHref,
+  redirectToPosition = false,
 }: {
-  unitId: string;
+  unitId?: string;
+  units?: UnitWithContext[];
   jobRoles: JobRole[];
   position?: Position;
   cancelHref: string;
+  redirectToPosition?: boolean;
 }) {
   const handler = position
     ? updatePositionAction.bind(null, position.id)
@@ -39,7 +44,10 @@ export function PositionForm({
 
   return (
     <form action={action} className="space-y-8" noValidate>
-      <input type="hidden" name="unit_id" value={unitId} />
+      {unitId ? <input type="hidden" name="unit_id" value={unitId} /> : null}
+      {redirectToPosition ? (
+        <input type="hidden" name="redirect_to" value="position" />
+      ) : null}
 
       <section aria-labelledby="position-structure-heading">
         <div>
@@ -53,6 +61,27 @@ export function PositionForm({
         </div>
 
         <div className="mt-5 space-y-5">
+          {!unitId ? (
+            <Field
+              id="unit_id"
+              label="Unidade"
+              error={state.fieldErrors?.unit_id}
+              required
+            >
+              <Select defaultValue="" name="unit_id">
+                <option disabled value="">
+                  Selecione uma unidade
+                </option>
+
+                {units?.map((unit) => (
+                  <option key={unit.id} value={unit.id}>
+                    {unit.name} · {unit.operation.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          ) : null}
+
           <Field
             id="job_role_id"
             label="Cargo"

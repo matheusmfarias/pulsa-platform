@@ -1,4 +1,4 @@
-import { ArrowLeft, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -20,6 +20,7 @@ import {
 } from "@/modules/positions";
 import { unitIdSchema } from "@/modules/units";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const relationLinkClass =
   "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -109,13 +110,15 @@ function DetailSection({
 
 export default async function PositionDetailsPage({
   params,
-}: PageProps<"/app/units/[unitId]/positions/[positionId]">) {
+}: {
+  params: Promise<{ positionId: string; unitId?: string }>;
+}) {
   const values = await params;
 
-  const unitId = unitIdSchema.safeParse(values.unitId);
+  const unitId = values.unitId ? unitIdSchema.safeParse(values.unitId) : null;
   const positionId = positionIdSchema.safeParse(values.positionId);
 
-  if (!unitId.success || !positionId.success) notFound();
+  if ((unitId && !unitId.success) || !positionId.success) notFound();
 
   let detail;
 
@@ -127,7 +130,17 @@ export default async function PositionDetailsPage({
     return (
       <PageShell>
         <ContentContainer size="detail-wide">
-          <PageHeader eyebrow="Postos" title="Detalhe do posto" />
+          <PageHeader
+            breadcrumb={
+              <Breadcrumb
+                items={[
+                  { label: "Operação" },
+                  { label: "Postos", href: "/app/positions" },
+                ]}
+              />
+            }
+            title="Detalhe do posto"
+          />
 
           <FeedbackMessage className="mt-6" variant="danger">
             {toPublicErrorMessage(error)}
@@ -139,7 +152,12 @@ export default async function PositionDetailsPage({
 
   const { position, assignments, activeAssignments, occupancy } = detail;
 
-  if (position.unit.id !== unitId.data) notFound();
+  if (unitId?.success && position.unit.id !== unitId.data) notFound();
+
+  const isGlobalRoute = !unitId;
+  const detailHref = isGlobalRoute
+    ? `/app/positions/${position.id}`
+    : `/app/units/${position.unit.id}/positions/${position.id}`;
 
   const historicalAssignments = assignments.filter(
     (assignment) => assignment.status !== "active",
@@ -148,29 +166,27 @@ export default async function PositionDetailsPage({
   return (
     <PageShell>
       <ContentContainer size="detail-wide">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={`/app/units/${unitId.data}`}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar para unidade
-          </Link>
-        </Button>
-
         <PageHeader
           actions={
             <PermissionGate permission="position:update">
               <Button asChild variant="outline">
-                <Link
-                  href={`/app/units/${unitId.data}/positions/${position.id}/edit`}
-                >
+                <Link href={`${detailHref}/edit`}>
                   <Pencil aria-hidden="true" className="size-4" />
                   Editar
                 </Link>
               </Button>
             </PermissionGate>
           }
-          className="mt-5 sm:mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Operação" },
+                { label: "Postos", href: "/app/positions" },
+                { label: position.job_role.name },
+              ]}
+            />
+          }
           description="Estrutura operacional, ocupação e alocações relacionadas ao posto."
-          eyebrow="Postos"
           metadata={
             <div className="flex flex-wrap items-center gap-3">
               <PositionStatusBadge status={position.status} />
@@ -324,6 +340,7 @@ export default async function PositionDetailsPage({
                 <PositionStatusAction
                   currentStatus={position.status}
                   positionId={position.id}
+                  redirectToPosition={isGlobalRoute}
                 />
               </div>
             </DetailSection>

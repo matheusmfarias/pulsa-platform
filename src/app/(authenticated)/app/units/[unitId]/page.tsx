@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Pencil, Plus } from "lucide-react";
+import { ArrowRight, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -30,6 +30,7 @@ import {
   unitIdSchema,
 } from "@/modules/units";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const relationLinkClass =
   "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -121,7 +122,7 @@ export default async function UnitDetailsPage({
     return (
       <PageShell>
         <ContentContainer size="detail-wide">
-          <PageHeader eyebrow="Unidades" title="Detalhe da unidade" />
+          <PageHeader breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Unidades", href: "/app/units" }]} />} title="Detalhe da unidade" />
 
           <FeedbackMessage className="mt-6" variant="danger">
             {toPublicErrorMessage(error)}
@@ -138,13 +139,6 @@ export default async function UnitDetailsPage({
   return (
     <PageShell>
       <ContentContainer size="detail-wide">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/units">
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar para unidades
-          </Link>
-        </Button>
-
         <PageHeader
           actions={
             <PermissionGate permission="unit:update">
@@ -156,9 +150,8 @@ export default async function UnitDetailsPage({
               </Button>
             </PermissionGate>
           }
-          className="mt-5 sm:mt-6"
+          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Unidades", href: "/app/units" }, { label: unit.name }]} />}
           description="Estrutura, efetivo e relações operacionais desta unidade."
-          eyebrow="Unidades"
           metadata={
             <div className="flex flex-wrap items-center gap-3">
               <UnitStatusBadge status={unit.status} />

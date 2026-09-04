@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -7,7 +5,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { listJobRoles } from "@/modules/job-roles";
 import {
   getPositionById,
@@ -18,42 +16,52 @@ import { unitIdSchema } from "@/modules/units";
 
 export default async function EditPositionPage({
   params,
-}: PageProps<"/app/units/[unitId]/positions/[positionId]/edit">) {
+}: {
+  params: Promise<{ positionId: string; unitId?: string }>;
+}) {
   const values = await params;
 
-  const route = unitIdSchema.safeParse(values.unitId);
+  const route = values.unitId ? unitIdSchema.safeParse(values.unitId) : null;
   const id = positionIdSchema.safeParse(values.positionId);
 
-  if (!route.success || !id.success) notFound();
+  if ((route && !route.success) || !id.success) notFound();
 
   const [position, allJobRoles] = await Promise.all([
     getPositionById(id.data),
     listJobRoles(),
   ]);
 
-  if (position.unit_id !== route.data) notFound();
+  if (route?.success && position.unit_id !== route.data) notFound();
 
   const jobRoles = allJobRoles.filter(
     (jobRole) =>
       jobRole.status === "active" || jobRole.id === position.job_role_id,
   );
 
-  const detailHref = `/app/units/${route.data}/positions/${position.id}`;
+  const isGlobalRoute = !route;
+  const detailHref = isGlobalRoute
+    ? `/app/positions/${position.id}`
+    : `/app/units/${position.unit_id}/positions/${position.id}`;
+  const breadcrumbItems = isGlobalRoute
+    ? [
+        { label: "Operação" },
+        { label: "Postos", href: "/app/positions" },
+        { label: position.job_role.name, href: detailHref },
+        { label: "Editar" },
+      ]
+    : [
+        { label: "Operação" },
+        { label: "Unidades", href: "/app/units" },
+        { label: position.job_role.name, href: detailHref },
+        { label: "Editar" },
+      ];
 
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={detailHref}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={<Breadcrumb items={breadcrumbItems} />}
           description="Atualize a estrutura e as informações cadastrais deste posto."
-          eyebrow="Postos"
           title="Editar posto"
         />
 
@@ -65,7 +73,8 @@ export default async function EditPositionPage({
             cancelHref={detailHref}
             jobRoles={jobRoles}
             position={position}
-            unitId={route.data}
+            redirectToPosition={isGlobalRoute}
+            unitId={position.unit_id}
           />
         </section>
       </ContentContainer>

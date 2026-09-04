@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -7,7 +5,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { listJobRoles } from "@/modules/job-roles";
 import { PositionForm } from "@/modules/positions";
@@ -27,23 +25,18 @@ export default async function NewPositionPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={`/app/units/${unit.id}`}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
-          description="Cadastre um posto dentro da estrutura operacional desta unidade."
-          eyebrow="Postos"
-          metadata={
-            <span>
-              Unidade:{" "}
-              <span className="font-medium text-foreground">{unit.name}</span>
-            </span>
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Operação" },
+                { label: "Unidades", href: "/app/units" },
+                { label: unit.name, href: `/app/units/${unit.id}` },
+                { label: "Novo posto" },
+              ]}
+            />
           }
+          description="Cadastre um posto dentro da estrutura operacional desta unidade."
           title="Novo posto"
         />
 

@@ -1,4 +1,4 @@
-import { ArrowLeft, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -24,6 +24,7 @@ import {
   type ContractWithClient,
 } from "@/modules/contracts";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const relationLinkClass =
   "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -40,22 +41,14 @@ function formatContractDate(value: string): string {
   }).format(new Date(value + "T00:00:00Z"));
 }
 
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: ReactNode;
-}) {
+function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
 
-      <dd className="mt-1 text-sm leading-6">
-        {value}
-      </dd>
+      <dd className="mt-1 text-sm leading-6">{value}</dd>
     </div>
   );
 }
@@ -95,9 +88,7 @@ function DetailSection({
         ) : null}
       </header>
 
-      <div className="mt-5">
-        {children}
-      </div>
+      <div className="mt-5">{children}</div>
     </section>
   );
 }
@@ -105,9 +96,7 @@ function DetailSection({
 export default async function ClientDetailsPage({
   params,
 }: PageProps<"/app/clients/[clientId]">) {
-  const route = clientIdSchema.safeParse(
-    (await params).clientId,
-  );
+  const route = clientIdSchema.safeParse((await params).clientId);
 
   if (!route.success) {
     notFound();
@@ -126,14 +115,13 @@ export default async function ClientDetailsPage({
       <PageShell>
         <ContentContainer size="detail-wide">
           <PageHeader
-            eyebrow="Clientes"
+            breadcrumb={
+              <Breadcrumb items={[{ label: "Comercial" }, { label: "Clientes" }]} />
+            }
             title="Detalhe do cliente"
           />
 
-          <FeedbackMessage
-            className="mt-6"
-            variant="danger"
-          >
+          <FeedbackMessage className="mt-6" variant="danger">
             {toPublicErrorMessage(error)}
           </FeedbackMessage>
         </ContentContainer>
@@ -156,33 +144,34 @@ export default async function ClientDetailsPage({
   return (
     <PageShell>
       <ContentContainer size="detail-wide">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/clients">
-            <ArrowLeft
-              aria-hidden="true"
-              className="size-4"
-            />
-            Voltar para clientes
-          </Link>
-        </Button>
-
         <PageHeader
           actions={
             <PermissionGate permission="client:update">
               <Button asChild variant="outline">
                 <Link href={`/app/clients/${client.id}/edit`}>
-                  <Pencil
-                    aria-hidden="true"
-                    className="size-4"
-                  />
+                  <Pencil aria-hidden="true" className="size-4" />
                   Editar
                 </Link>
               </Button>
             </PermissionGate>
           }
-          className="mt-5 sm:mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                {
+                  label: "Comercial",
+                },
+                {
+                  label: "Clientes",
+                  href: "/app/clients",
+                },
+                {
+                  label: client.trade_name,
+                },
+              ]}
+            />
+          }
           description="Dados cadastrais e vínculos comerciais deste cliente."
-          eyebrow="Clientes"
           metadata={
             <div className="flex flex-wrap items-center gap-3">
               <ClientStatusBadge status={client.status} />
@@ -200,23 +189,15 @@ export default async function ClientDetailsPage({
             title="Dados cadastrais"
           >
             <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-              <DetailItem
-                label="Nome fantasia"
-                value={client.trade_name}
-              />
+              <DetailItem label="Nome fantasia" value={client.trade_name} />
 
-              <DetailItem
-                label="Razão social"
-                value={client.legal_name}
-              />
+              <DetailItem label="Razão social" value={client.legal_name} />
 
               <DetailItem
                 label="CNPJ"
                 value={
                   <span className="tabular-nums">
-                    {formatDocumentNumber(
-                      client.document_number,
-                    )}
+                    {formatDocumentNumber(client.document_number)}
                   </span>
                 }
               />
@@ -232,18 +213,9 @@ export default async function ClientDetailsPage({
             actions={
               client.status === "active" ? (
                 <PermissionGate permission="contract:create">
-                  <Button
-                    asChild
-                    className="w-fit"
-                    size="sm"
-                  >
-                    <Link
-                      href={`/app/contracts/new?clientId=${client.id}`}
-                    >
-                      <Plus
-                        aria-hidden="true"
-                        className="size-4"
-                      />
+                  <Button asChild className="w-fit" size="sm">
+                    <Link href={`/app/contracts/new?clientId=${client.id}`}>
+                      <Plus aria-hidden="true" className="size-4" />
                       Novo contrato
                     </Link>
                   </Button>
@@ -278,17 +250,12 @@ export default async function ClientDetailsPage({
                       </Link>
 
                       <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                        Início em{" "}
-                        {formatContractDate(
-                          contract.start_date,
-                        )}
+                        Início em {formatContractDate(contract.start_date)}
                       </p>
                     </div>
 
                     <div className="w-fit self-start sm:self-auto">
-                      <ContractStatusBadge
-                        status={contract.status}
-                      />
+                      <ContractStatusBadge status={contract.status} />
                     </div>
                   </li>
                 ))}
@@ -308,9 +275,7 @@ export default async function ClientDetailsPage({
                     Situação atual
                   </span>
 
-                  <ClientStatusBadge
-                    status={client.status}
-                  />
+                  <ClientStatusBadge status={client.status} />
                 </div>
 
                 <div className="w-fit">

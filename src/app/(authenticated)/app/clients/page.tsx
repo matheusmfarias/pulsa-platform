@@ -17,6 +17,7 @@ import {
   listClients,
 } from "@/modules/clients";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 type SearchParams = Promise<{
   q?: string;
@@ -44,8 +45,19 @@ export default async function ClientsPage({
       <PageShell>
         <ContentContainer size="list">
           <PageHeader
+            breadcrumb={
+              <Breadcrumb
+                items={[
+                  {
+                    label: "Comercial",
+                  },
+                  {
+                    label: "Clientes",
+                  },
+                ]}
+              />
+            }
             description="Empresas atendidas pela Pulsa, incluindo registros ativos e inativos."
-            eyebrow="Comercial"
             title="Clientes"
           />
 
@@ -73,8 +85,19 @@ export default async function ClientsPage({
               </Button>
             </PermissionGate>
           }
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                {
+                  label: "Comercial",
+                },
+                {
+                  label: "Clientes",
+                },
+              ]}
+            />
+          }
           description="Empresas atendidas pela Pulsa, incluindo registros ativos e inativos."
-          eyebrow="Comercial"
           title="Clientes"
         />
 

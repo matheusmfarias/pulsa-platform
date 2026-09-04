@@ -25,7 +25,14 @@ const administrationMigration = readFileSync(
   ),
   "utf8",
 );
-const migration = `${rbacMigration}\n${jobRolesMigration}\n${administrationMigration}`;
+const schedulingMigration = readFileSync(
+  new URL(
+    "../../supabase/migrations/20260904100000_scheduling_domain_foundation.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const migration = `${rbacMigration}\n${jobRolesMigration}\n${administrationMigration}\n${schedulingMigration}`;
 
 const mutationPermissions = [
   ["client", "client:create", "client:update"],
@@ -44,7 +51,7 @@ function extractRolePermissions(role: keyof typeof ROLE_PERMISSIONS) {
   )];
   const match = matches.at(-1);
   expect(match, `SQL permissions for ${role}`).toBeDefined();
-  return [...match![1].matchAll(/'([a-z_]+:(?:read|create|update))'/g)].map(
+  return [...match![1].matchAll(/'([a-z_]+:[a-z_]+)'/g)].map(
     ([, permission]) => permission,
   );
 }

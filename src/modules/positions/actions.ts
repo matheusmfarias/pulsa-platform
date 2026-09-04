@@ -14,7 +14,8 @@ import { changePositionStatus } from "./services/change-position-status";
 import { createPosition } from "./services/create-position";
 import { updatePosition } from "./services/update-position";
 
-type Field = "unit_id" | "job_role_id" | "description" | "base_required_headcount";
+type Field =
+  "unit_id" | "job_role_id" | "description" | "base_required_headcount";
 export type PositionActionState = {
   error: string | null;
   fieldErrors?: Partial<Record<Field, string[]>>;
@@ -49,7 +50,10 @@ export async function createPositionAction(
   } catch (error) {
     return failure(error, "create_position");
   }
+  revalidatePath("/app/positions");
   revalidatePath(`/app/units/${position.unit_id}`);
+  if (formData.get("redirect_to") === "position")
+    redirect(`/app/positions/${position.id}`);
   redirect(`/app/units/${position.unit_id}`);
 }
 export async function updatePositionAction(
@@ -71,12 +75,17 @@ export async function updatePositionAction(
   } catch (error) {
     return failure(error, "update_position");
   }
+  revalidatePath("/app/positions");
   revalidatePath(`/app/units/${position.unit_id}`);
+  if (formData.get("redirect_to") === "position")
+    redirect(`/app/positions/${position.id}`);
   redirect(`/app/units/${position.unit_id}`);
 }
 export async function changePositionStatusAction(
   positionId: string,
   targetStatus: string,
+  _state: PositionActionState,
+  formData: FormData,
 ): Promise<PositionActionState> {
   const input = z
     .object({ id: positionIdSchema, status: positionStatusSchema })
@@ -88,6 +97,9 @@ export async function changePositionStatusAction(
   } catch (error) {
     return failure(error, "change_position_status");
   }
+  revalidatePath("/app/positions");
   revalidatePath(`/app/units/${position.unit_id}`);
+  if (formData.get("redirect_to") === "position")
+    redirect(`/app/positions/${position.id}`);
   redirect(`/app/units/${position.unit_id}`);
 }

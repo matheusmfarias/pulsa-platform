@@ -1,12 +1,9 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-
 import {
   ContentContainer,
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { AssignmentForm } from "@/modules/assignments";
 import { listPositions } from "@/modules/positions";
 import { listWorkers } from "@/modules/workers";
@@ -34,23 +31,39 @@ export default async function NewAssignmentPage({
   const cancelHref = workerId
     ? `/app/workers/${workerId}`
     : selectedPosition
-      ? `/app/units/${selectedPosition.unit.id}/positions/${selectedPosition.id}`
+      ? `/app/positions/${selectedPosition.id}`
       : "/app/assignments";
+
+  const selectedPositionHref = selectedPosition
+    ? `/app/positions/${selectedPosition.id}`
+    : undefined;
 
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={cancelHref}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={
+                selectedPosition && selectedPositionHref
+                  ? [
+                      { label: "Operação" },
+                      { label: "Postos", href: "/app/positions" },
+                      {
+                        label: selectedPosition.job_role.name,
+                        href: selectedPositionHref,
+                      },
+                      { label: "Nova alocação" },
+                    ]
+                  : [
+                      { label: "Operação" },
+                      { label: "Alocações", href: "/app/assignments" },
+                      { label: "Nova alocação" },
+                    ]
+              }
+            />
+          }
           description="Vincule um colaborador ativo a um posto ativo por um período definido."
-          eyebrow="Alocações"
           title="Nova alocação"
         />
 

@@ -2,6 +2,8 @@ export * from "./actions";
 export * from "./components/job-role-form";
 export * from "./components/job-role-status-action";
 export * from "./components/job-role-status-badge";
+export * from "./components/job-role-table";
+export * from "./components/job-role-filter-bar";
 export * from "./domain/job-role";
 export * from "./schemas/job-role-schemas";
 export * from "./services/change-job-role-status";

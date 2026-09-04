@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -7,7 +5,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import {
   assignmentIdSchema,
   AssignmentForm,
@@ -19,9 +17,7 @@ import { listWorkers } from "@/modules/workers";
 export default async function EditAssignmentPage({
   params,
 }: PageProps<"/app/assignments/[assignmentId]/edit">) {
-  const route = assignmentIdSchema.safeParse(
-    (await params).assignmentId,
-  );
+  const route = assignmentIdSchema.safeParse((await params).assignmentId);
 
   if (!route.success) notFound();
 
@@ -36,17 +32,18 @@ export default async function EditAssignmentPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={detailHref}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Operação" },
+                { label: "Alocações", href: "/app/assignments" },
+                { label: assignment.worker.full_name, href: detailHref },
+                { label: "Editar" },
+              ]}
+            />
+          }
           description="Atualize o vínculo operacional e o período desta alocação."
-          eyebrow="Alocações"
           title="Editar alocação"
         />
 

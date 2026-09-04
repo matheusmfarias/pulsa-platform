@@ -240,6 +240,7 @@ Legenda:
 - R = read
 - U = update
 - D = destructive transition/administrative removal
+- S/A/P = submit/approve/publish
 
 | Domain | DIRECTOR | OPERATIONS_MANAGER | SUPERVISOR | HR | RECRUITER | ADMINISTRATIVE |
 |---|---|---|---|---|---|---|
@@ -250,6 +251,7 @@ Legenda:
 | Units/Positions | CRUD | CRUD | R/U | R | R | R |
 | Workers | CRUD | R | R | CRUD | R | R |
 | Assignments | CRUD | CRUD | R | R/U | R | R |
+| Scheduling | R/C/U/S/A/P | R/C/U/S/A/P | R/C/U/S/A/P | R/C/U/S/A/P | R | R |
 | Administration (memberships/audit) | R/U | - | - | - | - | - |
 
 Essa matriz é inicial e deve ser revisada quando a operação real definir responsabilidades.
@@ -314,6 +316,22 @@ A home autenticada apresenta KPIs derivados de Operations, Units, Workers, Assig
 Positions ativos, além de efetivo base. Ocupação considera somente `Assignment.status = active`.
 Os alertas atuais são Worker ativo sem Assignment ativa e Position abaixo de
 `base_required_headcount`; vacancy/coverage não são persistidos.
+
+---
+
+## Scheduling Foundation
+
+Scheduling persiste `schedules`, `schedule_revisions` e `schedule_entries` conforme
+`docs/SCHEDULING_DOMAIN.md`. Períodos civis de uma mesma Operation são protegidos contra
+sobreposição por constraint PostgreSQL, revisões publicadas são imutáveis e entradas só podem
+ser alteradas em `draft`.
+
+As ações explícitas de criação, edição, submissão, aprovação, devolução, publicação e criação de
+revisão baseada em publicação usam RPCs públicas RBAC-protected, implementações/helpers privados
+e audit na mesma transação. Submissão, aprovação e publicação revalidam elegibilidade temporal e
+conflitos do Worker, inclusive contra planejamentos relevantes de outras Schedules da
+Organization. RLS permanece responsável pela leitura Organization-scoped; roles da API não têm
+DML direto nas tabelas.
 
 ---
 

@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -8,12 +7,10 @@ import {
 } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
-import {
-  clientIdSchema,
-  listClients,
-} from "@/modules/clients";
+import { clientIdSchema, listClients } from "@/modules/clients";
 import { ContractForm } from "@/modules/contracts";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 type SearchParams = Promise<{ clientId?: string }>;
 
@@ -38,8 +35,19 @@ export default async function NewContractPage({
       <PageShell>
         <ContentContainer size="form">
           <PageHeader
+            breadcrumb={
+              <Breadcrumb
+                items={[
+                  { label: "Comercial" },
+                  {
+                    label: "Contratos",
+                    href: "/app/contracts",
+                  },
+                  { label: "Novo contrato" },
+                ]}
+              />
+            }
             description="Registre o vínculo comercial de um cliente ativo."
-            eyebrow="Contratos"
             title="Novo contrato"
           />
 
@@ -55,6 +63,10 @@ export default async function NewContractPage({
     ? requestedClient.data
     : undefined;
 
+  const defaultClient = defaultClientId
+    ? (clients.find((client) => client.id === defaultClientId) ?? null)
+    : null;
+
   const cancelHref = defaultClientId
     ? `/app/clients/${defaultClientId}`
     : "/app/contracts";
@@ -62,34 +74,48 @@ export default async function NewContractPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={cancelHref}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={
+                defaultClient
+                  ? [
+                      { label: "Comercial" },
+                      {
+                        label: "Clientes",
+                        href: "/app/clients",
+                      },
+                      {
+                        label: defaultClient.trade_name,
+                        href: `/app/clients/${defaultClient.id}`,
+                      },
+                      { label: "Novo contrato" },
+                    ]
+                  : [
+                      { label: "Comercial" },
+                      {
+                        label: "Contratos",
+                        href: "/app/contracts",
+                      },
+                      { label: "Novo contrato" },
+                    ]
+              }
+            />
+          }
           description="Registre o vínculo comercial de um cliente ativo."
-          eyebrow="Contratos"
           title="Novo contrato"
         />
 
         {clients.length === 0 ? (
           <section className="mt-8 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
-            <h2 className="font-medium">
-              Nenhum cliente ativo disponível
-            </h2>
+            <h2 className="font-medium">Nenhum cliente ativo disponível</h2>
 
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
               É necessário ter ao menos um cliente ativo para criar um contrato.
             </p>
 
             <Button asChild className="mt-5" variant="outline">
-              <Link href="/app/clients">
-                Ver clientes
-              </Link>
+              <Link href="/app/clients">Ver clientes</Link>
             </Button>
           </section>
         ) : (

@@ -1,9 +1,7 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { getWorkerById, WorkerForm, workerIdSchema } from "@/modules/workers";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
@@ -24,7 +22,7 @@ export default async function EditWorkerPage({
       <PageShell>
         <ContentContainer size="form">
           <PageHeader
-            eyebrow="Colaboradores"
+            breadcrumb={<Breadcrumb items={[{ label: "Pessoas" }, { label: "Colaboradores", href: "/app/workers" }]} />}
             title="Editar colaborador"
           />
           <FeedbackMessage className="mt-6" variant="danger">
@@ -38,17 +36,9 @@ export default async function EditWorkerPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={"/app/workers/" + worker.id}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={<Breadcrumb items={[{ label: "Pessoas" }, { label: "Colaboradores", href: "/app/workers" }, { label: worker.full_name, href: "/app/workers/" + worker.id }, { label: "Editar" }]} />}
           description="Atualize somente os dados cadastrais do colaborador."
-          eyebrow="Colaboradores"
-          metadata={<span className="font-medium text-foreground">{worker.full_name}</span>}
           title="Editar colaborador"
         />
         <section

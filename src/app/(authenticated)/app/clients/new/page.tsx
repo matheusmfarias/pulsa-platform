@@ -1,29 +1,26 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-
 import {
   ContentContainer,
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
 import { ClientForm } from "@/modules/clients";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function NewClientPage() {
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/clients">
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Comercial" },
+                { label: "Clientes", href: "/app/clients" },
+                { label: "Novo cliente" },
+              ]}
+            />
+          }
           description="Cadastre os dados jurídicos e comerciais da empresa atendida."
-          eyebrow="Clientes"
           title="Novo cliente"
         />
 

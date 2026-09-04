@@ -14,6 +14,7 @@ import {
   WorkerTable,
 } from "@/modules/workers";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 type SearchParams = Promise<{ q?: string; status?: string }>;
 
@@ -79,7 +80,7 @@ export default async function WorkersPage({
       <PageShell>
         <ContentContainer size="list">
           <PageHeader
-            eyebrow="Pessoas"
+            breadcrumb={<Breadcrumb items={[{ label: "Pessoas" }, { label: "Colaboradores" }]} />}
             title="Colaboradores"
             description="Cadastro, situação e contexto operacional dos colaboradores."
           />
@@ -103,7 +104,7 @@ export default async function WorkersPage({
         <PageHeader
           actions={<NewWorkerButton />}
           description="Cadastro, situação e contexto operacional dos colaboradores."
-          eyebrow="Pessoas"
+          breadcrumb={<Breadcrumb items={[{ label: "Pessoas" }, { label: "Colaboradores" }]} />}
           title="Colaboradores"
         />
 

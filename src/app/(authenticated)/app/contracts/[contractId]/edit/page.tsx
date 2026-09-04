@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -7,7 +5,6 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { listClients } from "@/modules/clients";
 import {
@@ -16,13 +13,12 @@ import {
   getContractById,
 } from "@/modules/contracts";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default async function EditContractPage({
   params,
 }: PageProps<"/app/contracts/[contractId]/edit">) {
-  const route = contractIdSchema.safeParse(
-    (await params).contractId,
-  );
+  const route = contractIdSchema.safeParse((await params).contractId);
 
   if (!route.success) notFound();
 
@@ -46,8 +42,10 @@ export default async function EditContractPage({
       <PageShell>
         <ContentContainer size="form">
           <PageHeader
+            breadcrumb={
+              <Breadcrumb items={[{ label: "Comercial" }, { label: "Contratos" }]} />
+            }
             description="Atualize o vínculo comercial, o período e a referência deste contrato."
-            eyebrow="Contratos"
             title="Editar contrato"
           />
 
@@ -64,25 +62,30 @@ export default async function EditContractPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={detailHref}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
-          description="Atualize o vínculo comercial, o período e a referência deste contrato."
-          eyebrow="Contratos"
-          metadata={
-            <span>
-              Contrato:{" "}
-              <span className="font-medium text-foreground">
-                {contract.name}
-              </span>
-            </span>
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Comercial" },
+                {
+                  label: "Clientes",
+                  href: "/app/clients",
+                },
+                {
+                  label: contract.client.trade_name,
+                  href: `/app/clients/${contract.client.id}`,
+                },
+                {
+                  label: contract.name,
+                  href: detailHref,
+                },
+                {
+                  label: "Editar",
+                },
+              ]}
+            />
           }
+          description="Atualize o vínculo comercial, o período e a referência deste contrato."
           title="Editar contrato"
         />
 

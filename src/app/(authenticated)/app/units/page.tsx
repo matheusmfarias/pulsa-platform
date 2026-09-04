@@ -15,6 +15,7 @@ import {
   UnitTable,
 } from "@/modules/units";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default async function UnitsPage() {
   let units;
@@ -27,8 +28,8 @@ export default async function UnitsPage() {
       <PageShell>
         <ContentContainer size="list">
           <PageHeader
+            breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Unidades" }]} />}
             description="Locais vinculados às operações."
-            eyebrow="Estrutura operacional"
             title="Unidades"
           />
 
@@ -55,7 +56,7 @@ export default async function UnitsPage() {
             </PermissionGate>
           }
           description="Locais vinculados às operações."
-          eyebrow="Estrutura operacional"
+          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Unidades" }]} />}
           title="Unidades"
         />
 

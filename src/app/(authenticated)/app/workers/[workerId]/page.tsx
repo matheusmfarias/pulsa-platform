@@ -1,9 +1,13 @@
-import { ArrowLeft, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
+import {
+  ContentContainer,
+  PageHeader,
+  PageShell,
+} from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { AssignmentStatusBadge } from "@/modules/assignments";
@@ -16,6 +20,7 @@ import {
   workerIdSchema,
 } from "@/modules/workers";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const relationLinkClass =
   "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -28,13 +33,7 @@ function formatDate(value: string | null): string {
     : "Em aberto";
 }
 
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: ReactNode;
-}) {
+function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -62,7 +61,9 @@ function DetailSection({
     <section aria-labelledby={id} className="py-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="font-semibold" id={id}>{title}</h2>
+          <h2 className="font-semibold" id={id}>
+            {title}
+          </h2>
           {description ? (
             <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
               {description}
@@ -70,7 +71,9 @@ function DetailSection({
           ) : null}
         </div>
         {actions ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {actions}
+          </div>
         ) : null}
       </header>
       <div className="mt-5">{children}</div>
@@ -93,7 +96,17 @@ export default async function WorkerDetailsPage({
     return (
       <PageShell>
         <ContentContainer size="detail-wide">
-          <PageHeader eyebrow="Colaboradores" title="Detalhe do colaborador" />
+          <PageHeader
+            breadcrumb={
+              <Breadcrumb
+                items={[
+                  { label: "Pessoas" },
+                  { label: "Colaboradores", href: "/app/workers" },
+                ]}
+              />
+            }
+            title="Detalhe do colaborador"
+          />
           <FeedbackMessage className="mt-6" variant="danger">
             {toPublicErrorMessage(error)}
           </FeedbackMessage>
@@ -107,13 +120,6 @@ export default async function WorkerDetailsPage({
   return (
     <PageShell>
       <ContentContainer size="detail-wide">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/workers">
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar para colaboradores
-          </Link>
-        </Button>
-
         <PageHeader
           actions={
             <PermissionGate permission="worker:update">
@@ -125,13 +131,22 @@ export default async function WorkerDetailsPage({
               </Button>
             </PermissionGate>
           }
-          className="mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Pessoas" },
+                { label: "Colaboradores", href: "/app/workers" },
+                { label: worker.full_name },
+              ]}
+            />
+          }
           description="Dados cadastrais e contexto operacional do colaborador."
-          eyebrow="Colaboradores"
           metadata={
             <div className="flex flex-wrap items-center gap-3">
               <WorkerStatusBadge status={worker.status} />
-              <span className="tabular-nums">CPF {formatCpf(worker.document_number)}</span>
+              <span className="tabular-nums">
+                CPF {formatCpf(worker.document_number)}
+              </span>
             </div>
           }
           title={worker.full_name}
@@ -144,8 +159,14 @@ export default async function WorkerDetailsPage({
             title="Dados do colaborador"
           >
             <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-              <DetailItem label="E-mail" value={worker.email ?? "Não informado"} />
-              <DetailItem label="Telefone" value={worker.phone ?? "Não informado"} />
+              <DetailItem
+                label="E-mail"
+                value={worker.email ?? "Não informado"}
+              />
+              <DetailItem
+                label="Telefone"
+                value={worker.phone ?? "Não informado"}
+              />
               <DetailItem
                 label="Início do vínculo"
                 value={formatDate(worker.engagement_start_date)}
@@ -201,12 +222,13 @@ export default async function WorkerDetailsPage({
                         className={relationLinkClass}
                         href={
                           "/app/clients/" +
-                          activeAssignment.position.unit.operation.contract.client.id
+                          activeAssignment.position.unit.operation.contract
+                            .client.id
                         }
                       >
                         {
-                          activeAssignment.position.unit.operation.contract.client
-                            .trade_name
+                          activeAssignment.position.unit.operation.contract
+                            .client.trade_name
                         }
                       </Link>
                     }
@@ -232,12 +254,7 @@ export default async function WorkerDetailsPage({
                   </Link>
                   <Link
                     className={relationLinkClass}
-                    href={
-                      "/app/units/" +
-                      activeAssignment.position.unit.id +
-                      "/positions/" +
-                      activeAssignment.position.id
-                    }
+                    href={"/app/positions/" + activeAssignment.position.id}
                   >
                     Ver posto
                   </Link>
@@ -295,7 +312,10 @@ export default async function WorkerDetailsPage({
                         <span aria-hidden="true"> · </span>
                         <Link
                           className="rounded-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
-                          href={"/app/operations/" + assignment.position.unit.operation.id}
+                          href={
+                            "/app/operations/" +
+                            assignment.position.unit.operation.id
+                          }
                         >
                           {assignment.position.unit.operation.name}
                         </Link>

@@ -1,4 +1,4 @@
-import { ArrowLeft, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -18,6 +18,7 @@ import {
 } from "@/modules/assignments";
 import { PermissionGate } from "@/modules/authorization";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const relationLinkClass =
   "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -30,22 +31,14 @@ function formatDate(value: string | null): string {
     : "Em aberto";
 }
 
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: ReactNode;
-}) {
+function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
 
-      <dd className="mt-1 text-sm leading-6">
-        {value}
-      </dd>
+      <dd className="mt-1 text-sm leading-6">{value}</dd>
     </div>
   );
 }
@@ -75,9 +68,7 @@ function DetailSection({
         ) : null}
       </div>
 
-      <div className="mt-5">
-        {children}
-      </div>
+      <div className="mt-5">{children}</div>
     </section>
   );
 }
@@ -85,9 +76,7 @@ function DetailSection({
 export default async function AssignmentDetailsPage({
   params,
 }: PageProps<"/app/assignments/[assignmentId]">) {
-  const route = assignmentIdSchema.safeParse(
-    (await params).assignmentId,
-  );
+  const route = assignmentIdSchema.safeParse((await params).assignmentId);
 
   if (!route.success) {
     notFound();
@@ -106,14 +95,18 @@ export default async function AssignmentDetailsPage({
       <PageShell>
         <ContentContainer size="detail">
           <PageHeader
-            eyebrow="Alocações"
+            breadcrumb={
+              <Breadcrumb
+                items={[
+                  { label: "Operação" },
+                  { label: "Alocações", href: "/app/assignments" },
+                ]}
+              />
+            }
             title="Detalhe da alocação"
           />
 
-          <FeedbackMessage
-            className="mt-6"
-            variant="danger"
-          >
+          <FeedbackMessage className="mt-6" variant="danger">
             {toPublicErrorMessage(error)}
           </FeedbackMessage>
         </ContentContainer>
@@ -121,54 +114,39 @@ export default async function AssignmentDetailsPage({
     );
   }
 
-  const positionHref =
-    `/app/units/${assignment.position.unit.id}` +
-    `/positions/${assignment.position.id}`;
+  const positionHref = `/app/positions/${assignment.position.id}`;
 
   return (
     <PageShell>
       <ContentContainer size="detail">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/assignments">
-            <ArrowLeft
-              aria-hidden="true"
-              className="size-4"
-            />
-            Voltar para alocações
-          </Link>
-        </Button>
-
         <PageHeader
           actions={
             <PermissionGate permission="assignment:update">
               <Button asChild variant="outline">
-                <Link
-                  href={`/app/assignments/${assignment.id}/edit`}
-                >
-                  <Pencil
-                    aria-hidden="true"
-                    className="size-4"
-                  />
+                <Link href={`/app/assignments/${assignment.id}/edit`}>
+                  <Pencil aria-hidden="true" className="size-4" />
                   Editar
                 </Link>
               </Button>
             </PermissionGate>
           }
-          className="mt-5 sm:mt-6"
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Operação" },
+                { label: "Alocações", href: "/app/assignments" },
+                { label: assignment.worker.full_name },
+              ]}
+            />
+          }
           description="Vínculo temporal entre colaborador e posto."
-          eyebrow="Alocações"
           metadata={
             <div className="flex flex-wrap items-center gap-3">
-              <AssignmentStatusBadge
-                status={assignment.status}
-              />
+              <AssignmentStatusBadge status={assignment.status} />
 
               <span>
                 Posto:{" "}
-                <Link
-                  className={relationLinkClass}
-                  href={positionHref}
-                >
+                <Link className={relationLinkClass} href={positionHref}>
                   {assignment.position.job_role.name}
                 </Link>
               </span>
@@ -199,10 +177,7 @@ export default async function AssignmentDetailsPage({
               <DetailItem
                 label="Posto"
                 value={
-                  <Link
-                    className={relationLinkClass}
-                    href={positionHref}
-                  >
+                  <Link className={relationLinkClass} href={positionHref}>
                     {assignment.position.job_role.name}
                   </Link>
                 }
@@ -257,10 +232,7 @@ export default async function AssignmentDetailsPage({
                       className={relationLinkClass}
                       href={`/app/contracts/${assignment.position.unit.operation.contract.id}`}
                     >
-                      {
-                        assignment.position.unit.operation.contract
-                          .name
-                      }
+                      {assignment.position.unit.operation.contract.name}
                     </Link>
                   }
                 />
@@ -298,9 +270,7 @@ export default async function AssignmentDetailsPage({
                     Situação atual
                   </span>
 
-                  <AssignmentStatusBadge
-                    status={assignment.status}
-                  />
+                  <AssignmentStatusBadge status={assignment.status} />
                 </div>
 
                 <div className="w-fit">

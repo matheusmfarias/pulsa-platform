@@ -61,7 +61,7 @@ export function PositionTable({
           <TableBody>
             {positions.map((position) => {
               const occupied = getOccupiedHeadcount(position);
-              const href = `/app/units/${position.unit.id}/positions/${position.id}`;
+              const href = `/app/positions/${position.id}`;
 
               return (
                 <TableRow key={position.id}>
@@ -121,9 +121,7 @@ export function PositionTable({
                   <TableCell className="hidden max-w-56 text-muted-foreground xl:table-cell">
                     <span
                       className="block truncate"
-                      title={
-                        position.unit.operation.contract.client.trade_name
-                      }
+                      title={position.unit.operation.contract.client.trade_name}
                     >
                       {position.unit.operation.contract.client.trade_name}
                     </span>

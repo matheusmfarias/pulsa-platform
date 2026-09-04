@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -11,6 +10,7 @@ import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { contractIdSchema, listContracts } from "@/modules/contracts";
 import { OperationForm } from "@/modules/operations";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 type SearchParams = Promise<{ contractId?: string }>;
 
@@ -32,8 +32,8 @@ export default async function NewOperationPage({
       <PageShell>
         <ContentContainer size="form">
           <PageHeader
+            breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações", href: "/app/operations" }, { label: "Nova operação" }]} />}
             description="Registre um engajamento operacional para um contrato ativo."
-            eyebrow="Operações"
             title="Nova operação"
           />
 
@@ -48,17 +48,9 @@ export default async function NewOperationPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/operations">
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
+          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações", href: "/app/operations" }, { label: "Nova operação" }]} />}
           description="Registre um engajamento operacional para um contrato ativo."
-          eyebrow="Operações"
           title="Nova operação"
         />
 

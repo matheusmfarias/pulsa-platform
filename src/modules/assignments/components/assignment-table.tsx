@@ -43,17 +43,11 @@ export function AssignmentTable({
                 <span className="hidden xl:inline">Colaborador</span>
               </TableHead>
 
-              <TableHead className="hidden xl:table-cell">
-                Posto
-              </TableHead>
+              <TableHead className="hidden xl:table-cell">Posto</TableHead>
 
-              <TableHead className="hidden xl:table-cell">
-                Unidade
-              </TableHead>
+              <TableHead className="hidden xl:table-cell">Unidade</TableHead>
 
-              <TableHead className="hidden xl:table-cell">
-                Período
-              </TableHead>
+              <TableHead className="hidden xl:table-cell">Período</TableHead>
 
               <TableHead className="w-28 px-2 xl:w-32 xl:px-4">
                 Status
@@ -84,7 +78,7 @@ export function AssignmentTable({
                       <p className="truncate">
                         <Link
                           className={relationLinkClass}
-                          href={`/app/units/${assignment.position.unit.id}/positions/${assignment.position.id}`}
+                          href={`/app/positions/${assignment.position.id}`}
                         >
                           {assignment.position.job_role.name}
                         </Link>
@@ -109,7 +103,7 @@ export function AssignmentTable({
                   <TableCell className="hidden xl:table-cell">
                     <Link
                       className={relationLinkClass}
-                      href={`/app/units/${assignment.position.unit.id}/positions/${assignment.position.id}`}
+                      href={`/app/positions/${assignment.position.id}`}
                     >
                       {assignment.position.job_role.name}
                     </Link>
@@ -140,10 +134,7 @@ export function AssignmentTable({
                         href={href}
                         title="Ver detalhes"
                       >
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="size-4"
-                        />
+                        <ArrowRight aria-hidden="true" className="size-4" />
                       </Link>
                     </Button>
                   </TableCell>

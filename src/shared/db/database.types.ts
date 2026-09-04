@@ -404,6 +404,200 @@ export type Database = {
           },
         ]
       }
+      schedule_entries: {
+        Row: {
+          assignment_id: string
+          break_ends_at: string | null
+          break_starts_at: string | null
+          created_at: string
+          created_by: string
+          ends_at: string
+          id: string
+          schedule_revision_id: string
+          starts_at: string
+        }
+        Insert: {
+          assignment_id: string
+          break_ends_at?: string | null
+          break_starts_at?: string | null
+          created_at?: string
+          created_by: string
+          ends_at: string
+          id?: string
+          schedule_revision_id: string
+          starts_at: string
+        }
+        Update: {
+          assignment_id?: string
+          break_ends_at?: string | null
+          break_starts_at?: string | null
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          id?: string
+          schedule_revision_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_entries_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_entries_schedule_revision_id_fkey"
+            columns: ["schedule_revision_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_revisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedule_revisions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          based_on_revision_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          version: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          based_on_revision_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          schedule_id: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          version: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          based_on_revision_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          schedule_id?: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_revisions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_revisions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_revisions_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_revisions_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_revisions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          operation_id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          operation_id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          operation_id?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedules_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -567,6 +761,124 @@ export type Database = {
           target_organization_id: string
         }
         Returns: boolean
+      }
+      approve_schedule_revision: {
+        Args: { schedule_revision_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          based_on_revision_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_schedule: {
+        Args: {
+          operation_id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          id: string
+          operation_id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_schedule_entry: {
+        Args: {
+          assignment_id: string
+          break_ends_at?: string | null
+          break_starts_at?: string | null
+          ends_at: string
+          schedule_revision_id: string
+          starts_at: string
+        }
+        Returns: {
+          assignment_id: string
+          break_ends_at: string | null
+          break_starts_at: string | null
+          created_at: string
+          created_by: string
+          ends_at: string
+          id: string
+          schedule_revision_id: string
+          starts_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_entries"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_schedule_revision_from_published: {
+        Args: { schedule_revision_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          based_on_revision_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      delete_schedule_entry: {
+        Args: { entry_id: string }
+        Returns: {
+          assignment_id: string
+          break_ends_at: string | null
+          break_starts_at: string | null
+          created_at: string
+          created_by: string
+          ends_at: string
+          id: string
+          schedule_revision_id: string
+          starts_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_entries"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       is_active_organization_member: {
         Args: { target_organization_id: string }
@@ -800,6 +1112,105 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "workers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      publish_schedule_revision: {
+        Args: { schedule_revision_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          based_on_revision_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      return_schedule_revision_to_draft: {
+        Args: { schedule_revision_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          based_on_revision_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_schedule_revision: {
+        Args: { schedule_revision_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          based_on_revision_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      update_schedule_entry: {
+        Args: {
+          assignment_id: string
+          break_ends_at?: string | null
+          break_starts_at?: string | null
+          ends_at: string
+          entry_id: string
+          starts_at: string
+        }
+        Returns: {
+          assignment_id: string
+          break_ends_at: string | null
+          break_starts_at: string | null
+          created_at: string
+          created_by: string
+          ends_at: string
+          id: string
+          schedule_revision_id: string
+          starts_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "schedule_entries"
           isOneToOne: true
           isSetofReturn: false
         }

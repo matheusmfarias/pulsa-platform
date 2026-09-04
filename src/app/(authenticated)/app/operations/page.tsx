@@ -12,6 +12,7 @@ import { PermissionGate } from "@/modules/authorization";
 import { listOperations, OperationTable } from "@/modules/operations";
 import { resolveOperationalContext } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default async function OperationsPage() {
   let operations;
@@ -24,8 +25,8 @@ export default async function OperationsPage() {
       <PageShell>
         <ContentContainer size="list">
           <PageHeader
+            breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações" }]} />}
             description="Engajamentos operacionais administrados pela Pulsa."
-            eyebrow="Execução"
             title="Operações"
           />
 
@@ -52,7 +53,7 @@ export default async function OperationsPage() {
             </PermissionGate>
           }
           description="Engajamentos operacionais administrados pela Pulsa."
-          eyebrow="Execução"
+          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações" }]} />}
           title="Operações"
         />
 

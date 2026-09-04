@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -7,14 +5,10 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
-import {
-  ClientForm,
-  clientIdSchema,
-  getClientById,
-} from "@/modules/clients";
+import { ClientForm, clientIdSchema, getClientById } from "@/modules/clients";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default async function EditClientPage({
   params,
@@ -36,8 +30,10 @@ export default async function EditClientPage({
       <PageShell>
         <ContentContainer size="form">
           <PageHeader
+            breadcrumb={
+              <Breadcrumb items={[{ label: "Comercial" }, { label: "Clientes" }]} />
+            }
             description="Atualize os dados jurídicos e comerciais deste cliente."
-            eyebrow="Clientes"
             title="Editar cliente"
           />
 
@@ -54,25 +50,21 @@ export default async function EditClientPage({
   return (
     <PageShell>
       <ContentContainer size="form">
-        <Button asChild size="sm" variant="ghost">
-          <Link href={detailHref}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar
-          </Link>
-        </Button>
-
         <PageHeader
-          className="mt-5 sm:mt-6"
-          description="Atualize os dados jurídicos e comerciais deste cliente."
-          eyebrow="Clientes"
-          metadata={
-            <span>
-              Cliente:{" "}
-              <span className="font-medium text-foreground">
-                {client.trade_name}
-              </span>
-            </span>
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Comercial" },
+                { label: "Clientes", href: "/app/clients" },
+                {
+                  label: client.trade_name,
+                  href: `/app/clients/${client.id}`,
+                },
+                { label: "Editar" },
+              ]}
+            />
           }
+          description="Atualize os dados jurídicos e comerciais deste cliente."
           title="Editar cliente"
         />
 
@@ -80,10 +72,7 @@ export default async function EditClientPage({
           aria-label="Formulário de edição do cliente"
           className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8"
         >
-          <ClientForm
-            cancelHref={detailHref}
-            client={client}
-          />
+          <ClientForm cancelHref={detailHref} client={client} />
         </section>
       </ContentContainer>
     </PageShell>

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Pencil, Plus } from "lucide-react";
+import { ArrowRight, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -29,6 +29,7 @@ import {
 } from "@/modules/operations";
 import { UnitStatusBadge } from "@/modules/units";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const relationLinkClass =
   "rounded-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -135,7 +136,7 @@ export default async function OperationDetailsPage({
       <PageShell>
         <ContentContainer size="detail-wide">
           <PageHeader
-            eyebrow="Operações"
+            breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações", href: "/app/operations" }]} />}
             title="Detalhe da operação"
           />
 
@@ -150,13 +151,6 @@ export default async function OperationDetailsPage({
   return (
     <PageShell>
       <ContentContainer size="detail-wide">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/app/operations">
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Voltar para operações
-          </Link>
-        </Button>
-
         <PageHeader
           actions={
             <PermissionGate permission="operation:update">
@@ -168,9 +162,8 @@ export default async function OperationDetailsPage({
               </Button>
             </PermissionGate>
           }
-          className="mt-5 sm:mt-6"
+          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações", href: "/app/operations" }, { label: operation.name }]} />}
           description="Contexto contratual, estrutura e execução desta operação."
-          eyebrow="Operações"
           metadata={
             <div className="flex flex-wrap items-center gap-3">
               <OperationStatusBadge status={operation.status} />
