@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 
 import {
+  ActiveFiltersSummary,
+  ListFilterActions,
+  ListFilterBar,
+} from "@/components/layout/list";
+
+import {
   ASSIGNMENT_STATUS_LABELS,
   type AssignmentStatus,
 } from "../domain/assignment";
@@ -24,11 +30,10 @@ export function AssignmentFilterBar({
   const hasActiveFilters = hasActiveAssignmentFilters(filters);
 
   return (
-    <form
+    <ListFilterBar
       action="/app/assignments"
       aria-label="Filtros de alocações"
-      className="mt-6 flex flex-col gap-3 rounded-surface border border-border-default bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-end"
-      method="get"
+      className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
     >
       <div className="min-w-0 flex-1 sm:max-w-xs">
         <Select
@@ -45,7 +50,7 @@ export function AssignmentFilterBar({
         </Select>
       </div>
 
-      <div className="flex gap-2">
+      <ListFilterActions>
         <Button className="flex-1 sm:flex-none" type="submit" variant="outline">
           Aplicar filtro
         </Button>
@@ -60,17 +65,14 @@ export function AssignmentFilterBar({
             </Link>
           </Button>
         ) : null}
-      </div>
+      </ListFilterActions>
 
       {filters.status ? (
-        <p className="border-t border-border-default pt-3 text-xs leading-5 text-muted-foreground sm:basis-full">
+        <ActiveFiltersSummary className="sm:basis-full">
           <span className="font-medium text-foreground">Filtro ativo:</span>{" "}
-          Status:{" "}
-          {ASSIGNMENT_STATUS_LABELS[
-            filters.status as AssignmentStatus
-          ]}
-        </p>
+          Status: {ASSIGNMENT_STATUS_LABELS[filters.status as AssignmentStatus]}
+        </ActiveFiltersSummary>
       ) : null}
-    </form>
+    </ListFilterBar>
   );
 }

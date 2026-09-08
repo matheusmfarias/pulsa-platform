@@ -1,6 +1,8 @@
 export {
   AUTHORIZATION_ACTIONS,
   AUTHORIZATION_ENTITIES,
+  ABSENCE_AUTHORIZATION_ACTIONS,
+  REPLACEMENT_AUTHORIZATION_ACTIONS,
   ROLE_PERMISSIONS,
   SCHEDULE_AUTHORIZATION_ACTIONS,
   authorize,
@@ -8,6 +10,8 @@ export {
   type AuthorizationAction,
   type AuthorizationContext,
   type AuthorizationEntity,
+  type AbsenceAuthorizationAction,
+  type ReplacementAuthorizationAction,
   type Permission,
   type ScheduleAuthorizationAction,
 } from "./domain/permissions";

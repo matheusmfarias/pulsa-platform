@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      absences: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reason: string
+          reported_at: string
+          reported_by: string
+          schedule_entry_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          reason: string
+          reported_at?: string
+          reported_by: string
+          schedule_entry_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          reason?: string
+          reported_at?: string
+          reported_by?: string
+          schedule_entry_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absences_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absences_schedule_entry_id_fkey"
+            columns: ["schedule_entry_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      replacements: {
+        Row: {
+          absence_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          replacement_assignment_id: string
+          status: string
+        }
+        Insert: {
+          absence_id: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          organization_id: string
+          replacement_assignment_id: string
+          status?: string
+        }
+        Update: {
+          absence_id?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          replacement_assignment_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "replacements_absence_id_fkey"
+            columns: ["absence_id"]
+            isOneToOne: false
+            referencedRelation: "absences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replacements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replacements_replacement_assignment_id_fkey"
+            columns: ["replacement_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           created_at: string
@@ -724,6 +840,89 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_absence: {
+        Args: { absence_id: string; organization_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reason: string
+          reported_at: string
+          reported_by: string
+          schedule_entry_id: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "absences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cancel_replacement: {
+        Args: { organization_id: string; replacement_id: string }
+        Returns: {
+          absence_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          replacement_assignment_id: string
+          status: string
+        }
+        SetofOptions: { from: "*"; to: "replacements"; isOneToOne: true; isSetofReturn: false }
+      }
+      create_absence: {
+        Args: {
+          notes?: string | null
+          organization_id: string
+          reason: string
+          schedule_entry_id: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reason: string
+          reported_at: string
+          reported_by: string
+          schedule_entry_id: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "absences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_replacement: {
+        Args: { absence_id: string; assignment_id: string; organization_id: string }
+        Returns: {
+          absence_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          replacement_assignment_id: string
+          status: string
+        }
+        SetofOptions: { from: "*"; to: "replacements"; isOneToOne: true; isSetofReturn: false }
+      }
+      list_replacement_candidates: {
+        Args: { absence_id: string; organization_id: string }
+        Returns: {
+          assignment_id: string
+          worker_full_name: string
+          worker_id: string
+        }[]
+      }
       build_audit_metadata: {
         Args: {
           new_row: Json

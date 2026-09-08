@@ -8,6 +8,12 @@ import { Select } from "@/components/ui/select";
 import { POSITION_STATUS_LABELS } from "../domain/position";
 import type { PositionGlobalListFilters } from "../schemas/position-schemas";
 
+import {
+  ActiveFiltersSummary,
+  ListFilterActions,
+  ListFilterBar,
+} from "@/components/layout/list";
+
 export function hasActivePositionFilters(
   filters: PositionGlobalListFilters,
 ): boolean {
@@ -22,11 +28,10 @@ export function PositionFilterBar({
   const hasActiveFilters = hasActivePositionFilters(filters);
 
   return (
-    <form
+    <ListFilterBar
       action="/app/positions"
       aria-label="Filtros de postos"
-      className="mt-6 grid gap-3 rounded-surface border border-border-default bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
-      method="get"
+      className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
     >
       <div className="relative">
         <Search
@@ -53,7 +58,7 @@ export function PositionFilterBar({
         <option value="inactive">Inativos</option>
       </Select>
 
-      <div className="flex gap-2">
+      <ListFilterActions>
         <Button className="flex-1 sm:flex-none" type="submit" variant="outline">
           Aplicar filtros
         </Button>
@@ -65,18 +70,18 @@ export function PositionFilterBar({
             </Link>
           </Button>
         ) : null}
-      </div>
+      </ListFilterActions>
 
       {hasActiveFilters ? (
-        <p className="border-t border-border-default pt-3 text-xs leading-5 text-muted-foreground sm:col-span-3">
+        <ActiveFiltersSummary className="sm:col-span-3">
           <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
           {filters.query ? <>Busca por “{filters.query}”</> : null}
           {filters.query && filters.status ? " · " : null}
           {filters.status
             ? "Status: " + POSITION_STATUS_LABELS[filters.status]
             : null}
-        </p>
+        </ActiveFiltersSummary>
       ) : null}
-    </form>
+    </ListFilterBar>
   );
 }

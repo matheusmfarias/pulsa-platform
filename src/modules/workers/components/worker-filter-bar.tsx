@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
+import {
+  ActiveFiltersSummary,
+  ListFilterActions,
+  ListFilterBar,
+} from "@/components/layout/list";
+
 import { WORKER_STATUS_LABELS } from "../domain/worker";
 import type { WorkerListFilters } from "../schemas/worker-schemas";
 
@@ -12,19 +18,14 @@ export function hasActiveWorkerFilters(filters: WorkerListFilters): boolean {
   return Boolean(filters.query) || filters.status !== "all";
 }
 
-export function WorkerFilterBar({
-  filters,
-}: {
-  filters: WorkerListFilters;
-}) {
+export function WorkerFilterBar({ filters }: { filters: WorkerListFilters }) {
   const hasActiveFilters = hasActiveWorkerFilters(filters);
 
   return (
-    <form
+    <ListFilterBar
       action="/app/workers"
       aria-label="Filtros de colaboradores"
-      className="mt-6 grid gap-3 rounded-surface border border-border-default bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
-      method="get"
+      className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
     >
       <div className="relative">
         <Search
@@ -52,29 +53,32 @@ export function WorkerFilterBar({
         <option value="terminated">Encerrados</option>
       </Select>
 
-      <div className="flex gap-2">
+      <ListFilterActions>
         <Button className="flex-1 sm:flex-none" type="submit" variant="outline">
           Aplicar filtros
         </Button>
         {hasActiveFilters ? (
           <Button asChild size="icon" variant="ghost">
-            <Link aria-label="Limpar filtros de colaboradores" href="/app/workers">
+            <Link
+              aria-label="Limpar filtros de colaboradores"
+              href="/app/workers"
+            >
               <X aria-hidden="true" className="size-4" />
             </Link>
           </Button>
         ) : null}
-      </div>
+      </ListFilterActions>
 
       {hasActiveFilters ? (
-        <p className="border-t border-border-default pt-3 text-xs leading-5 text-muted-foreground sm:col-span-3">
+        <ActiveFiltersSummary className="sm:col-span-3">
           <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
           {filters.query ? <>Busca por “{filters.query}”</> : null}
           {filters.query && filters.status !== "all" ? " · " : null}
           {filters.status !== "all"
             ? "Status: " + WORKER_STATUS_LABELS[filters.status]
             : null}
-        </p>
+        </ActiveFiltersSummary>
       ) : null}
-    </form>
+    </ListFilterBar>
   );
 }

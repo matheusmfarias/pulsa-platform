@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requirePermission } from "@/modules/authorization";
-import { createSchedule, publishScheduleRevision } from "@/modules/scheduling";
-import { createScheduleRecord, transitionRevision } from "@/modules/scheduling/repositories/scheduling-repository";
+import { copyScheduleFromPublished, createSchedule, publishScheduleRevision } from "@/modules/scheduling";
+import { createScheduleRecord, findCurrentPublishedRevision, findRevisions, findScheduleById, transitionRevision } from "@/modules/scheduling/repositories/scheduling-repository";
 
 vi.mock("@/modules/authorization", () => ({ requirePermission: vi.fn() }));
 vi.mock("@/modules/scheduling/repositories/scheduling-repository", () => ({
-  createScheduleRecord: vi.fn(), transitionRevision: vi.fn(),
+  createScheduleRecord: vi.fn(), findCurrentPublishedRevision: vi.fn(), findRevisions: vi.fn(), findScheduleById: vi.fn(), transitionRevision: vi.fn(),
 }));
 
 const schedule = {
@@ -27,5 +27,18 @@ describe("Scheduling services", () => {
     vi.mocked(transitionRevision).mockResolvedValue({ data: null, error: { code: "23514", message: "Only approved ScheduleRevision can be published" } } as never);
     await expect(publishScheduleRevision(revision.id)).rejects.toMatchObject({ code: "VALIDATION" });
     expect(requirePermission).toHaveBeenCalledWith("schedule:publish");
+  });
+
+  it("creates a version 1 draft when copying a published Schedule", async () => {
+    const destination = { ...schedule, id: "00000000-0000-4000-8000-000000000402", period_start: "2026-10-01", period_end: "2026-10-31" };
+    const draft = { ...revision, id: "00000000-0000-4000-8000-000000000502", schedule_id: destination.id, status: "draft", submitted_at: null, submitted_by: null, approved_at: null, approved_by: null, published_at: null, published_by: null };
+    vi.mocked(findScheduleById).mockResolvedValue({ data: schedule, error: null } as never);
+    vi.mocked(findCurrentPublishedRevision).mockResolvedValue({ data: { ...revision, schedule, entries: [] }, error: null } as never);
+    vi.mocked(createScheduleRecord).mockResolvedValue({ data: destination, error: null } as never);
+    vi.mocked(findRevisions).mockResolvedValue({ data: [draft], error: null } as never);
+
+    await expect(copyScheduleFromPublished({ ...destination, source_schedule_id: schedule.id })).resolves.toMatchObject({ schedule: { id: destination.id }, copied: 0, skipped: 0 });
+    expect(findRevisions).toHaveBeenCalledWith(destination.id);
+    expect(requirePermission).toHaveBeenCalledWith("schedule:update");
   });
 });

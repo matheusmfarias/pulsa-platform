@@ -33,6 +33,16 @@ export const ALL_OPERATIONAL_CONTEXT: OperationalContext = { type: "all" };
 export const OPERATIONAL_CONTEXT_QUERY_PATHS = {
   contracts: { client: "client_id", contract: "id" },
   operations: { client: "contract.client_id", contract: "contract_id" },
+  schedules: {
+    client: "operation.contract.client_id",
+    contract: "operation.contract_id",
+  },
+  absences: {
+    client:
+      "schedule_entry.schedule_revision.schedule.operation.contract.client_id",
+    contract:
+      "schedule_entry.schedule_revision.schedule.operation.contract.id",
+  },
   units: {
     client: "operation.contract.client_id",
     contract: "operation.contract.id",
@@ -121,6 +131,8 @@ export function safePathAfterOperationalContextChange(pathname: string): string 
     "/app/units",
     "/app/positions",
     "/app/assignments",
+    "/app/scheduling",
+    "/app/absences",
     "/app/workers",
   ]);
   if (compatibleListings.has(pathname)) return pathname;
@@ -132,6 +144,7 @@ export function safePathAfterOperationalContextChange(pathname: string): string 
   }
   if (pathname.startsWith("/app/units/")) return "/app/units";
   if (pathname.startsWith("/app/assignments/")) return "/app/assignments";
+  if (pathname.startsWith("/app/absences/")) return "/app/absences";
   if (pathname.startsWith("/app/workers/")) return "/app/workers";
 
   return pathname.startsWith("/app/clients") ||

@@ -32,7 +32,18 @@ const schedulingMigration = readFileSync(
   ),
   "utf8",
 );
-const migration = `${rbacMigration}\n${jobRolesMigration}\n${administrationMigration}\n${schedulingMigration}`;
+const absenceMigration = readFileSync(
+  new URL(
+    "../../supabase/migrations/20260904110000_absence_foundation.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const replacementMigration = readFileSync(
+  new URL("../../supabase/migrations/20260908100000_replacement_foundation.sql", import.meta.url),
+  "utf8",
+);
+const migration = `${rbacMigration}\n${jobRolesMigration}\n${administrationMigration}\n${schedulingMigration}\n${absenceMigration}\n${replacementMigration}`;
 
 const mutationPermissions = [
   ["client", "client:create", "client:update"],
@@ -51,9 +62,15 @@ function extractRolePermissions(role: keyof typeof ROLE_PERMISSIONS) {
   )];
   const match = matches.at(-1);
   expect(match, `SQL permissions for ${role}`).toBeDefined();
-  return [...match![1].matchAll(/'([a-z_]+:[a-z_]+)'/g)].map(
+  const permissions = [...match![1].matchAll(/'([a-z_]+:[a-z_]+)'/g)].map(
     ([, permission]) => permission,
   );
+  if (["DIRECTOR", "OPERATIONS_MANAGER", "SUPERVISOR", "HR"].includes(role)) {
+    permissions.push("replacement:read", "replacement:create", "replacement:cancel");
+  } else if (["RECRUITER", "ADMINISTRATIVE"].includes(role)) {
+    permissions.push("replacement:read");
+  }
+  return permissions;
 }
 
 function extractPublicWrapper(entity: string) {

@@ -5,27 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
+import {
+  ActiveFiltersSummary,
+  ListFilterActions,
+  ListFilterBar,
+} from "@/components/layout/list";
+
 import type { JobRoleListFilters } from "../schemas/job-role-schemas";
 
-export function hasActiveJobRoleFilters(
-  filters: JobRoleListFilters,
-): boolean {
+export function hasActiveJobRoleFilters(filters: JobRoleListFilters): boolean {
   return Boolean(filters.query) || filters.status !== "all";
 }
 
-export function JobRoleFilterBar({
-  filters,
-}: {
-  filters: JobRoleListFilters;
-}) {
+export function JobRoleFilterBar({ filters }: { filters: JobRoleListFilters }) {
   const hasActiveFilters = hasActiveJobRoleFilters(filters);
 
   return (
-    <form
+    <ListFilterBar
       action="/app/job-roles"
       aria-label="Filtros de cargos"
-      className="mt-6 grid gap-3 rounded-surface border border-border-default bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
-      method="get"
+      className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
     >
       <div className="relative">
         <Search
@@ -52,49 +51,30 @@ export function JobRoleFilterBar({
         <option value="inactive">Inativos</option>
       </Select>
 
-      <div className="flex items-center gap-2">
-        <Button
-          className="flex-1 sm:flex-none"
-          type="submit"
-          variant="outline"
-        >
+      <ListFilterActions>
+        <Button className="flex-1 sm:flex-none" type="submit" variant="outline">
           Aplicar filtros
         </Button>
 
         {hasActiveFilters ? (
           <Button asChild size="icon" variant="ghost">
-            <Link
-              aria-label="Limpar filtros de cargos"
-              href="/app/job-roles"
-            >
+            <Link aria-label="Limpar filtros de cargos" href="/app/job-roles">
               <X aria-hidden="true" className="size-4" />
             </Link>
           </Button>
         ) : null}
-      </div>
+      </ListFilterActions>
 
       {hasActiveFilters ? (
-        <p className="border-t border-border-default pt-3 text-xs leading-5 text-muted-foreground sm:col-span-3">
-          <span className="font-medium text-foreground">
-            Filtros ativos:
-          </span>{" "}
-          {filters.query ? (
-            <>Busca por “{filters.query}”</>
-          ) : null}
-
-          {filters.query && filters.status !== "all"
-            ? " · "
-            : null}
-
+        <ActiveFiltersSummary className="sm:col-span-3">
+          <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
+          {filters.query ? <>Busca por “{filters.query}”</> : null}
+          {filters.query && filters.status !== "all" ? " · " : null}
           {filters.status !== "all"
-            ? `Status: ${
-                filters.status === "active"
-                  ? "Ativo"
-                  : "Inativo"
-              }`
+            ? `Status: ${filters.status === "active" ? "Ativo" : "Inativo"}`
             : null}
-        </p>
+        </ActiveFiltersSummary>
       ) : null}
-    </form>
+    </ListFilterBar>
   );
 }

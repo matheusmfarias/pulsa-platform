@@ -11,6 +11,8 @@ export const AUTHORIZATION_ENTITIES = [
   "worker",
   "assignment",
   "schedule",
+  "absence",
+  "replacement",
   "organization_member",
   "audit",
 ] as const;
@@ -24,21 +26,38 @@ export const SCHEDULE_AUTHORIZATION_ACTIONS = [
   "approve",
   "publish",
 ] as const;
+export const ABSENCE_AUTHORIZATION_ACTIONS = ["read", "create", "cancel"] as const;
+export const REPLACEMENT_AUTHORIZATION_ACTIONS = [
+  "read",
+  "create",
+  "cancel",
+] as const;
 
 export type AuthorizationEntity = (typeof AUTHORIZATION_ENTITIES)[number];
 export type AuthorizationAction = (typeof AUTHORIZATION_ACTIONS)[number];
 export type ScheduleAuthorizationAction =
   (typeof SCHEDULE_AUTHORIZATION_ACTIONS)[number];
-type StandardAuthorizationEntity = Exclude<AuthorizationEntity, "schedule">;
+export type AbsenceAuthorizationAction =
+  (typeof ABSENCE_AUTHORIZATION_ACTIONS)[number];
+export type ReplacementAuthorizationAction =
+  (typeof REPLACEMENT_AUTHORIZATION_ACTIONS)[number];
+type StandardAuthorizationEntity = Exclude<
+  AuthorizationEntity,
+  "schedule" | "absence" | "replacement"
+>;
 export type Permission =
   | `${StandardAuthorizationEntity}:${AuthorizationAction}`
-  | `schedule:${ScheduleAuthorizationAction}`;
+  | `schedule:${ScheduleAuthorizationAction}`
+  | `absence:${AbsenceAuthorizationAction}`
+  | `replacement:${ReplacementAuthorizationAction}`;
 
 const OPERATIONAL_ENTITIES = AUTHORIZATION_ENTITIES.filter(
   (entity) =>
     entity !== "organization_member" &&
     entity !== "audit" &&
-    entity !== "schedule",
+    entity !== "schedule" &&
+    entity !== "absence" &&
+    entity !== "replacement",
 );
 
 const ALL_OPERATIONAL_PERMISSIONS = OPERATIONAL_ENTITIES.flatMap((entity) =>
@@ -53,10 +72,19 @@ const ALL_SCHEDULE_PERMISSIONS = SCHEDULE_AUTHORIZATION_ACTIONS.map(
   (action) => `schedule:${action}` as Permission,
 );
 
+const ALL_ABSENCE_PERMISSIONS = ABSENCE_AUTHORIZATION_ACTIONS.map(
+  (action) => `absence:${action}` as Permission,
+);
+const ALL_REPLACEMENT_PERMISSIONS = REPLACEMENT_AUTHORIZATION_ACTIONS.map(
+  (action) => `replacement:${action}` as Permission,
+);
+
 export const ROLE_PERMISSIONS = {
   DIRECTOR: [
     ...ALL_OPERATIONAL_PERMISSIONS,
     ...ALL_SCHEDULE_PERMISSIONS,
+    ...ALL_ABSENCE_PERMISSIONS,
+    ...ALL_REPLACEMENT_PERMISSIONS,
     "organization_member:read",
     "organization_member:update",
     "audit:read",
@@ -85,6 +113,8 @@ export const ROLE_PERMISSIONS = {
     "assignment:create",
     "assignment:update",
     ...ALL_SCHEDULE_PERMISSIONS,
+    ...ALL_ABSENCE_PERMISSIONS,
+    ...ALL_REPLACEMENT_PERMISSIONS,
   ],
   SUPERVISOR: [
     "client:read",
@@ -98,6 +128,8 @@ export const ROLE_PERMISSIONS = {
     "worker:read",
     "assignment:read",
     ...ALL_SCHEDULE_PERMISSIONS,
+    ...ALL_ABSENCE_PERMISSIONS,
+    ...ALL_REPLACEMENT_PERMISSIONS,
   ],
   HR: [
     ...OPERATIONAL_READ_PERMISSIONS,
@@ -105,13 +137,22 @@ export const ROLE_PERMISSIONS = {
     "worker:update",
     "assignment:update",
     ...ALL_SCHEDULE_PERMISSIONS,
+    ...ALL_ABSENCE_PERMISSIONS,
+    ...ALL_REPLACEMENT_PERMISSIONS,
   ],
   RECRUITER: [
     ...OPERATIONAL_READ_PERMISSIONS,
     "worker:create",
     "schedule:read",
+    "absence:read",
+    "replacement:read",
   ],
-  ADMINISTRATIVE: [...OPERATIONAL_READ_PERMISSIONS, "schedule:read"],
+  ADMINISTRATIVE: [
+    ...OPERATIONAL_READ_PERMISSIONS,
+    "schedule:read",
+    "absence:read",
+    "replacement:read",
+  ],
 } satisfies Record<OrganizationRole, readonly Permission[]>;
 
 export type AuthorizationContext = { role: OrganizationRole };

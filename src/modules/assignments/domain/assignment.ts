@@ -29,6 +29,7 @@ export type AssignmentWithContext = Assignment & {
     unit: {
       id: string;
       name: string;
+      timezone: string;
       operation: {
         id: string;
         name: string;

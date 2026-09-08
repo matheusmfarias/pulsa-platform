@@ -7,6 +7,12 @@ import { Select } from "@/components/ui/select";
 
 import type { ClientListFilters } from "../schemas/client-schemas";
 
+import {
+  ActiveFiltersSummary,
+  ListFilterActions,
+  ListFilterBar,
+} from "@/components/layout/list";
+
 export function hasActiveClientFilters(filters: ClientListFilters): boolean {
   return Boolean(filters.query) || filters.status !== "all";
 }
@@ -15,11 +21,10 @@ export function ClientFilterBar({ filters }: { filters: ClientListFilters }) {
   const hasActiveFilters = hasActiveClientFilters(filters);
 
   return (
-    <form
+    <ListFilterBar
       action="/app/clients"
       aria-label="Filtros de clientes"
-      className="mt-6 grid gap-3 rounded-surface border border-border-default bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
-      method="get"
+      className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
     >
       <div className="relative">
         <Search
@@ -46,7 +51,7 @@ export function ClientFilterBar({ filters }: { filters: ClientListFilters }) {
         <option value="inactive">Inativos</option>
       </Select>
 
-      <div className="flex items-center gap-2">
+      <ListFilterActions>
         <Button className="flex-1 sm:flex-none" type="submit" variant="outline">
           Aplicar filtros
         </Button>
@@ -58,18 +63,18 @@ export function ClientFilterBar({ filters }: { filters: ClientListFilters }) {
             </Link>
           </Button>
         ) : null}
-      </div>
+      </ListFilterActions>
 
       {hasActiveFilters ? (
-        <p className="border-t border-border-default pt-3 text-xs leading-5 text-muted-foreground sm:col-span-3">
+        <ActiveFiltersSummary className="sm:col-span-3">
           <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
           {filters.query ? <>Busca por “{filters.query}”</> : null}
           {filters.query && filters.status !== "all" ? " · " : null}
           {filters.status !== "all"
             ? `Status: ${filters.status === "active" ? "Ativo" : "Inativo"}`
             : null}
-        </p>
+        </ActiveFiltersSummary>
       ) : null}
-    </form>
+    </ListFilterBar>
   );
 }

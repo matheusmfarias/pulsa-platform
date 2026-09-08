@@ -26,6 +26,10 @@ export const createScheduleSchema = z
     message: "O fim do período não pode anteceder o início.",
   });
 
+export const copyScheduleSchema = createScheduleSchema.extend({
+  source_schedule_id: scheduleIdSchema,
+});
+
 const scheduleEntryFields = z.object({
   schedule_revision_id: scheduleRevisionIdSchema,
   assignment_id: z.uuid("Assignment inválida."),
@@ -69,5 +73,6 @@ export const updateScheduleEntrySchema = scheduleEntryFields
   .superRefine(validateEntryTiming);
 
 export type CreateScheduleInput = z.infer<typeof createScheduleSchema>;
+export type CopyScheduleInput = z.infer<typeof copyScheduleSchema>;
 export type ScheduleEntryInput = z.infer<typeof scheduleEntryInputSchema>;
 export type UpdateScheduleEntryInput = z.infer<typeof updateScheduleEntrySchema>;

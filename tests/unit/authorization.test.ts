@@ -23,7 +23,7 @@ describe("authorization", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("implements representative entries from the role matrix", () => {
-    expect(ROLE_PERMISSIONS.DIRECTOR).toHaveLength(33);
+    expect(ROLE_PERMISSIONS.DIRECTOR).toHaveLength(39);
     expect(can({ role: "DIRECTOR" }, "organization_member:read")).toBe(true);
     expect(can({ role: "DIRECTOR" }, "organization_member:update")).toBe(true);
     expect(can({ role: "DIRECTOR" }, "audit:read")).toBe(true);
@@ -49,6 +49,21 @@ describe("authorization", () => {
     expect(can({ role: "RECRUITER" }, "schedule:read")).toBe(true);
     expect(can({ role: "RECRUITER" }, "schedule:create")).toBe(false);
     expect(can({ role: "ADMINISTRATIVE" }, "schedule:read")).toBe(true);
+    for (const role of [
+      "DIRECTOR",
+      "OPERATIONS_MANAGER",
+      "SUPERVISOR",
+      "HR",
+    ] as const) {
+      expect(can({ role }, "absence:read")).toBe(true);
+      expect(can({ role }, "absence:create")).toBe(true);
+      expect(can({ role }, "absence:cancel")).toBe(true);
+    }
+    for (const role of ["RECRUITER", "ADMINISTRATIVE"] as const) {
+      expect(can({ role }, "absence:read")).toBe(true);
+      expect(can({ role }, "absence:create")).toBe(false);
+      expect(can({ role }, "absence:cancel")).toBe(false);
+    }
   });
 
   it("authorize returns an allowed context", () => {

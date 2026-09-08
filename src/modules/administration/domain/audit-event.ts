@@ -12,6 +12,8 @@ export const AUDIT_ENTITY_TYPES = [
   "worker",
   "assignment",
   "organization_member",
+  "absence",
+  "replacement",
 ] as const;
 
 export const AUDIT_ACTIONS = [
@@ -19,6 +21,7 @@ export const AUDIT_ACTIONS = [
   "update",
   "status_change",
   "membership_change",
+  "cancel",
 ] as const;
 
 export const auditEntityTypeSchema = z.enum(AUDIT_ENTITY_TYPES);
@@ -83,6 +86,8 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   worker: "Colaborador",
   assignment: "Alocação",
   organization_member: "Membership",
+  absence: "Ausência",
+  replacement: "Substituição",
 };
 
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
@@ -90,6 +95,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   update: "Atualização",
   status_change: "Mudança de status",
   membership_change: "Mudança de membership",
+  cancel: "Cancelamento",
 };
 
 export function readAuditMetadata(metadata: Json): {

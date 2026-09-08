@@ -2,6 +2,8 @@
 
 import {
   BriefcaseBusiness,
+  CalendarDays,
+  CalendarX2,
   Building2,
   FileText,
   LayoutDashboard,
@@ -24,7 +26,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { OperationalContextSwitcher } from "@/components/shared/operational-context-switcher";
@@ -113,6 +115,18 @@ export const authenticatedNavigation: NavigationGroup[] = [
         icon: UserRoundCheck,
         label: "Alocações",
         matches: matchesResource("/app/assignments"),
+      },
+      {
+        href: "/app/scheduling",
+        icon: CalendarDays,
+        label: "Escalas",
+        matches: matchesResource("/app/scheduling"),
+      },
+      {
+        href: "/app/absences",
+        icon: CalendarX2,
+        label: "Ausências",
+        matches: matchesResource("/app/absences"),
       },
     ],
   },

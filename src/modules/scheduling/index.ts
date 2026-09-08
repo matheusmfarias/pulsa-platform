@@ -1,4 +1,12 @@
 export * from "./domain/scheduling";
+export * from "./domain/weekly-schedule";
 export * from "./schemas/scheduling-schemas";
 export * from "./services/repository-errors";
 export * from "./services/scheduling-services";
+export { copyScheduleEntriesToPeriod, copyScheduleEntryToDays } from "./services/schedule-copy";
+export { ScheduleForm } from "./components/schedule-form";
+export { ScheduleRevisionActions, scheduleRevisionActionsFor } from "./components/schedule-revision-actions";
+export { ScheduleStatusBadge } from "./components/schedule-status-badge";
+export { ScheduleTable } from "./components/schedule-table";
+export { ScheduleWeekEditor } from "./components/schedule-week-editor";
+export { ScheduleWorkerView, entriesForScheduleDay, groupEntriesByWorker } from "./components/schedule-worker-view";

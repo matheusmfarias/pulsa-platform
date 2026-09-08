@@ -6,6 +6,7 @@ export const scheduleRevisionStatusSchema = z.enum([
   "approved",
   "published",
 ]);
+export type ScheduleRevisionStatus = z.infer<typeof scheduleRevisionStatusSchema>;
 
 export const scheduleSchema = z.object({
   id: z.uuid(),
@@ -46,6 +47,27 @@ export const scheduleEntrySchema = z.object({
 });
 
 export const scheduleEntryWithContextSchema = scheduleEntrySchema.extend({
+  absences: z
+    .array(
+      z.object({
+        id: z.uuid(),
+        reason: z.enum([
+          "sick",
+          "medical_certificate",
+          "personal",
+          "no_show",
+          "other",
+        ]),
+        status: z.enum(["reported", "cancelled"]),
+        replacements: z.array(z.object({
+          id: z.uuid(),
+          status: z.enum(["active", "cancelled"]),
+          replacement_assignment_id: z.uuid(),
+          replacement_assignment: z.object({ worker: z.object({ id: z.uuid(), full_name: z.string() }) }),
+        })).optional(),
+      }),
+    )
+    .optional(),
   assignment: z.object({
     id: z.uuid(),
     worker_id: z.uuid(),
@@ -77,4 +99,36 @@ export type Schedule = z.infer<typeof scheduleSchema>;
 export type ScheduleRevision = z.infer<typeof scheduleRevisionSchema>;
 export type ScheduleEntry = z.infer<typeof scheduleEntrySchema>;
 export type ScheduleEntryWithContext = z.infer<typeof scheduleEntryWithContextSchema>;
+
+export function activeAbsenceForScheduleEntry(entry: ScheduleEntryWithContext) {
+  return entry.absences?.find((absence) => absence.status === "reported") ?? null;
+}
+
+export function activeReplacementForAbsence(
+  absence: NonNullable<ReturnType<typeof activeAbsenceForScheduleEntry>>,
+) {
+  return absence.replacements?.find((replacement) => replacement.status === "active") ?? null;
+}
+
 export type ScheduleRevisionWithEntries = z.infer<typeof scheduleRevisionWithEntriesSchema>;
+
+export const SCHEDULE_REVISION_STATUS_LABELS: Record<ScheduleRevisionStatus, string> = {
+  draft: "Rascunho",
+  pending_approval: "Aguardando aprovação",
+  approved: "Aprovada",
+  published: "Publicada",
+};
+
+export type ScheduleOverview = Schedule & {
+  operation: { id: string; name: string };
+  latestRevision: ScheduleRevision | null;
+};
+
+export function selectScheduleWorkRevision(
+  revisions: ScheduleRevision[],
+): ScheduleRevision | null {
+  const workingRevision = revisions.find((revision) =>
+    ["draft", "pending_approval", "approved"].includes(revision.status),
+  );
+  return workingRevision ?? revisions.find((revision) => revision.status === "published") ?? null;
+}
