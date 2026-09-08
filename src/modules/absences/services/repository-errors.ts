@@ -27,6 +27,12 @@ export function throwAbsenceRepositoryError(
   if (message.includes("Only a reported Absence can be cancelled")) {
     throw new AppError("CONFLICT", "A ausência já está cancelada.");
   }
+  if (message.includes("Cancele a substituição ativa antes de cancelar a ausência.")) {
+    throw new AppError(
+      "CONFLICT",
+      "Cancele a substituição ativa antes de cancelar a ausência.",
+    );
+  }
   if (error.code === "P0002") {
     throw new AppError("NOT_FOUND", "Ausência ou entrada de escala não encontrada.");
   }

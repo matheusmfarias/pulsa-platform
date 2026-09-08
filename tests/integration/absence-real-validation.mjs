@@ -123,6 +123,19 @@ try {
   if (entryError) failAt("create ScheduleEntry fixture", entryError);
   entry = createdEntry;
 
+  const { error: submitError } = await director.rpc("submit_schedule_revision", {
+    schedule_revision_id: revision.id,
+  });
+  if (submitError) failAt("submit ScheduleRevision fixture", submitError);
+  const { error: approveError } = await director.rpc("approve_schedule_revision", {
+    schedule_revision_id: revision.id,
+  });
+  if (approveError) failAt("approve ScheduleRevision fixture", approveError);
+  const { error: publishError } = await director.rpc("publish_schedule_revision", {
+    schedule_revision_id: revision.id,
+  });
+  if (publishError) failAt("publish ScheduleRevision fixture", publishError);
+
   const { data: createdAbsence, error: absenceError } = await director.rpc(
     "create_absence",
     {
