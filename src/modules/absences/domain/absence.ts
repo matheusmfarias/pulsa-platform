@@ -85,9 +85,6 @@ export function isAbsenceWithoutCoverage(absence: AbsenceWithContext) {
   return absence.status === "reported" && !absence.replacements?.some((replacement) => replacement.status === "active");
 }
 
-export function sortAbsencesWithoutCoverage(absences: AbsenceWithContext[]) {
-  return [...absences].filter(isAbsenceWithoutCoverage).sort((left, right) => left.schedule_entry.starts_at.localeCompare(right.schedule_entry.starts_at));
-}
 
 export const ABSENCE_REASON_LABELS: Record<AbsenceReason, string> = {
   sick: "Doença",

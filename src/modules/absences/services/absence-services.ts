@@ -11,7 +11,6 @@ import {
   type Absence,
   type AbsenceWithContext,
 } from "../domain/absence";
-import { isAbsenceWithoutCoverage } from "../domain/absence";
 import {
   cancelAbsenceRecord,
   findAbsenceById,
@@ -52,15 +51,12 @@ export async function getAbsenceById(id: unknown): Promise<Absence> {
 
 export async function listAbsences(
   operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
-  options: { withoutCoverage?: boolean } = {},
+  options: { withoutCoverage?: boolean; limit?: number } = {},
 ): Promise<AbsenceWithContext[]> {
   const { organizationId } = await requirePermission("absence:read");
-  const { data, error } = await findAbsences(organizationId, operationalContext);
+  const { data, error } = await findAbsences(organizationId, operationalContext, options);
   if (error) throwAbsenceRepositoryError(error, "list_absences");
-  const absences = (data ?? []).map((row) => absenceWithContextSchema.parse(row));
-  return options.withoutCoverage
-    ? absences.filter(isAbsenceWithoutCoverage).sort((left, right) => left.schedule_entry.starts_at.localeCompare(right.schedule_entry.starts_at))
-    : absences;
+  return (data ?? []).map((row) => absenceWithContextSchema.parse(row));
 }
 
 export async function getAbsenceDetailsById(

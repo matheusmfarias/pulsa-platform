@@ -29,7 +29,7 @@ import {
   TableScrollArea,
 } from "@/components/ui/table";
 import { resolveOperationalContext } from "@/modules/operational-context";
-import { listAbsences, sortAbsencesWithoutCoverage } from "@/modules/absences";
+import { listAbsences } from "@/modules/absences";
 import { getOperationalOverview } from "@/modules/overview/operational-overview";
 import { toPublicErrorMessage } from "@/shared/errors";
 
@@ -39,7 +39,7 @@ export default async function InternalHomePage() {
 
   try {
     const { context } = await resolveOperationalContext();
-    [overview, uncoveredAbsences] = await Promise.all([getOperationalOverview(context), listAbsences(context).then(sortAbsencesWithoutCoverage)]);
+    [overview, uncoveredAbsences] = await Promise.all([getOperationalOverview(context), listAbsences(context, { withoutCoverage: true, limit: 3 })]);
   } catch (error) {
     return (
       <PageShell>

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { authenticatedNavigation } from "@/components/shared/authenticated-navigation";
 import { OPERATIONAL_CONTEXT_QUERY_PATHS, applyOperationalContextFilter } from "@/modules/operational-context";
-import { scheduleRevisionActionsFor, selectScheduleWorkRevision } from "@/modules/scheduling";
+import { canRegisterAbsenceOnRevision, scheduleRevisionActionsFor, selectOfficialPublishedRevision, selectScheduleRevision, selectScheduleWorkRevision } from "@/modules/scheduling";
 
 const revision = (version: number, status: "draft" | "pending_approval" | "approved" | "published") => ({
   id: `00000000-0000-4000-8000-000000000${version.toString().padStart(3, "0")}`,
@@ -34,6 +34,21 @@ describe("Scheduling Backoffice", () => {
   it("prefers the most recent working revision before the published history", () => {
     expect(selectScheduleWorkRevision([revision(3, "draft"), revision(2, "published"), revision(1, "published")])?.version).toBe(3);
     expect(selectScheduleWorkRevision([revision(2, "published"), revision(1, "published")])?.version).toBe(2);
+  });
+
+  it("opens the requested official published revision even when a draft exists", () => {
+    const revisions = [revision(3, "draft"), revision(2, "published"), revision(1, "published")];
+    const official = selectOfficialPublishedRevision(revisions);
+    expect(selectScheduleRevision(revisions, official?.id)?.version).toBe(2);
+    expect(selectScheduleRevision(revisions)?.version).toBe(3);
+  });
+
+  it("registers Absence only on the greatest published revision", () => {
+    const revisions = [revision(4, "draft"), revision(3, "published"), revision(2, "published")];
+    expect(canRegisterAbsenceOnRevision(true, revisions[1], revisions)).toBe(true);
+    expect(canRegisterAbsenceOnRevision(true, revisions[2], revisions)).toBe(false);
+    expect(canRegisterAbsenceOnRevision(true, revisions[0], revisions)).toBe(false);
+    expect(canRegisterAbsenceOnRevision(false, revisions[1], revisions)).toBe(false);
   });
 
   it("only exposes lifecycle actions allowed by permissions", () => {

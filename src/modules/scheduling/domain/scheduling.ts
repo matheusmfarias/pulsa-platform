@@ -132,3 +132,25 @@ export function selectScheduleWorkRevision(
   );
   return workingRevision ?? revisions.find((revision) => revision.status === "published") ?? null;
 }
+
+export function selectScheduleRevision(
+  revisions: ScheduleRevision[],
+  requestedRevisionId?: string,
+) {
+  return revisions.find((revision) => revision.id === requestedRevisionId) ??
+    selectScheduleWorkRevision(revisions);
+}
+
+export function selectOfficialPublishedRevision(revisions: ScheduleRevision[]) {
+  return revisions
+    .filter((revision) => revision.status === "published")
+    .sort((left, right) => right.version - left.version)[0] ?? null;
+}
+
+export function canRegisterAbsenceOnRevision(
+  hasPermission: boolean,
+  revision: ScheduleRevision | null,
+  revisions: ScheduleRevision[],
+) {
+  return hasPermission && revision?.id === selectOfficialPublishedRevision(revisions)?.id;
+}

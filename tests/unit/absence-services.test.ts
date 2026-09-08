@@ -145,6 +145,26 @@ describe("Absence services", () => {
     expect(requirePermission).toHaveBeenNthCalledWith(1, "absence:read");
     expect(requirePermission).toHaveBeenNthCalledWith(2, "absence:read");
     expect(findAbsenceById).toHaveBeenCalledWith(organizationId, absence.id);
-    expect(findAbsences).toHaveBeenCalledWith(organizationId, { type: "all" });
+    expect(findAbsences).toHaveBeenCalledWith(organizationId, { type: "all" }, {});
+  });
+
+  it("delegates uncovered filtering, limit, and OperationalContext to the read model", async () => {
+    const context = {
+      type: "contract" as const,
+      clientId: "00000000-0000-4000-8000-000000000105",
+      contractId: "00000000-0000-4000-8000-000000000106",
+    };
+    vi.mocked(findAbsences).mockResolvedValue({
+      data: [absenceWithContext],
+      error: null,
+    } as never);
+
+    await expect(
+      listAbsences(context, { withoutCoverage: true, limit: 3 }),
+    ).resolves.toEqual([absenceWithContext]);
+    expect(findAbsences).toHaveBeenCalledWith(organizationId, context, {
+      withoutCoverage: true,
+      limit: 3,
+    });
   });
 });

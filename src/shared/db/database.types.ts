@@ -923,6 +923,18 @@ export type Database = {
           worker_id: string
         }[]
       }
+      list_uncovered_absence_ids: {
+        Args: {
+          client_id?: string | null
+          contract_id?: string | null
+          organization_id: string
+          result_limit?: number | null
+        }
+        Returns: {
+          absence_id: string
+          starts_at: string
+        }[]
+      }
       build_audit_metadata: {
         Args: {
           new_row: Json
