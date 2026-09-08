@@ -14,6 +14,7 @@ export const AUTHORIZATION_ENTITIES = [
   "absence",
   "replacement",
   "presence",
+  "worker_access",
   "organization_member",
   "audit",
 ] as const;
@@ -39,6 +40,7 @@ export const PRESENCE_AUTHORIZATION_ACTIONS = [
   "update",
   "cancel",
 ] as const;
+export const WORKER_ACCESS_AUTHORIZATION_ACTIONS = ["read", "manage"] as const;
 
 export type AuthorizationEntity = (typeof AUTHORIZATION_ENTITIES)[number];
 export type AuthorizationAction = (typeof AUTHORIZATION_ACTIONS)[number];
@@ -50,16 +52,19 @@ export type ReplacementAuthorizationAction =
   (typeof REPLACEMENT_AUTHORIZATION_ACTIONS)[number];
 export type PresenceAuthorizationAction =
   (typeof PRESENCE_AUTHORIZATION_ACTIONS)[number];
+export type WorkerAccessAuthorizationAction =
+  (typeof WORKER_ACCESS_AUTHORIZATION_ACTIONS)[number];
 type StandardAuthorizationEntity = Exclude<
   AuthorizationEntity,
-  "schedule" | "absence" | "replacement" | "presence"
+  "schedule" | "absence" | "replacement" | "presence" | "worker_access"
 >;
 export type Permission =
   | `${StandardAuthorizationEntity}:${AuthorizationAction}`
   | `schedule:${ScheduleAuthorizationAction}`
   | `absence:${AbsenceAuthorizationAction}`
   | `replacement:${ReplacementAuthorizationAction}`
-  | `presence:${PresenceAuthorizationAction}`;
+  | `presence:${PresenceAuthorizationAction}`
+  | `worker_access:${WorkerAccessAuthorizationAction}`;
 
 const OPERATIONAL_ENTITIES = AUTHORIZATION_ENTITIES.filter(
   (entity) =>
@@ -68,7 +73,8 @@ const OPERATIONAL_ENTITIES = AUTHORIZATION_ENTITIES.filter(
     entity !== "schedule" &&
     entity !== "absence" &&
     entity !== "replacement" &&
-    entity !== "presence",
+    entity !== "presence" &&
+    entity !== "worker_access",
 );
 
 const ALL_OPERATIONAL_PERMISSIONS = OPERATIONAL_ENTITIES.flatMap((entity) =>
@@ -92,6 +98,9 @@ const ALL_REPLACEMENT_PERMISSIONS = REPLACEMENT_AUTHORIZATION_ACTIONS.map(
 const ALL_PRESENCE_PERMISSIONS = PRESENCE_AUTHORIZATION_ACTIONS.map(
   (action) => `presence:${action}` as Permission,
 );
+const ALL_WORKER_ACCESS_PERMISSIONS = WORKER_ACCESS_AUTHORIZATION_ACTIONS.map(
+  (action) => `worker_access:${action}` as Permission,
+);
 
 export const ROLE_PERMISSIONS = {
   DIRECTOR: [
@@ -100,6 +109,7 @@ export const ROLE_PERMISSIONS = {
     ...ALL_ABSENCE_PERMISSIONS,
     ...ALL_REPLACEMENT_PERMISSIONS,
     ...ALL_PRESENCE_PERMISSIONS,
+    ...ALL_WORKER_ACCESS_PERMISSIONS,
     "organization_member:read",
     "organization_member:update",
     "audit:read",

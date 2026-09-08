@@ -11,7 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { AssignmentStatusBadge } from "@/modules/assignments";
-import { PermissionGate } from "@/modules/authorization";
+import { can, getAuthorizationContext, PermissionGate } from "@/modules/authorization";
+import {
+  getWorkerAccessAdministration,
+  WorkerAccessAdministrationPanel,
+} from "@/modules/worker-access";
 import {
   formatCpf,
   getWorkerOperationalDetail,
@@ -116,6 +120,10 @@ export default async function WorkerDetailsPage({
   }
 
   const { worker, assignments, activeAssignment } = detail;
+  const authorization = await getAuthorizationContext();
+  const workerAccess = can(authorization, "worker_access:read")
+    ? await getWorkerAccessAdministration(worker.id)
+    : null;
 
   return (
     <PageShell>
@@ -177,6 +185,19 @@ export default async function WorkerDetailsPage({
               />
             </dl>
           </DetailSection>
+
+          {workerAccess ? (
+            <DetailSection
+              description="Identidade de acesso do Pulsa Worker. Este vínculo não cria membership interno."
+              id="worker-access"
+              title="Acesso ao Pulsa Worker"
+            >
+              <WorkerAccessAdministrationPanel
+                access={workerAccess}
+                workerId={worker.id}
+              />
+            </DetailSection>
+          ) : null}
 
           <DetailSection
             description="A alocação registra a relação temporal vigente entre o colaborador e um posto."

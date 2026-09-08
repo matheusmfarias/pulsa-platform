@@ -72,6 +72,117 @@ export type Database = {
           },
         ]
       }
+      worker_access_invitations: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          created_by: string
+          expired_at: string | null
+          expires_at: string
+          id: string
+          invitation_email: string
+          invitation_token_hash: string
+          channel: string
+          auth_user_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          worker_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by: string
+          expired_at?: string | null
+          expires_at?: string
+          id?: string
+          invitation_email: string
+          invitation_token_hash: string
+          channel?: string
+          auth_user_id: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          worker_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string
+          expired_at?: string | null
+          expires_at?: string
+          id?: string
+          invitation_email?: string
+          invitation_token_hash?: string
+          channel?: string
+          auth_user_id?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          worker_id?: string
+        }
+        Relationships: []
+      }
+      worker_access_links: {
+        Row: {
+          activated_at: string
+          activated_by: string
+          created_at: string
+          id: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          activated_at?: string
+          activated_by: string
+          created_at?: string
+          id?: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string
+          created_at?: string
+          id?: string
+          invitation_id?: string
+          profile_id?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: []
+      }
       presences: {
         Row: {
           actual_assignment_id: string
@@ -966,6 +1077,101 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_worker_access: {
+        Args: { invitation_token: string }
+        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_worker_access_administration: {
+        Args: { organization_id: string; worker_id: string }
+        Returns: {
+          invitation_email: string | null
+          invitation_expires_at: string | null
+          invitation_id: string | null
+          invitation_status: string | null
+          link_id: string | null
+          link_profile_id: string | null
+          link_status: string | null
+        }[]
+      }
+      get_worker_access_claim: {
+        Args: { invitation_token: string }
+        Returns: {
+          expires_at: string
+          invitation_email: string
+          worker_name: string
+        }[]
+      }
+      invite_worker_access: {
+        Args: {
+          organization_id: string
+          target_email: string
+          invitation_token_hash: string
+          target_auth_user_id: string
+          worker_id: string
+        }
+        Returns: Database["public"]["Tables"]["worker_access_invitations"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_invitations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      resolve_worker_access: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          organization_id: string
+          user_id: string
+          worker_id: string
+          worker_name: string
+        }[]
+      }
+      resume_worker_access: {
+        Args: { organization_id: string; worker_id: string }
+        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      revoke_worker_access: {
+        Args: { organization_id: string; reason: string; worker_id: string }
+        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      revoke_worker_access_invitation: {
+        Args: { invitation_id: string; organization_id: string; reason: string }
+        Returns: Database["public"]["Tables"]["worker_access_invitations"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_invitations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      suspend_worker_access: {
+        Args: { organization_id: string; reason: string; worker_id: string }
+        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancel_presence: {
         Args: {
           idempotency_key: string

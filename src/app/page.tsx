@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { getAuthenticatedUser, LoginForm } from "@/modules/auth";
+import { getAuthorizationContext } from "@/modules/authorization";
+import { getOptionalWorkerAccess } from "@/modules/worker-access";
+import { isAppError } from "@/shared/errors";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +12,14 @@ export default async function LoginPage() {
   const user = await getAuthenticatedUser();
 
   if (user) {
-    redirect("/app");
+    try {
+      await getAuthorizationContext();
+      redirect("/app");
+    } catch (error) {
+      if (!isAppError(error) || error.code !== "AUTHORIZATION") throw error;
+    }
+
+    if (await getOptionalWorkerAccess()) redirect("/worker");
   }
 
   return (

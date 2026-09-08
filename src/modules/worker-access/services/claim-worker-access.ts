@@ -1,0 +1,43 @@
+import { AppError } from "@/shared/errors";
+
+import type { WorkerAccessClaim } from "../domain/worker-access";
+import {
+  claimWorkerAccessRecord,
+  findWorkerAccessClaimRecord,
+} from "../repositories/worker-access-repository";
+import {
+  workerAccessClaimRowSchema,
+  workerInvitationTokenSchema,
+  workerAccessLinkRowSchema,
+} from "../schemas/worker-access-schemas";
+import { throwWorkerAccessRepositoryError } from "./repository-errors";
+
+export async function getWorkerAccessClaim(
+  invitationToken: unknown,
+): Promise<WorkerAccessClaim | null> {
+  const token = workerInvitationTokenSchema.safeParse(invitationToken);
+  if (!token.success) return null;
+  const { data, error } = await findWorkerAccessClaimRecord(token.data);
+  if (error) throwWorkerAccessRepositoryError(error, "get_worker_access_claim");
+  if (!data) return null;
+
+  const parsed = workerAccessClaimRowSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new AppError("INFRASTRUCTURE", "Convite Worker inválido.");
+  }
+  return {
+    workerName: parsed.data.worker_name,
+    invitationEmail: parsed.data.invitation_email,
+    expiresAt: parsed.data.expires_at,
+  };
+}
+
+export async function claimWorkerAccess(invitationToken: unknown): Promise<void> {
+  const token = workerInvitationTokenSchema.safeParse(invitationToken);
+  if (!token.success) throw new AppError("AUTHORIZATION", "Convite inválido.");
+  const { data, error } = await claimWorkerAccessRecord(token.data);
+  if (error) throwWorkerAccessRepositoryError(error, "claim_worker_access");
+  if (!workerAccessLinkRowSchema.safeParse(data).success) {
+    throw new AppError("INFRASTRUCTURE", "Vínculo Worker inválido.");
+  }
+}

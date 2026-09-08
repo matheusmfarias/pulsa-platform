@@ -47,7 +47,11 @@ const presenceMigration = readFileSync(
   new URL("../../supabase/migrations/20260908140000_presence_foundation.sql", import.meta.url),
   "utf8",
 );
-const migration = `${rbacMigration}\n${jobRolesMigration}\n${administrationMigration}\n${schedulingMigration}\n${absenceMigration}\n${replacementMigration}\n${presenceMigration}`;
+const workerAccessMigration = readFileSync(
+  new URL("../../supabase/migrations/20260908160000_worker_access_foundation.sql", import.meta.url),
+  "utf8",
+);
+const migration = `${rbacMigration}\n${jobRolesMigration}\n${administrationMigration}\n${schedulingMigration}\n${absenceMigration}\n${replacementMigration}\n${presenceMigration}\n${workerAccessMigration}`;
 
 const mutationPermissions = [
   ["client", "client:create", "client:update"],

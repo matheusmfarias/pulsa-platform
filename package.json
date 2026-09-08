@@ -19,6 +19,7 @@
     "test:history:real": "node tests/integration/operational-history-real-validation.mjs",
     "test:rbac:real": "node tests/integration/rbac-hardening-real-validation.mjs",
     "test:administration:real": "node tests/integration/administration-real-validation.mjs",
+    "test:worker-access:real": "node tests/integration/worker-access-real-validation.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {

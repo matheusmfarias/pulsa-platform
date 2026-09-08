@@ -7,6 +7,8 @@ import {
 import { getAuthenticatedUser } from "@/modules/auth";
 import { can, getAuthorizationContext } from "@/modules/authorization";
 import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOptionalWorkerAccess } from "@/modules/worker-access";
+import { isAppError } from "@/shared/errors";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +20,17 @@ export default async function AuthenticatedLayout({
   if (!user) redirect("/");
 
   const email = user.email ?? "Usuário autenticado";
-  const [authorization, operationalContextState] = await Promise.all([
-    getAuthorizationContext(),
-    resolveOperationalContext(),
-  ]);
+  let authorization;
+  try {
+    authorization = await getAuthorizationContext();
+  } catch (error) {
+    if (isAppError(error) && error.code === "AUTHORIZATION") {
+      if (await getOptionalWorkerAccess()) redirect("/worker");
+      redirect("/");
+    }
+    throw error;
+  }
+  const operationalContextState = await resolveOperationalContext();
   const showAdministration = can(authorization, "organization_member:read");
 
   return (
