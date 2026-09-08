@@ -40,4 +40,16 @@ describe("administration domain", () => {
       changes: ["role"],
     });
   });
+
+  it("accepts Presence audit events", () => {
+    expect(
+      auditListFiltersSchema.parse({
+        entityType: "presence",
+        action: "record_arrival",
+      }),
+    ).toMatchObject({
+      entityType: "presence",
+      action: "record_arrival",
+    });
+  });
 });

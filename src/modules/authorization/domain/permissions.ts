@@ -13,6 +13,7 @@ export const AUTHORIZATION_ENTITIES = [
   "schedule",
   "absence",
   "replacement",
+  "presence",
   "organization_member",
   "audit",
 ] as const;
@@ -32,6 +33,12 @@ export const REPLACEMENT_AUTHORIZATION_ACTIONS = [
   "create",
   "cancel",
 ] as const;
+export const PRESENCE_AUTHORIZATION_ACTIONS = [
+  "read",
+  "create",
+  "update",
+  "cancel",
+] as const;
 
 export type AuthorizationEntity = (typeof AUTHORIZATION_ENTITIES)[number];
 export type AuthorizationAction = (typeof AUTHORIZATION_ACTIONS)[number];
@@ -41,15 +48,18 @@ export type AbsenceAuthorizationAction =
   (typeof ABSENCE_AUTHORIZATION_ACTIONS)[number];
 export type ReplacementAuthorizationAction =
   (typeof REPLACEMENT_AUTHORIZATION_ACTIONS)[number];
+export type PresenceAuthorizationAction =
+  (typeof PRESENCE_AUTHORIZATION_ACTIONS)[number];
 type StandardAuthorizationEntity = Exclude<
   AuthorizationEntity,
-  "schedule" | "absence" | "replacement"
+  "schedule" | "absence" | "replacement" | "presence"
 >;
 export type Permission =
   | `${StandardAuthorizationEntity}:${AuthorizationAction}`
   | `schedule:${ScheduleAuthorizationAction}`
   | `absence:${AbsenceAuthorizationAction}`
-  | `replacement:${ReplacementAuthorizationAction}`;
+  | `replacement:${ReplacementAuthorizationAction}`
+  | `presence:${PresenceAuthorizationAction}`;
 
 const OPERATIONAL_ENTITIES = AUTHORIZATION_ENTITIES.filter(
   (entity) =>
@@ -57,7 +67,8 @@ const OPERATIONAL_ENTITIES = AUTHORIZATION_ENTITIES.filter(
     entity !== "audit" &&
     entity !== "schedule" &&
     entity !== "absence" &&
-    entity !== "replacement",
+    entity !== "replacement" &&
+    entity !== "presence",
 );
 
 const ALL_OPERATIONAL_PERMISSIONS = OPERATIONAL_ENTITIES.flatMap((entity) =>
@@ -78,6 +89,9 @@ const ALL_ABSENCE_PERMISSIONS = ABSENCE_AUTHORIZATION_ACTIONS.map(
 const ALL_REPLACEMENT_PERMISSIONS = REPLACEMENT_AUTHORIZATION_ACTIONS.map(
   (action) => `replacement:${action}` as Permission,
 );
+const ALL_PRESENCE_PERMISSIONS = PRESENCE_AUTHORIZATION_ACTIONS.map(
+  (action) => `presence:${action}` as Permission,
+);
 
 export const ROLE_PERMISSIONS = {
   DIRECTOR: [
@@ -85,6 +99,7 @@ export const ROLE_PERMISSIONS = {
     ...ALL_SCHEDULE_PERMISSIONS,
     ...ALL_ABSENCE_PERMISSIONS,
     ...ALL_REPLACEMENT_PERMISSIONS,
+    ...ALL_PRESENCE_PERMISSIONS,
     "organization_member:read",
     "organization_member:update",
     "audit:read",
@@ -115,6 +130,7 @@ export const ROLE_PERMISSIONS = {
     ...ALL_SCHEDULE_PERMISSIONS,
     ...ALL_ABSENCE_PERMISSIONS,
     ...ALL_REPLACEMENT_PERMISSIONS,
+    ...ALL_PRESENCE_PERMISSIONS,
   ],
   SUPERVISOR: [
     "client:read",
@@ -130,6 +146,7 @@ export const ROLE_PERMISSIONS = {
     ...ALL_SCHEDULE_PERMISSIONS,
     ...ALL_ABSENCE_PERMISSIONS,
     ...ALL_REPLACEMENT_PERMISSIONS,
+    ...ALL_PRESENCE_PERMISSIONS,
   ],
   HR: [
     ...OPERATIONAL_READ_PERMISSIONS,
@@ -139,6 +156,7 @@ export const ROLE_PERMISSIONS = {
     ...ALL_SCHEDULE_PERMISSIONS,
     ...ALL_ABSENCE_PERMISSIONS,
     ...ALL_REPLACEMENT_PERMISSIONS,
+    "presence:read",
   ],
   RECRUITER: [
     ...OPERATIONAL_READ_PERMISSIONS,

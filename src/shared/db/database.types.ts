@@ -72,6 +72,132 @@ export type Database = {
           },
         ]
       }
+      presences: {
+        Row: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          corrected_at: string | null
+          corrected_by: string | null
+          correction_reason: string | null
+          created_at: string
+          created_by: string
+          departed_at: string | null
+          id: string
+          organization_id: string
+          replacement_id: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference: string | null
+          status: string
+        }
+        Insert: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          corrected_at?: string | null
+          corrected_by?: string | null
+          correction_reason?: string | null
+          created_at?: string
+          created_by: string
+          departed_at?: string | null
+          id?: string
+          organization_id: string
+          replacement_id?: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference?: string | null
+          status?: string
+        }
+        Update: {
+          actual_assignment_id?: string
+          arrived_at?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          corrected_at?: string | null
+          corrected_by?: string | null
+          correction_reason?: string | null
+          created_at?: string
+          created_by?: string
+          departed_at?: string | null
+          id?: string
+          organization_id?: string
+          replacement_id?: string | null
+          schedule_entry_id?: string
+          source?: string
+          source_reference?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presences_actual_assignment_id_fkey"
+            columns: ["actual_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_corrected_by_fkey"
+            columns: ["corrected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_replacement_id_fkey"
+            columns: ["replacement_id"]
+            isOneToOne: false
+            referencedRelation: "replacements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_schedule_entry_id_fkey"
+            columns: ["schedule_entry_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       replacements: {
         Row: {
           absence_id: string
@@ -840,6 +966,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_presence: {
+        Args: {
+          idempotency_key: string
+          organization_id: string
+          presence_id: string
+          reason: string
+          source?: string
+          source_reference?: string | null
+        }
+        Returns: Database["public"]["Tables"]["presences"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "presences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancel_absence: {
         Args: { absence_id: string; organization_id: string }
         Returns: {
@@ -914,6 +1057,42 @@ export type Database = {
           status: string
         }
         SetofOptions: { from: "*"; to: "replacements"; isOneToOne: true; isSetofReturn: false }
+      }
+      complete_presence: {
+        Args: {
+          departed_at: string
+          idempotency_key: string
+          organization_id: string
+          presence_id: string
+          source?: string
+          source_reference?: string | null
+        }
+        Returns: Database["public"]["Tables"]["presences"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "presences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      correct_presence: {
+        Args: {
+          arrived_at: string
+          departed_at: string | null
+          idempotency_key: string
+          organization_id: string
+          presence_id: string
+          reason: string
+          source?: string
+          source_reference?: string | null
+        }
+        Returns: Database["public"]["Tables"]["presences"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "presences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       list_replacement_candidates: {
         Args: { absence_id: string; organization_id: string }
@@ -1395,6 +1574,23 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      start_presence: {
+        Args: {
+          arrived_at: string
+          idempotency_key: string
+          organization_id: string
+          schedule_entry_id: string
+          source?: string
+          source_reference?: string | null
+        }
+        Returns: Database["public"]["Tables"]["presences"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "presences"
           isOneToOne: true
           isSetofReturn: false
         }

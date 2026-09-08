@@ -23,7 +23,7 @@ describe("authorization", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("implements representative entries from the role matrix", () => {
-    expect(ROLE_PERMISSIONS.DIRECTOR).toHaveLength(39);
+    expect(ROLE_PERMISSIONS.DIRECTOR).toHaveLength(43);
     expect(can({ role: "DIRECTOR" }, "organization_member:read")).toBe(true);
     expect(can({ role: "DIRECTOR" }, "organization_member:update")).toBe(true);
     expect(can({ role: "DIRECTOR" }, "audit:read")).toBe(true);
@@ -63,6 +63,17 @@ describe("authorization", () => {
       expect(can({ role }, "absence:read")).toBe(true);
       expect(can({ role }, "absence:create")).toBe(false);
       expect(can({ role }, "absence:cancel")).toBe(false);
+    }
+    for (const role of ["DIRECTOR", "OPERATIONS_MANAGER", "SUPERVISOR"] as const) {
+      expect(can({ role }, "presence:read")).toBe(true);
+      expect(can({ role }, "presence:create")).toBe(true);
+      expect(can({ role }, "presence:update")).toBe(true);
+      expect(can({ role }, "presence:cancel")).toBe(true);
+    }
+    expect(can({ role: "HR" }, "presence:read")).toBe(true);
+    expect(can({ role: "HR" }, "presence:create")).toBe(false);
+    for (const role of ["RECRUITER", "ADMINISTRATIVE"] as const) {
+      expect(can({ role }, "presence:read")).toBe(false);
     }
   });
 

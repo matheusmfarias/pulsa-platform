@@ -15,6 +15,7 @@
     "test:assignment:real": "node tests/integration/assignment-real-validation.mjs",
     "test:scheduling:real": "node tests/integration/scheduling-real-validation.mjs",
     "test:absence:real": "node tests/integration/absence-real-validation.mjs",
+    "test:presence:real": "node tests/integration/presence-real-validation.mjs",
     "test:history:real": "node tests/integration/operational-history-real-validation.mjs",
     "test:rbac:real": "node tests/integration/rbac-hardening-real-validation.mjs",
     "test:administration:real": "node tests/integration/administration-real-validation.mjs",
