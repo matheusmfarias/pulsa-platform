@@ -33,6 +33,9 @@ export function throwAbsenceRepositoryError(
       "Cancele a substituição ativa antes de cancelar a ausência.",
     );
   }
+  if (message.includes("Absence can only be reported for the current published ScheduleEntry")) {
+    throw new AppError("VALIDATION", "A ausência só pode ser registrada na revisão publicada atual da escala.");
+  }
   if (error.code === "P0002") {
     throw new AppError("NOT_FOUND", "Ausência ou entrada de escala não encontrada.");
   }
