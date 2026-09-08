@@ -1102,6 +1102,52 @@ export type Database = {
           worker_id: string
         }[]
       }
+      list_presence_operational_day: {
+        Args: {
+          target_client_id?: string | null
+          target_contract_id?: string | null
+          target_date: string
+          target_organization_id: string
+        }
+        Returns: {
+          absence_id: string | null
+          absence_reason: string | null
+          actual_assignment_id: string | null
+          actual_worker_id: string | null
+          actual_worker_name: string | null
+          arrived_after_start: boolean
+          arrived_at: string | null
+          client_id: string
+          client_name: string
+          contract_id: string
+          contract_name: string
+          departed_at: string | null
+          departed_before_end: boolean
+          ends_at: string
+          job_role_id: string
+          job_role_name: string
+          operation_id: string
+          operation_name: string
+          operational_status: string
+          original_worker_id: string
+          original_worker_name: string
+          planned_assignment_id: string
+          position_id: string
+          presence_id: string | null
+          presence_status: string | null
+          replacement_assignment_id: string | null
+          replacement_id: string | null
+          replacement_worker_id: string | null
+          replacement_worker_name: string | null
+          schedule_entry_id: string
+          schedule_id: string
+          schedule_revision_id: string
+          starts_at: string
+          unit_id: string
+          unit_name: string
+          unit_timezone: string
+        }[]
+      }
       list_uncovered_absence_ids: {
         Args: {
           client_id?: string | null

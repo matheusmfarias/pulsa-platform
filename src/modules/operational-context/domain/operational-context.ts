@@ -133,6 +133,7 @@ export function safePathAfterOperationalContextChange(pathname: string): string 
     "/app/assignments",
     "/app/scheduling",
     "/app/absences",
+    "/app/presences",
     "/app/workers",
   ]);
   if (compatibleListings.has(pathname)) return pathname;

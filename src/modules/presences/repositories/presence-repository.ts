@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import type { OperationalContext } from "@/modules/operational-context";
 
 import type {
   CancelPresenceInput,
@@ -91,3 +92,20 @@ export async function findPresences(organizationId: string) {
     .order("arrived_at", { ascending: false });
 }
 
+export async function findPresenceOperationalDay(
+  organizationId: string,
+  date: string,
+  operationalContext: OperationalContext,
+) {
+  const supabase = await createServerSupabaseClient();
+  return supabase.rpc("list_presence_operational_day", {
+    target_organization_id: organizationId,
+    target_date: date,
+    target_client_id:
+      operationalContext.type === "all" ? null : operationalContext.clientId,
+    target_contract_id:
+      operationalContext.type === "contract"
+        ? operationalContext.contractId
+        : null,
+  });
+}

@@ -1,12 +1,19 @@
 import { requirePermission } from "@/modules/authorization";
 import { AppError } from "@/shared/errors";
+import type { OperationalContext } from "@/modules/operational-context";
 
 import { presenceSchema, type Presence } from "../domain/presence";
+import {
+  operationalPresenceRowSchema,
+  presenceOperationalDateSchema,
+  type OperationalPresenceRow,
+} from "../domain/operational-presence";
 import {
   cancelPresenceRecord,
   completePresenceRecord,
   correctPresenceRecord,
   findPresenceById,
+  findPresenceOperationalDay,
   findPresences,
   startPresenceRecord,
 } from "../repositories/presence-repository";
@@ -67,3 +74,17 @@ export async function listPresences(): Promise<Presence[]> {
   return (data ?? []).map((row) => presenceSchema.parse(row));
 }
 
+export async function listPresenceOperationalDay(
+  date: unknown,
+  operationalContext: OperationalContext,
+): Promise<OperationalPresenceRow[]> {
+  const validDate = presenceOperationalDateSchema.parse(date);
+  const { organizationId } = await requirePermission("presence:read");
+  const { data, error } = await findPresenceOperationalDay(
+    organizationId,
+    validDate,
+    operationalContext,
+  );
+  if (error) throwPresenceRepositoryError(error, "list_presence_operational_day");
+  return (data ?? []).map((row) => operationalPresenceRowSchema.parse(row));
+}

@@ -1,6 +1,6 @@
 # Pulsa Platform — Operational Presence Domain
 
-Status: proposta de domínio para a Fase 6 — sem implementação
+Status: Fases 6A e 6B implementadas
 
 ## 1. Propósito e fronteira
 
@@ -37,7 +37,7 @@ prova comparecimento.
 `Presence` deve referenciar diretamente:
 
 - uma `ScheduleEntry`, como âncora do compromisso operacional concreto; e
-- uma `performed_assignment_id`, como a `Assignment` da pessoa que efetivamente compareceu.
+- uma `actual_assignment_id`, como a `Assignment` da pessoa que efetivamente compareceu.
 
 Quando o comparecimento decorrer de substituição, deve também referenciar o `Replacement` que
 autorizou aquela troca. O vínculo conceitual é:
@@ -48,7 +48,7 @@ ScheduleEntry (planejado original)
 ├── Absence (exceção, opcional)
 │   └── Replacement (cobertura, opcional)
 └── Presence (realizado)
-    ├── performed_assignment_id
+    ├── actual_assignment_id
     └── replacement_id (somente quando o realizado é o substituto)
 ```
 
@@ -73,7 +73,7 @@ A resolução ocorre transacionalmente no primeiro registro de presença:
    `replacement_assignment_id`;
 5. se houver `Absence` ativa sem `Replacement`, não há Worker efetivamente esperado e a entrada
    está descoberta; não se cria `Presence` até a exceção ser resolvida;
-6. persistir a Assignment resolvida em `performed_assignment_id` e, quando aplicável, o
+6. persistir a Assignment resolvida em `actual_assignment_id` e, quando aplicável, o
    `replacement_id`.
 
 Essa resolução é um **snapshot do fato no momento do registro**, não uma propriedade calculada
@@ -99,7 +99,7 @@ Campos mínimos propostos:
 - `id`;
 - `organization_id`;
 - `schedule_entry_id`;
-- `performed_assignment_id`;
+- `actual_assignment_id`;
 - `replacement_id` (`null` para o Worker original);
 - `status`;
 - `arrived_at`;
@@ -111,7 +111,7 @@ Campos mínimos propostos:
 - `cancelled_at`, `cancelled_by` e `cancellation_reason` quando cancelada.
 
 `organization_id` é mantido como boundary de tenancy/RLS e deve coincidir com a Organization da
-`ScheduleEntry`, da `performed_assignment_id` e do `Replacement`, quando presente.
+`ScheduleEntry`, da `actual_assignment_id` e do `Replacement`, quando presente.
 
 `arrived_at` e `departed_at` são instantes `timestamptz`, persistidos em UTC. Exibição e
 comparação civil usam `Position → Unit.timezone`, como no Scheduling. `recorded_at` é diferente
@@ -190,13 +190,13 @@ autenticação.
 2. Só se inicia `Presence` para uma `ScheduleEntry` de revisão publicada oficial no momento da
    criação.
 3. Existe no máximo uma `Presence` não cancelada por `ScheduleEntry`.
-4. Sem ausência reportada, `performed_assignment_id` é a Assignment original e
+4. Sem ausência reportada, `actual_assignment_id` é a Assignment original e
    `replacement_id` é `null`.
-5. Com ausência reportada e replacement ativo, `performed_assignment_id` é exatamente a
+5. Com ausência reportada e replacement ativo, `actual_assignment_id` é exatamente a
    `replacement_assignment_id` e `replacement_id` aponta para esse replacement.
 6. Ausência reportada e descoberta não aceita `Presence`; a ausência deve ser cancelada ou
    coberta primeiro.
-7. `performed_assignment_id`, `schedule_entry_id` e `replacement_id` são imutáveis depois da
+7. `actual_assignment_id`, `schedule_entry_id` e `replacement_id` são imutáveis depois da
    criação. Erro de identidade exige cancelamento e novo registro.
 8. `arrived_at` é obrigatório; `departed_at`, quando presente, deve ser maior que
    `arrived_at`.
@@ -278,10 +278,10 @@ Estados derivados para a visão, sem criar um novo lifecycle persistido:
 | Sem ausência e sem presença | Worker original | Aguardando confirmação |
 | Ausência reportada, sem replacement | Ninguém | Ausente · descoberto |
 | Ausência reportada, replacement ativo, sem presença | Substituto | Coberto · aguardando confirmação |
-| Presence `present` | `performed_assignment` | Presente |
-| Presence `completed` | `performed_assignment` | Concluído |
-| Chegada após início planejado | `performed_assignment` | Presente · chegada após o previsto |
-| Saída antes do fim planejado | `performed_assignment` | Concluído · saída antes do previsto |
+| Presence `present` | `actual_assignment` | Presente |
+| Presence `completed` | `actual_assignment` | Concluído |
+| Chegada após início planejado | `actual_assignment` | Presente · chegada após o previsto |
+| Saída antes do fim planejado | `actual_assignment` | Concluído · saída antes do previsto |
 
 A visão deve priorizar exceções:
 
@@ -374,6 +374,8 @@ de auditoria permanecem protegidas por `audit:read` e RLS Organization-scoped.
 
 ### 6A — Presence Domain Foundation
 
+Implementada em `20260908140000_presence_foundation.sql` e no módulo `presences`.
+
 - validar este modelo e o vocabulário operacional com Supervisores;
 - criar schema, constraints, lifecycle e proteção histórica;
 - criar permissões fixas, RLS, RPCs e services com `requirePermission()`;
@@ -385,6 +387,11 @@ Critério de saída: o backend consegue afirmar, de forma auditável, qual Assig
 `ScheduleEntry` publicada sem alterar Planned, Exception ou Coverage.
 
 ### 6B — Supervisor Operational View
+
+Implementada por `list_presence_operational_day`, que aplica data civil pela timezone da Unit,
+revisão publicada oficial e filtros de OperationalContext no banco. A rota `/app/presences`
+apresenta resumo diário, esperado versus realizado e usa as RPCs auditadas da 6A para chegada,
+saída, correção e cancelamento.
 
 - criar o read model diário de esperado versus realizado;
 - combinar ScheduleEntry, Absence, Replacement e Presence sem persistir estados derivados;

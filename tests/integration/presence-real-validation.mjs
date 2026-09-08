@@ -20,6 +20,8 @@ const options = { auth: { autoRefreshToken: false, persistSession: false } };
 const admin = createClient(supabaseUrl, serviceRoleKey, options);
 
 const primaryOrganizationId = "00000000-0000-4000-8000-000000000001";
+const primaryClientId = "00000000-0000-4000-8000-000000000101";
+const primaryContractId = "00000000-0000-4000-8000-000000000201";
 const operationId = "00000000-0000-4000-8000-000000000301";
 const originalAssignmentId = "00000000-0000-4000-8000-000000000701";
 const originalPositionId = "00000000-0000-4000-8000-000000000501";
@@ -31,6 +33,12 @@ const originalDate = new Date(Date.UTC(2200, 0, fixtureDayOffset + 1))
 const replacementDate = new Date(Date.UTC(2200, 0, fixtureDayOffset + 2))
   .toISOString()
   .slice(0, 10);
+const timezoneDate = new Date(Date.UTC(2200, 0, fixtureDayOffset + 3))
+  .toISOString()
+  .slice(0, 10);
+const timezoneUtcDate = new Date(`${timezoneDate}T00:00:00Z`);
+timezoneUtcDate.setUTCDate(timezoneUtcDate.getUTCDate() + 1);
+const timezoneUtcDateString = timezoneUtcDate.toISOString().slice(0, 10);
 
 const userIds = [];
 const presenceIds = [];
@@ -84,6 +92,15 @@ async function rpc(actor, name, args, step) {
   return data;
 }
 
+async function listOperationalDay(actor, date, filters = {}) {
+  return rpc(actor, "list_presence_operational_day", {
+    target_organization_id: primaryOrganizationId,
+    target_date: date,
+    target_client_id: filters.clientId ?? null,
+    target_contract_id: filters.contractId ?? null,
+  }, `read operational Presence ${date}`);
+}
+
 const cleanupErrors = [];
 
 async function cleanup(step, operation) {
@@ -108,7 +125,15 @@ async function cleanupAuditEvents(entityType, entityIds) {
   );
 }
 
-async function createScheduleEntry(actor, date, publish = true) {
+async function createScheduleEntry(
+  actor,
+  date,
+  publish = true,
+  interval = {
+    startsAt: `${date}T11:00:00Z`,
+    endsAt: `${date}T19:00:00Z`,
+  },
+) {
   const schedule = await rpc(actor, "create_schedule", {
     organization_id: primaryOrganizationId,
     operation_id: operationId,
@@ -126,8 +151,8 @@ async function createScheduleEntry(actor, date, publish = true) {
   const entry = await rpc(actor, "create_schedule_entry", {
     schedule_revision_id: revision.id,
     assignment_id: originalAssignmentId,
-    starts_at: `${date}T11:00:00Z`,
-    ends_at: `${date}T19:00:00Z`,
+    starts_at: interval.startsAt,
+    ends_at: interval.endsAt,
   }, `create ScheduleEntry ${date}`);
 
   if (publish) {
@@ -168,6 +193,18 @@ try {
   otherDirectorFixture = await createActor("DIRECTOR", otherOrganizationId, "other-director");
   const director = directorFixture.client;
   const supervisor = supervisorFixture.client;
+
+  const timezoneFlow = await createScheduleEntry(director, timezoneDate, true, {
+    startsAt: `${timezoneUtcDateString}T02:00:00Z`,
+    endsAt: `${timezoneUtcDateString}T03:00:00Z`,
+  });
+  const timezoneCivilRows = await listOperationalDay(supervisor, timezoneDate);
+  const timezoneUtcRows = await listOperationalDay(supervisor, timezoneUtcDateString);
+  assert(
+    timezoneCivilRows.some((row) => row.schedule_entry_id === timezoneFlow.entry.id) &&
+      !timezoneUtcRows.some((row) => row.schedule_entry_id === timezoneFlow.entry.id),
+    "Operational read model did not interpret the day in Unit.timezone",
+  );
 
   const replacementWorker = await rpc(director, "mutate_worker_with_audit", {
     operation: "create",
@@ -214,6 +251,13 @@ try {
   ]) {
     await rpc(director, command, { schedule_revision_id: originalFlow.revision.id }, command);
   }
+
+  const awaitingRows = await listOperationalDay(supervisor, originalDate);
+  assert(
+    awaitingRows.find((row) => row.schedule_entry_id === originalFlow.entry.id)
+      ?.operational_status === "awaiting_confirmation",
+    "Published entry was not awaiting confirmation",
+  );
 
   const originalKey = `original-${suffix}`;
   const originalPresence = await rpc(supervisor, "start_presence", {
@@ -273,11 +317,23 @@ try {
     organization_id: primaryOrganizationId,
     presence_id: originalPresence.id,
     arrived_at: `${originalDate}T11:01:00Z`,
-    departed_at: `${originalDate}T19:02:00Z`,
+    departed_at: `${originalDate}T18:58:00Z`,
     reason: "Horários confirmados pelo Supervisor",
     idempotency_key: `correct-${suffix}`,
   }, "correct Presence");
   assert(correctedPresence.corrected_by === supervisorFixture.userId, "Correction actor was lost");
+
+  const completedOperationalRows = await listOperationalDay(supervisor, originalDate);
+  const completedOperational = completedOperationalRows.find(
+    (row) => row.schedule_entry_id === originalFlow.entry.id,
+  );
+  assert(
+    completedOperational?.operational_status === "completed" &&
+      completedOperational.actual_assignment_id === originalAssignmentId &&
+      completedOperational.arrived_after_start === true &&
+      completedOperational.departed_before_end === true,
+    "Operational read model lost the original completed Presence",
+  );
 
   const identityMutation = await admin
     .from("presences")
@@ -305,6 +361,13 @@ try {
     idempotency_key: `cancel-original-${suffix}`,
   }, "cancel original Presence");
   assert(cancelledOriginal.status === "cancelled", "Cancelled Presence history was not preserved");
+
+  const afterCancellationRows = await listOperationalDay(supervisor, originalDate);
+  assert(
+    afterCancellationRows.find((row) => row.schedule_entry_id === originalFlow.entry.id)
+      ?.operational_status === "awaiting_confirmation",
+    "Cancelled Presence counted as operational realization",
+  );
 
   const restartedPresence = await rpc(supervisor, "start_presence", {
     organization_id: primaryOrganizationId,
@@ -369,6 +432,12 @@ try {
   ]) {
     await rpc(director, command, { schedule_revision_id: successor.id }, `${command} successor`);
   }
+  const officialRevisionRows = await listOperationalDay(supervisor, originalDate);
+  assert(
+    !officialRevisionRows.some((row) => row.schedule_entry_id === originalFlow.entry.id) &&
+      officialRevisionRows.some((row) => row.schedule_entry_id === successorEntry.id),
+    "Operational read model did not select only the current published revision",
+  );
   const supersededStart = await supervisor.rpc("start_presence", {
     organization_id: primaryOrganizationId,
     schedule_entry_id: originalFlow.entry.id,
@@ -386,6 +455,13 @@ try {
   }, "create uncovered Absence");
   absenceIds.push(absence.id);
 
+  const uncoveredRows = await listOperationalDay(supervisor, replacementDate);
+  assert(
+    uncoveredRows.find((row) => row.schedule_entry_id === replacementFlow.entry.id)
+      ?.operational_status === "uncovered_absence",
+    "Reported Absence was not shown as uncovered",
+  );
+
   const uncoveredStart = await supervisor.rpc("start_presence", {
     organization_id: primaryOrganizationId,
     schedule_entry_id: replacementFlow.entry.id,
@@ -401,6 +477,13 @@ try {
   }, "create active Replacement");
   replacementIds.push(replacement.id);
 
+  const replacementExpectedRows = await listOperationalDay(supervisor, replacementDate);
+  assert(
+    replacementExpectedRows.find((row) => row.schedule_entry_id === replacementFlow.entry.id)
+      ?.operational_status === "replacement_expected",
+    "Active Replacement was not shown as expected",
+  );
+
   const replacementPresence = await rpc(supervisor, "start_presence", {
     organization_id: primaryOrganizationId,
     schedule_entry_id: replacementFlow.entry.id,
@@ -412,6 +495,53 @@ try {
     replacementPresence.actual_assignment_id === replacementAssignmentId &&
       replacementPresence.replacement_id === replacement.id,
     "Presence did not resolve the active Replacement",
+  );
+
+  const replacementOperationalRows = await listOperationalDay(supervisor, replacementDate);
+  const replacementOperational = replacementOperationalRows.find(
+    (row) => row.schedule_entry_id === replacementFlow.entry.id,
+  );
+  assert(
+    replacementOperational?.operational_status === "present" &&
+      replacementOperational.actual_assignment_id === replacementAssignmentId &&
+      replacementOperational.replacement_id === replacement.id,
+    "Operational read model lost the Replacement actual Worker",
+  );
+
+  const clientRows = await listOperationalDay(supervisor, replacementDate, {
+    clientId: primaryClientId,
+  });
+  const contractRows = await listOperationalDay(supervisor, replacementDate, {
+    clientId: primaryClientId,
+    contractId: primaryContractId,
+  });
+  const unrelatedClientRows = await listOperationalDay(supervisor, replacementDate, {
+    clientId: randomUUID(),
+  });
+  assert(
+    clientRows.some((row) => row.schedule_entry_id === replacementFlow.entry.id) &&
+      contractRows.some((row) => row.schedule_entry_id === replacementFlow.entry.id) &&
+      unrelatedClientRows.length === 0,
+    "OperationalContext filters were not applied by the read model",
+  );
+
+  const { error: recruiterOperationalError } = await recruiterFixture.client.rpc(
+    "list_presence_operational_day",
+    {
+      target_organization_id: primaryOrganizationId,
+      target_date: replacementDate,
+      target_client_id: null,
+      target_contract_id: null,
+    },
+  );
+  assert(
+    recruiterOperationalError?.code === "42501",
+    "RECRUITER accessed the Presence operational read model",
+  );
+  const hrOperationalRows = await listOperationalDay(hrFixture.client, replacementDate);
+  assert(
+    hrOperationalRows.some((row) => row.schedule_entry_id === replacementFlow.entry.id),
+    "HR could not read the Presence operational read model",
   );
 
   const replacementCancellation = await director.rpc("cancel_replacement", {
