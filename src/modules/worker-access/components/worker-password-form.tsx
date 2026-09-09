@@ -36,7 +36,6 @@ export function getWorkerPasswordFormOptions(mode: WorkerPasswordFormMode) {
 export function WorkerPasswordForm({ mode }: { mode: WorkerPasswordFormMode }) {
   const router = useRouter();
   const options = getWorkerPasswordFormOptions(mode);
-  const [supabase] = useState(createBrowserSupabaseClient);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -49,22 +48,28 @@ export function WorkerPasswordForm({ mode }: { mode: WorkerPasswordFormMode }) {
       passwordConfirmation: formData.get("passwordConfirmation"),
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Revise as senhas informadas.");
+      setError(
+        parsed.error.issues[0]?.message ?? "Revise as senhas informadas.",
+      );
       return;
     }
 
     setPending(true);
+
+    const supabase = createBrowserSupabaseClient();
+
     const { error: updateError } = await supabase.auth.updateUser({
       password: parsed.data.password,
     });
+
     if (updateError) {
       setPending(false);
       setError(
         mode !== "reset" && updateError.code === "same_password"
           ? "A nova senha deve ser diferente da senha atual."
           : mode === "reset"
-          ? "Este link é inválido ou expirou. Solicite uma nova recuperação."
-          : "Não foi possível salvar sua senha. Tente novamente.",
+            ? "Este link é inválido ou expirou. Solicite uma nova recuperação."
+            : "Não foi possível salvar sua senha. Tente novamente.",
       );
       return;
     }
@@ -91,12 +96,17 @@ export function WorkerPasswordForm({ mode }: { mode: WorkerPasswordFormMode }) {
           aria-describedby={`${mode}-worker-password-help`}
           className="h-12"
         />
-        <p id={`${mode}-worker-password-help`} className="text-xs text-muted-foreground">
+        <p
+          id={`${mode}-worker-password-help`}
+          className="text-xs text-muted-foreground"
+        >
           Use pelo menos 8 caracteres.
         </p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor={`${mode}-worker-password-confirmation`}>Confirmar senha</Label>
+        <Label htmlFor={`${mode}-worker-password-confirmation`}>
+          Confirmar senha
+        </Label>
         <Input
           id={`${mode}-worker-password-confirmation`}
           name="passwordConfirmation"
