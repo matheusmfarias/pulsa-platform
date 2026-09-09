@@ -28,4 +28,18 @@ describe("Worker Schedule routes", () => {
     expect(detail).toContain("getWorkerScheduleEntry");
     expect(`${layout}${schedule}${detail}`).not.toContain("OperationalContext");
   });
+
+  it("uses the Worker civil anchor only when start is absent", () => {
+    const schedule = source(
+      "src/app/(worker-authenticated)/worker/schedule/page.tsx",
+    );
+    const domain = source(
+      "src/modules/worker-schedule/domain/worker-schedule.ts",
+    );
+    expect(schedule).toContain("getWorkerScheduleAnchorDate()");
+    expect(schedule).toMatch(
+      /validDate\(requestedStart\)[\s\S]*\? requestedStart[\s\S]*: await getWorkerScheduleAnchorDate\(\)/,
+    );
+    expect(`${schedule}${domain}`).not.toContain("currentUtcDate");
+  });
 });

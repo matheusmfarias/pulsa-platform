@@ -7,11 +7,13 @@ import type {
 } from "../domain/worker-schedule";
 import {
   findWorkerHomeRecords,
+  findWorkerScheduleAnchorDate,
   findWorkerScheduleEntryRecord,
   listWorkerScheduleRecords,
 } from "../repositories/worker-schedule-repository";
 import {
   workerHomeRowSchema,
+  workerScheduleAnchorDateSchema,
   workerScheduleEntryIdSchema,
   workerScheduleRangeSchema,
   workerScheduleRowSchema,
@@ -69,6 +71,25 @@ export async function getWorkerHome(): Promise<WorkerHome> {
     if (parsed.data.home_slot === "next") home.next = entry;
   }
   return home;
+}
+
+export async function getWorkerScheduleAnchorDate(): Promise<string> {
+  await requireWorkerAccess();
+  const { data, error } = await findWorkerScheduleAnchorDate();
+  if (error) {
+    throwWorkerScheduleRepositoryError(
+      error,
+      "get_worker_schedule_anchor_date",
+    );
+  }
+  const parsed = workerScheduleAnchorDateSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new AppError("INFRASTRUCTURE", "Data civil Worker inválida.");
+  }
+
+  // UTC is deliberately only a no-context fallback. Normal operation derives
+  // the civil date from the Unit selected by the database read model.
+  return parsed.data ?? new Date().toISOString().slice(0, 10);
 }
 
 export async function listWorkerSchedule(input: unknown): Promise<WorkerScheduleEntry[]> {

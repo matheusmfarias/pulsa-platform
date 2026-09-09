@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   addCivilDays,
-  currentUtcDate,
+  getWorkerScheduleAnchorDate,
   listWorkerSchedule,
   WorkerScheduleList,
 } from "@/modules/worker-schedule";
@@ -17,7 +17,9 @@ export default async function WorkerSchedulePage({
   searchParams,
 }: PageProps<"/worker/schedule">) {
   const requestedStart = (await searchParams).start;
-  const fromDate = validDate(requestedStart) ? requestedStart : currentUtcDate();
+  const fromDate = validDate(requestedStart)
+    ? requestedStart
+    : await getWorkerScheduleAnchorDate();
   const toDate = addCivilDays(fromDate, 6);
   const entries = await listWorkerSchedule({ fromDate, toDate });
 

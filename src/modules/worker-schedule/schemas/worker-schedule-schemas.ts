@@ -4,6 +4,8 @@ import { WORKER_JOURNEY_STATUSES } from "../domain/worker-schedule";
 
 const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
+export const workerScheduleAnchorDateSchema = isoDateSchema.nullable();
+
 export const workerScheduleRangeSchema = z
   .object({ fromDate: isoDateSchema, toDate: isoDateSchema })
   .refine(

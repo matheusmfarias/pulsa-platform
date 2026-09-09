@@ -33,7 +33,9 @@ const { supabaseUrl, publishableKey, serviceRoleKey } = requireIntegrationTestEn
 const options = { auth: { autoRefreshToken: false, persistSession: false } };
 const admin = createClient(supabaseUrl, serviceRoleKey, options);
 const marker = `${Date.now()}-${randomUUID()}`;
-const timezone = "Pacific/Kiritimati";
+const timezone = new Date().getUTCHours() >= 10
+  ? "Pacific/Kiritimati"
+  : "Pacific/Pago_Pago";
 const organizationIds = [];
 const userIds = [];
 
@@ -239,6 +241,7 @@ try {
   const oldRevision = await createRevision(schedule.id, 1, director.id);
   const oldRealized = await createEntry(oldRevision.id, originalAssignment.id, atOffset(-96), director.id);
   const oldUnrealized = await createEntry(oldRevision.id, originalAssignment.id, atOffset(-72), director.id);
+  const oldOngoing = await createEntry(oldRevision.id, originalAssignment.id, atOffset(-1, 4), director.id);
   await publish(oldRevision.id, director.id);
 
   const oldPresence = await insert("presences", {
@@ -280,7 +283,12 @@ try {
 
   const boundaryInstant = new Date();
   boundaryInstant.setUTCDate(boundaryInstant.getUTCDate() + 6);
-  boundaryInstant.setUTCHours(12, 30, 0, 0);
+  boundaryInstant.setUTCHours(
+    timezone === "Pacific/Kiritimati" ? 12 : 5,
+    30,
+    0,
+    0,
+  );
   const timezoneBoundary = await createEntry(
     currentRevision.id,
     originalAssignment.id,
@@ -289,12 +297,12 @@ try {
   );
   await publish(currentRevision.id, director.id);
 
-  await insert("presences", {
+  const oldOngoingPresence = await insert("presences", {
     organization_id: organization.id,
-    schedule_entry_id: current.id,
+    schedule_entry_id: oldOngoing.id,
     actual_assignment_id: originalAssignment.id,
     status: "present",
-    arrived_at: current.starts_at,
+    arrived_at: oldOngoing.starts_at,
     source: "manual",
     created_by: director.id,
   });
@@ -355,14 +363,14 @@ try {
   if (originalError) throw originalError;
   originalRows.forEach(assertMinimized);
   const byId = new Map(originalRows.map((entry) => [entry.schedule_entry_id, entry]));
-  assert(byId.get(current.id)?.journey_status === "in_progress", "Current Presence was not in progress");
+  assert(byId.get(current.id)?.journey_status === "original_expected", "Current official journey was not expected");
   assert(byId.get(completed.id)?.journey_status === "completed", "Completed Presence was not completed");
   assert(byId.get(expected.id)?.journey_status === "original_expected", "Original journey was not expected");
   assert(byId.get(absent.id)?.journey_status === "original_absent", "Reported Absence was not classified");
   assert(byId.get(replaced.id)?.journey_status === "original_replaced", "Covered Absence was not classified");
   assert(byId.get(cancelledPresenceEntry.id)?.journey_status === "original_expected", "Cancelled Presence changed the plan");
   assert(byId.get(cancelledPresenceEntry.id)?.presence_status === null, "Cancelled Presence was exposed as realization");
-  assert(!byId.has(oldRealized.id) && !byId.has(oldUnrealized.id), "Superseded publication leaked into the official list");
+  assert(!byId.has(oldRealized.id) && !byId.has(oldUnrealized.id) && !byId.has(oldOngoing.id), "Superseded publication leaked into the official list");
   for (const entry of hiddenEntries) assert(!byId.has(entry.id), "Non-published revision leaked");
   assert(byId.get(current.id)?.was_republished === true, "Republication was not signaled");
 
@@ -418,13 +426,46 @@ try {
   assert(oversized.error?.code === "22023", "Read model accepted more than 31 civil days");
   const { data: home, error: homeError } = await original.client.rpc("get_worker_home");
   if (homeError) throw homeError;
-  assert(home.some((entry) => entry.home_slot === "current" && entry.schedule_entry_id === current.id), "Today did not select the current journey");
+  assert(home.some((entry) => entry.home_slot === "current" && entry.schedule_entry_id === oldOngoing.id && entry.journey_status === "in_progress"), "Superseded present Presence did not remain current");
+  assert(!home.some((entry) => entry.home_slot === "current" && entry.schedule_entry_id === current.id), "Official expectation replaced the unfinished historical Presence");
+  assert(home.filter((entry) => entry.schedule_entry_id === oldOngoing.id).length === 1, "Ongoing Presence appeared in multiple Home slots");
+
+  const { data: anchor, error: anchorError } = await original.client.rpc("get_worker_schedule_anchor_date");
+  if (anchorError) throw anchorError;
+  const expectedAnchor = localDate(new Date(), timezone);
+  assert(anchor === expectedAnchor, "Schedule anchor did not use the relevant Unit timezone");
+  assert(anchor !== isoDate(new Date()), "Schedule anchor incorrectly used the current UTC date");
+
+  const completedOngoing = await director.client.rpc("complete_presence", {
+    organization_id: organization.id,
+    presence_id: oldOngoingPresence.id,
+    departed_at: new Date().toISOString(),
+    idempotency_key: `worker-schedule-hardening-${marker}`,
+    source: "manual",
+    source_reference: null,
+  });
+  if (completedOngoing.error) throw completedOngoing.error;
+  const { data: homeAfterCompletion, error: homeAfterCompletionError } = await original.client.rpc("get_worker_home");
+  if (homeAfterCompletionError) throw homeAfterCompletionError;
+  assert(homeAfterCompletion.some((entry) => entry.home_slot === "current" && entry.schedule_entry_id === current.id), "Home did not return to the official current expectation");
+  assert(!homeAfterCompletion.some((entry) => entry.schedule_entry_id === oldOngoing.id), "Completed superseded Presence remained in Home slots");
+  const completedHistorical = await original.client.rpc("get_worker_schedule_entry", {
+    target_schedule_entry_id: oldOngoing.id,
+  });
+  if (completedHistorical.error) throw completedHistorical.error;
+  assert(completedHistorical.data[0]?.journey_status === "completed", "Completed superseded Presence lost historical detail access");
+
   const emptyHome = await withoutJourney.client.rpc("get_worker_home");
   if (emptyHome.error) throw emptyHome.error;
   assert(emptyHome.data.length === 0, "Worker without journeys received another Worker's Home");
 
   const internalOnly = await director.client.rpc("get_worker_home");
   assert(internalOnly.error?.code === "42501", "Backoffice membership alone crossed the Worker boundary");
+  const internalAnchor = await director.client.rpc("get_worker_schedule_anchor_date");
+  assert(internalAnchor.error?.code === "42501", "Backoffice membership alone read the Worker anchor");
+  const anonymous = createClient(supabaseUrl, publishableKey, options);
+  const anonymousAnchor = await anonymous.rpc("get_worker_schedule_anchor_date");
+  assert(anonymousAnchor.error, "Anonymous caller executed the Worker anchor RPC");
   const { error: suspendError } = await admin
     .from("worker_access_links")
     .update({
@@ -437,10 +478,27 @@ try {
   if (suspendError) throw suspendError;
   const suspendedRead = await original.client.rpc("get_worker_home");
   assert(suspendedRead.error?.code === "42501", "Suspended Worker read the schedule");
+  const suspendedAnchor = await original.client.rpc("get_worker_schedule_anchor_date");
+  assert(suspendedAnchor.error?.code === "42501", "Suspended Worker read the schedule anchor");
+  const { error: revokeError } = await admin
+    .from("worker_access_links")
+    .update({
+      status: "revoked",
+      revoked_at: new Date().toISOString(),
+      revoked_by: director.id,
+      revocation_reason: "Fixture revocation",
+    })
+    .eq("id", original.access.id);
+  if (revokeError) throw revokeError;
+  const revokedAnchor = await original.client.rpc("get_worker_schedule_anchor_date");
+  assert(revokedAnchor.error?.code === "42501", "Revoked Worker read the schedule anchor");
 
   console.log(JSON.stringify({
     latestPublishedOnly: true,
     ownHistoricalPresence: true,
+    supersededPresentRemainsCurrent: true,
+    completionRestoresOfficialHome: true,
+    workerCivilAnchor: true,
     originalAndReplacementStatuses: true,
     cancelledPresenceIgnored: true,
     timezoneCivilDate: true,

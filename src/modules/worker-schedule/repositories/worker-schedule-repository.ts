@@ -7,6 +7,11 @@ export async function findWorkerHomeRecords() {
   return supabase.rpc("get_worker_home");
 }
 
+export async function findWorkerScheduleAnchorDate() {
+  const supabase = await createServerSupabaseClient();
+  return supabase.rpc("get_worker_schedule_anchor_date");
+}
+
 export async function listWorkerScheduleRecords(
   fromDate: string,
   toDate: string,

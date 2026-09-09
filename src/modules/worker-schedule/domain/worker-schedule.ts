@@ -46,10 +46,6 @@ export function addCivilDays(value: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function currentUtcDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 export const WORKER_JOURNEY_LABELS: Record<WorkerJourneyStatus, string> = {
   original_expected: "Você está escalado normalmente.",
   replacement_expected: "Você está cobrindo esta jornada.",

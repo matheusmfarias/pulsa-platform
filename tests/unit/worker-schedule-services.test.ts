@@ -2,10 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requireWorkerAccess } from "@/modules/worker-access";
 import {
+  findWorkerScheduleAnchorDate,
   findWorkerScheduleEntryRecord,
   listWorkerScheduleRecords,
 } from "@/modules/worker-schedule/repositories/worker-schedule-repository";
 import {
+  getWorkerScheduleAnchorDate,
   getWorkerScheduleEntry,
   listWorkerSchedule,
 } from "@/modules/worker-schedule/services/worker-schedule";
@@ -15,6 +17,7 @@ vi.mock(
   "@/modules/worker-schedule/repositories/worker-schedule-repository",
   () => ({
     findWorkerHomeRecords: vi.fn(),
+    findWorkerScheduleAnchorDate: vi.fn(),
     findWorkerScheduleEntryRecord: vi.fn(),
     listWorkerScheduleRecords: vi.fn(),
   }),
@@ -80,6 +83,28 @@ describe("Worker Schedule services", () => {
       listWorkerSchedule({ fromDate: "2026-09-01", toDate: "2026-10-02" }),
     ).rejects.toMatchObject({ code: "VALIDATION" });
     expect(listWorkerScheduleRecords).not.toHaveBeenCalled();
+  });
+
+  it("uses the database civil anchor after the WorkerAccess boundary", async () => {
+    vi.mocked(findWorkerScheduleAnchorDate).mockResolvedValue({
+      data: "2026-09-08",
+      error: null,
+    } as never);
+    await expect(getWorkerScheduleAnchorDate()).resolves.toBe("2026-09-08");
+    expect(requireWorkerAccess).toHaveBeenCalledBefore(
+      vi.mocked(findWorkerScheduleAnchorDate),
+    );
+  });
+
+  it("uses UTC only when the database has no operational timezone", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-09T00:30:00Z"));
+    vi.mocked(findWorkerScheduleAnchorDate).mockResolvedValue({
+      data: null,
+      error: null,
+    } as never);
+    await expect(getWorkerScheduleAnchorDate()).resolves.toBe("2026-09-09");
+    vi.useRealTimers();
   });
 
   it("returns not found for an unauthorized entry without leaking details", async () => {

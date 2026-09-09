@@ -1104,6 +1104,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: (WorkerScheduleRow & { home_slot: string })[]
       }
+      get_worker_schedule_anchor_date: {
+        Args: Record<PropertyKey, never>
+        Returns: string | null
+      }
       get_worker_schedule_entry: {
         Args: { target_schedule_entry_id: string }
         Returns: WorkerScheduleRow[]

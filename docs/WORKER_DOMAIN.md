@@ -762,6 +762,11 @@ Contratos implementados:
 - classificação derivada: `original_expected`, `replacement_expected`, `original_absent`,
   `original_replaced`, `in_progress` ou `completed`;
 - Presence `cancelled` não é projetada como realização;
+- o hardening 7B.1 mantém Presence própria `present` como jornada atual mesmo quando sua revisão
+  publicada foi substituída; ao concluir ou cancelar, somente a expectativa oficial vigente volta
+  a alimentar a Home;
+- sem `start` explícito, a escala deriva sua data civil da Unit operacional mais relevante
+  (jornada atual, próxima ou passada mais recente); UTC é apenas fallback sem contexto de Unit;
 - nomes e IDs de outros Workers, Client, Contract, notas e dados administrativos não integram
   os DTOs Worker.
 
