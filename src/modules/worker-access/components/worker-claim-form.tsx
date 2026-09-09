@@ -4,22 +4,37 @@ import { useFormStatus } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 
-import { claimWorkerAccessAction } from "../actions";
+import {
+  claimMyWorkerAccessAction,
+  claimWorkerAccessAction,
+} from "../actions";
+import { getWorkerClaimExperience } from "../domain/worker-access";
 
-function ClaimButton() {
+function ClaimButton({ hasPriorAccess }: { hasPriorAccess: boolean }) {
   const { pending } = useFormStatus();
+  const experience = getWorkerClaimExperience(hasPriorAccess);
 
   return (
     <Button className="h-12 w-full" disabled={pending} type="submit">
-      {pending ? "Ativando acesso…" : "Ativar meu acesso"}
+      {pending ? experience.pendingLabel : experience.submitLabel}
     </Button>
   );
 }
 
-export function WorkerClaimForm({ invitationToken }: { invitationToken: string }) {
+export function WorkerClaimForm({
+  hasPriorAccess,
+  invitationToken,
+}: {
+  hasPriorAccess: boolean;
+  invitationToken?: string;
+}) {
   return (
-    <form action={claimWorkerAccessAction.bind(null, invitationToken)}>
-      <ClaimButton />
+    <form
+      action={invitationToken
+        ? claimWorkerAccessAction.bind(null, invitationToken)
+        : claimMyWorkerAccessAction}
+    >
+      <ClaimButton hasPriorAccess={hasPriorAccess} />
     </form>
   );
 }

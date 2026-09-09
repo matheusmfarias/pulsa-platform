@@ -6,6 +6,7 @@ import {
   getWorkerScheduleEntry,
   WorkerScheduleEntryDetail,
 } from "@/modules/worker-schedule";
+import { handleWorkerRouteError } from "@/modules/worker-access";
 import { isAppError } from "@/shared/errors";
 import {
   getWorkerPresenceAction,
@@ -25,7 +26,7 @@ export default async function WorkerScheduleEntryPage({
     ]);
   } catch (error) {
     if (isAppError(error) && error.code === "NOT_FOUND") notFound();
-    throw error;
+    handleWorkerRouteError(error);
   }
 
   return (

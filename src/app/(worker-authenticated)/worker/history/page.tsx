@@ -2,6 +2,7 @@ import {
   listWorkerPresenceHistory,
   WorkerPresenceHistory,
 } from "@/modules/worker-presence";
+import { withWorkerRouteAccess } from "@/modules/worker-access";
 
 export default async function WorkerHistoryPage({
   searchParams,
@@ -11,11 +12,13 @@ export default async function WorkerHistoryPage({
   const beforeScheduleEntryId = typeof query.entry === "string"
     ? query.entry
     : null;
-  const page = await listWorkerPresenceHistory({
-    limit: 20,
-    beforeArrivedAt,
-    beforeScheduleEntryId,
-  });
+  const page = await withWorkerRouteAccess(() =>
+    listWorkerPresenceHistory({
+      limit: 20,
+      beforeArrivedAt,
+      beforeScheduleEntryId,
+    }),
+  );
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">

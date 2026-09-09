@@ -170,12 +170,14 @@ try {
   const second = await createUser("second");
   const terminatedUser = await createUser("terminated");
   const stranger = await createUser("stranger");
+  const tokenless = await createUser("tokenless");
 
   const primaryWorker = await createWorker(organizationA, "Primary");
   const secondWorker = await createWorker(organizationA, "Second");
   const thirdWorker = await createWorker(organizationA, "Third");
   const terminatedWorker = await createWorker(organizationA, "Terminated");
   const foreignWorker = await createWorker(organizationB, "Foreign");
+  const tokenlessWorker = await createWorker(organizationA, "Tokenless");
 
   const { error: hrInviteError } = await invite(hr, organizationA, primaryWorker, primary);
   assert(hrInviteError?.code === "42501", "HR administered Worker access despite the documented matrix");
@@ -203,6 +205,35 @@ try {
     .eq("profile_id", primary.userId);
   if (memberCountError) throw memberCountError;
   assert(memberCount === 0, "Worker invitation created organization_members");
+
+  const tokenlessInvitation = await invite(
+    director,
+    organizationA,
+    tokenlessWorker,
+    tokenless,
+  );
+  if (tokenlessInvitation.error) throw tokenlessInvitation.error;
+  const { data: ownPending, error: ownPendingError } = await tokenless.client.rpc(
+    "get_my_pending_worker_access_claim",
+  );
+  if (ownPendingError) throw ownPendingError;
+  assert(ownPending.length === 1, "Auth User did not resolve its pending invitation without token");
+  assert(ownPending[0].worker_name === "Worker Tokenless", "Pending claim exposed the wrong Worker");
+  const { data: strangerPending, error: strangerPendingError } = await stranger.client.rpc(
+    "get_my_pending_worker_access_claim",
+  );
+  if (strangerPendingError) throw strangerPendingError;
+  assert(strangerPending.length === 0, "Another Auth User enumerated a pending invitation");
+  const strangerTokenlessClaim = await stranger.client.rpc("claim_my_worker_access");
+  assert(strangerTokenlessClaim.error?.code === "42501", "Another Auth User claimed without a pending invitation");
+  const tokenlessClaim = await tokenless.client.rpc("claim_my_worker_access");
+  if (tokenlessClaim.error) throw tokenlessClaim.error;
+  const { data: tokenlessAccess, error: tokenlessAccessError } = await tokenless.client.rpc(
+    "resolve_worker_access",
+  );
+  if (tokenlessAccessError) throw tokenlessAccessError;
+  assert(tokenlessAccess[0].worker_id === tokenlessWorker, "Tokenless claim resolved the wrong Worker");
+  assert(tokenlessAccess[0].organization_id === organizationA, "Tokenless claim derived the wrong Organization");
 
   const { error: strangerClaimError } = await stranger.client.rpc("claim_worker_access", {
     invitation_token: invitationResult.token,
@@ -370,6 +401,7 @@ try {
       organizationMemberIsolation: true,
       oneToOneCurrentLinks: true,
       claimOwnershipAndIdempotency: true,
+      tokenlessOwnPendingClaim: true,
       workerBoundary: true,
       suspendedRevokedInactiveTerminatedBlocked: true,
       crossOrganizationBlocked: true,

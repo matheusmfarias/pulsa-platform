@@ -47,8 +47,22 @@ export const verifyWorkerOtpSchema = z.object({
   token: z
     .string()
     .trim()
-    .regex(/^\d{6}$/, "Informe o código de 6 dígitos."),
+    .regex(/^\d{8}$/, "Informe o código de 8 dígitos."),
 });
+
+export const workerPasswordSchema = z
+  .string()
+  .min(8, "A senha deve ter pelo menos 8 caracteres.");
+
+export const workerPasswordUpdateSchema = z
+  .object({
+    password: workerPasswordSchema,
+    passwordConfirmation: z.string(),
+  })
+  .refine((value) => value.password === value.passwordConfirmation, {
+    message: "As senhas não coincidem.",
+    path: ["passwordConfirmation"],
+  });
 
 export const workerInvitationTokenSchema = z
   .string()
@@ -65,6 +79,10 @@ export const workerAccessClaimRowSchema = z.object({
   worker_name: z.string().min(1),
   invitation_email: z.string().min(1),
   expires_at: z.string().min(1),
+});
+
+export const workerAccessHistoryStateRowSchema = z.object({
+  has_prior_access: z.boolean(),
 });
 
 export const workerAccessAdministrationRowSchema = z.object({

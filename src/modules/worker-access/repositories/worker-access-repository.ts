@@ -21,6 +21,21 @@ export async function claimWorkerAccessRecord(invitationToken: string) {
   });
 }
 
+export async function findMyPendingWorkerAccessClaimRecord() {
+  const supabase = await createServerSupabaseClient();
+  return supabase.rpc("get_my_pending_worker_access_claim").maybeSingle();
+}
+
+export async function claimMyWorkerAccessRecord() {
+  const supabase = await createServerSupabaseClient();
+  return supabase.rpc("claim_my_worker_access");
+}
+
+export async function getMyWorkerAccessHistoryStateRecord() {
+  const supabase = await createServerSupabaseClient();
+  return supabase.rpc("get_my_worker_access_history_state").single();
+}
+
 export async function findWorkerAccessAdministrationRecord(
   organizationId: string,
   workerId: string,
@@ -115,6 +130,14 @@ export async function requestWorkerOtpRecord(
 export async function verifyWorkerOtpRecord(email: string, token: string) {
   const supabase = await createServerSupabaseClient();
   return supabase.auth.verifyOtp({ email, token, type: "email" });
+}
+
+export async function requestWorkerPasswordResetRecord(
+  email: string,
+  redirectTo: string,
+) {
+  const supabase = await createServerSupabaseClient();
+  return supabase.auth.resetPasswordForEmail(email, { redirectTo });
 }
 
 export type WorkerAccessRepositoryError = Pick<

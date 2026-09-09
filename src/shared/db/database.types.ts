@@ -1167,6 +1167,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      claim_my_worker_access: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_worker_access_administration: {
         Args: { organization_id: string; worker_id: string }
         Returns: {
@@ -1185,6 +1195,26 @@ export type Database = {
           expires_at: string
           invitation_email: string
           worker_name: string
+        }[]
+      }
+      get_my_pending_worker_access_claim: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          expires_at: string
+          invitation_email: string
+          worker_name: string
+        }[]
+      }
+      get_my_worker_access_history_state: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          has_prior_access: boolean
+        }[]
+      }
+      get_my_worker_password_state: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          has_password: boolean
         }[]
       }
       invite_worker_access: {

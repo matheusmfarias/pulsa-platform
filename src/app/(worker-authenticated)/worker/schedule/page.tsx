@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { withWorkerRouteAccess } from "@/modules/worker-access";
 import {
   addCivilDays,
   getWorkerScheduleAnchorDate,
@@ -13,16 +14,23 @@ function validDate(value: unknown): value is string {
   return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-export default async function WorkerSchedulePage({
-  searchParams,
-}: PageProps<"/worker/schedule">) {
-  const requestedStart = (await searchParams).start;
+async function loadWorkerSchedule(requestedStart: unknown) {
   const anchorDate = await getWorkerScheduleAnchorDate();
   const fromDate = validDate(requestedStart)
     ? requestedStart
     : anchorDate;
   const toDate = addCivilDays(fromDate, 6);
   const entries = await listWorkerSchedule({ fromDate, toDate });
+
+  return { anchorDate, entries, fromDate, toDate };
+}
+
+export default async function WorkerSchedulePage({
+  searchParams,
+}: PageProps<"/worker/schedule">) {
+  const requestedStart = (await searchParams).start;
+  const { anchorDate, entries, fromDate, toDate } =
+    await withWorkerRouteAccess(() => loadWorkerSchedule(requestedStart));
 
   const formatter = new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",

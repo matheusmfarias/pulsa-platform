@@ -1,17 +1,20 @@
-import { CircleCheck, LogOut, Mail, UserRound } from "lucide-react";
+import { CircleCheck, KeyRound, LogOut, Mail, UserRound } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { getAuthenticatedUser } from "@/modules/auth";
 import {
   requireWorkerAccess,
+  withWorkerRouteAccess,
   workerLogoutAction,
 } from "@/modules/worker-access";
 
 export default async function WorkerAccountPage() {
-  const [user, access] = await Promise.all([
-    getAuthenticatedUser(),
-    requireWorkerAccess(),
-  ]);
+  const [user, access] = await withWorkerRouteAccess(() =>
+    Promise.all([
+      getAuthenticatedUser(),
+      requireWorkerAccess(),
+    ]));
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
@@ -43,12 +46,20 @@ export default async function WorkerAccountPage() {
         </div>
       </section>
 
-      <form action={workerLogoutAction} className="mt-6">
-        <Button className="h-12 w-full sm:w-auto" type="submit" variant="outline">
-          <LogOut aria-hidden="true" className="size-4" />
-          Sair da conta
+      <div className="mt-6 grid gap-3 sm:flex">
+        <Button asChild className="h-12 w-full sm:w-auto" variant="outline">
+          <Link href="/worker/account/password">
+            <KeyRound aria-hidden="true" className="size-4" />
+            Alterar senha
+          </Link>
         </Button>
-      </form>
+        <form action={workerLogoutAction}>
+          <Button className="h-12 w-full sm:w-auto" type="submit" variant="outline">
+            <LogOut aria-hidden="true" className="size-4" />
+            Sair da conta
+          </Button>
+        </form>
+      </div>
     </main>
   );
 }

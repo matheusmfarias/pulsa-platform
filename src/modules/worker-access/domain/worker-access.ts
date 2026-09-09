@@ -30,6 +30,24 @@ export type WorkerAccessClaim = {
   expiresAt: string;
 };
 
+export function getWorkerClaimExperience(hasPriorAccess: boolean) {
+  return hasPriorAccess
+    ? {
+        eyebrow: "Reativação de acesso",
+        title: "Confirme a reativação",
+        submitLabel: "Reativar meu acesso",
+        pendingLabel: "Reativando acesso…",
+        redirectTo: "/worker",
+      }
+    : {
+        eyebrow: "Primeiro acesso",
+        title: "Confirme seu acesso",
+        submitLabel: "Ativar meu acesso",
+        pendingLabel: "Ativando acesso…",
+        redirectTo: "/worker/set-password",
+      };
+}
+
 export type WorkerAccessAdministration = {
   linkId: string | null;
   linkStatus: WorkerAccessLinkStatus | null;

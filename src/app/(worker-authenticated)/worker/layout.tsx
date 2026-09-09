@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { getAuthenticatedUser } from "@/modules/auth";
-import { requireWorkerAccess } from "@/modules/worker-access";
+import {
+  handleWorkerRouteError,
+  requireWorkerAccess,
+} from "@/modules/worker-access";
 import { WorkerNavigation } from "@/modules/worker-schedule/components/worker-navigation";
-import { isAppError } from "@/shared/errors";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +20,7 @@ export default async function WorkerLayout({
   try {
     await requireWorkerAccess();
   } catch (error) {
-    if (isAppError(error) && error.code === "AUTHORIZATION") {
-      redirect("/worker/claim");
-    }
-    throw error;
+    handleWorkerRouteError(error);
   }
 
   return (

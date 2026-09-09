@@ -1,5 +1,23 @@
 project_id = "pulsa-platform"
 
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "http://localhost:3000/worker/sign-in**",
+  "http://localhost:3000/worker/reset-password**"
+]
+
+[auth.email]
+otp_length = 8
+
+[auth.email.template.confirmation]
+subject = "Seu código de acesso ao Pulsa Worker"
+content_path = "./supabase/templates/worker-auth.html"
+
+[auth.email.template.magic_link]
+subject = "Seu código de acesso ao Pulsa Worker"
+content_path = "./supabase/templates/worker-auth.html"
+
 [db.seed]
 enabled = true
 sql_paths = ["./seed/*.sql"]

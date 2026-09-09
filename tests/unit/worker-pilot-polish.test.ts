@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
+import { getWorkerClaimExperience } from "@/modules/worker-access/domain/worker-access";
+
 function source(relativePath: string) {
   return readFileSync(new URL(`../../${relativePath}`, import.meta.url), "utf8");
 }
@@ -50,18 +52,16 @@ describe("Pulsa Worker pilot polish", () => {
       "src/modules/worker-access/components/worker-sign-in-form.tsx",
     );
     const claimPage = source("src/app/(worker-public)/worker/claim/page.tsx");
-    const claimForm = source(
-      "src/modules/worker-access/components/worker-claim-form.tsx",
-    );
+    const initialClaim = getWorkerClaimExperience(false);
 
     expect(signInPage).toContain("Acesse sua conta");
     expect(signInPage).not.toContain("Este login não cria contas");
-    expect(signInForm).toContain("Código enviado");
-    expect(signInForm).toContain("Usar outro e-mail");
-    expect(claimPage).toContain("Confirme seu acesso");
+    expect(signInForm).toContain("Código de acesso");
+    expect(signInForm).toContain("Enviar novo código");
+    expect(initialClaim.title).toBe("Confirme seu acesso");
+    expect(initialClaim.submitLabel).toBe("Ativar meu acesso");
     expect(claimPage).toContain("Este acesso será vinculado a:");
     expect(claimPage).not.toContain("Nenhum identificador");
-    expect(claimForm).toContain("Ativar meu acesso");
   });
 
   it("keeps direct Presence feedback and remounts the form per action", () => {

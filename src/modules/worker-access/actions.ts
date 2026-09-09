@@ -4,10 +4,17 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { signOut } from "@/modules/auth/services/sign-out";
+import { loginSchema } from "@/modules/auth/schemas/login-schema";
+import { authenticate } from "@/modules/auth/services/authenticate";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 import { logger } from "@/shared/logging";
 
-import { claimWorkerAccess } from "./services/claim-worker-access";
+import {
+  claimMyWorkerAccess,
+  claimWorkerAccess,
+  getMyWorkerAccessHistoryState,
+} from "./services/claim-worker-access";
+import { getWorkerClaimExperience } from "./domain/worker-access";
 import {
   provisionWorkerAccess,
   resumeWorkerAccess,
@@ -15,7 +22,11 @@ import {
   revokeWorkerAccessInvitation,
   suspendWorkerAccess,
 } from "./services/worker-access-administration";
-import { requestWorkerOtp, verifyWorkerOtp } from "./services/worker-auth";
+import {
+  requestWorkerOtp,
+  requestWorkerPasswordReset,
+  verifyWorkerOtp,
+} from "./services/worker-auth";
 import { workerInvitationTokenSchema } from "./schemas/worker-access-schemas";
 
 export type WorkerAccessActionState = {
@@ -30,6 +41,28 @@ function actionError(error: unknown, operation: string): WorkerAccessActionState
     logger.error({ event: "worker_access.action_failed", operation });
   }
   return { error: toPublicErrorMessage(error) };
+}
+
+export async function workerPasswordSignInAction(
+  _previousState: WorkerAccessActionState,
+  formData: FormData,
+): Promise<WorkerAccessActionState> {
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Revise os dados informados.",
+    };
+  }
+
+  try {
+    await authenticate(parsed.data);
+  } catch (error) {
+    return actionError(error, "worker_password_sign_in");
+  }
+  redirect("/worker");
 }
 
 export async function requestWorkerOtpAction(
@@ -72,10 +105,36 @@ export async function verifyWorkerOtpAction(
   );
 }
 
+export async function requestWorkerPasswordResetAction(
+  _previousState: WorkerAccessActionState,
+  formData: FormData,
+): Promise<WorkerAccessActionState> {
+  try {
+    await requestWorkerPasswordReset({ email: formData.get("email") });
+  } catch (error) {
+    if (isAppError(error) && error.code === "VALIDATION") {
+      return { error: error.message };
+    }
+    // The public response remains the same for missing users and provider errors.
+    if (!isAppError(error)) {
+      logger.error({
+        event: "worker_access.action_failed",
+        operation: "request_password_reset",
+      });
+    }
+  }
+  return {
+    error: null,
+    success: "Se houver uma conta para este e-mail, enviaremos as instruções.",
+  };
+}
+
 export async function claimWorkerAccessAction(
   invitationToken: string,
 ): Promise<void> {
+  let hasPriorAccess: boolean;
   try {
+    hasPriorAccess = await getMyWorkerAccessHistoryState();
     await claimWorkerAccess(invitationToken);
   } catch (error) {
     if (!isAppError(error)) {
@@ -85,7 +144,24 @@ export async function claimWorkerAccessAction(
       `/worker/claim?invitation=${encodeURIComponent(invitationToken)}&error=unavailable`,
     );
   }
-  redirect("/worker");
+  redirect(getWorkerClaimExperience(hasPriorAccess).redirectTo);
+}
+
+export async function claimMyWorkerAccessAction(): Promise<void> {
+  let hasPriorAccess: boolean;
+  try {
+    hasPriorAccess = await getMyWorkerAccessHistoryState();
+    await claimMyWorkerAccess();
+  } catch (error) {
+    if (!isAppError(error)) {
+      logger.error({
+        event: "worker_access.action_failed",
+        operation: "claim_my_worker_access",
+      });
+    }
+    redirect("/worker/claim?error=unavailable");
+  }
+  redirect(getWorkerClaimExperience(hasPriorAccess).redirectTo);
 }
 
 export async function workerLogoutAction(): Promise<void> {

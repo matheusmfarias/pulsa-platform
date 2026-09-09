@@ -6,12 +6,18 @@ import {
   getOptionalWorkerAccess,
   WorkerSignInForm,
 } from "@/modules/worker-access";
+import { workerInvitationTokenSchema } from "@/modules/worker-access/schemas/worker-access-schemas";
 
 export default async function WorkerSignInPage({
   searchParams,
 }: PageProps<"/worker/sign-in">) {
-  const invitation = (await searchParams).invitation;
-  const invitationToken = typeof invitation === "string" ? invitation : undefined;
+  const query = await searchParams;
+  const invitation = query.invitation;
+  const parsedInvitation = workerInvitationTokenSchema.safeParse(invitation);
+  const invitationToken = parsedInvitation.success
+    ? parsedInvitation.data
+    : undefined;
+  const otpMode = query.mode === "code";
   const user = await getAuthenticatedUser();
   if (user && (await getOptionalWorkerAccess())) redirect("/worker");
 
@@ -24,11 +30,21 @@ export default async function WorkerSignInPage({
             Worker
           </span>
         </div>
-        <h1 className="mt-8 text-2xl font-semibold tracking-tight">Acesse sua conta</h1>
+        <h1 className="mt-8 text-2xl font-semibold tracking-tight">
+          {invitationToken
+            ? "Acesse seu convite"
+            : otpMode
+              ? "Entre com um código"
+              : "Acesse sua conta"}
+        </h1>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Use o e-mail que recebeu o convite da Pulsa. Enviaremos um código para confirmar seu acesso.
+          {invitationToken
+            ? "Informe o e-mail que recebeu o convite e o código enviado pela Pulsa."
+            : otpMode
+              ? "Informe um código recebido ou solicite um novo."
+              : "Use o e-mail e a senha da sua conta Pulsa Worker."}
         </p>
-        <WorkerSignInForm invitationToken={invitationToken} />
+        <WorkerSignInForm invitationToken={invitationToken} otpMode={otpMode} />
       </section>
     </main>
   );
