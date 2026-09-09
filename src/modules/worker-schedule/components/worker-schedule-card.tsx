@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import {
   WORKER_JOURNEY_LABELS,
@@ -20,7 +21,13 @@ const statusClasses = {
   completed: "border-slate-300 bg-slate-50/70",
 } as const;
 
-export function WorkerScheduleCard({ entry }: { entry: WorkerScheduleEntry }) {
+export function WorkerScheduleCard({
+  entry,
+  presenceControl,
+}: {
+  entry: WorkerScheduleEntry;
+  presenceControl?: ReactNode;
+}) {
   return (
     <article className={`rounded-xl border p-5 shadow-sm ${statusClasses[entry.journeyStatus]}`}>
       <div className="flex items-start justify-between gap-4">
@@ -39,15 +46,27 @@ export function WorkerScheduleCard({ entry }: { entry: WorkerScheduleEntry }) {
       <h2 className="mt-4 font-semibold">{entry.unitName}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{entry.jobRoleName}</p>
       <p className="mt-3 text-sm leading-6">{WORKER_JOURNEY_LABELS[entry.journeyStatus]}</p>
+      {entry.presenceStatus === "present" && entry.arrivedAt ? (
+        <p className="mt-2 text-sm font-medium">
+          Chegada registrada às {formatWorkerTime(entry.arrivedAt, entry.unitTimezone)}
+        </p>
+      ) : entry.presenceStatus === "completed" && entry.arrivedAt && entry.departedAt ? (
+        <p className="mt-2 text-sm font-medium tabular-nums">
+          {formatWorkerTime(entry.arrivedAt, entry.unitTimezone)} — {formatWorkerTime(entry.departedAt, entry.unitTimezone)}
+        </p>
+      ) : null}
       {entry.wasRepublished ? (
         <p className="mt-3 text-xs text-muted-foreground">{formatScheduleUpdate(entry)}</p>
       ) : null}
-      <Link
-        className="mt-4 inline-flex min-h-10 items-center font-medium text-action-primary underline-offset-4 hover:underline"
-        href={`/worker/schedule/${entry.scheduleEntryId}`}
-      >
-        Ver detalhes
-      </Link>
+      {presenceControl}
+      {!presenceControl ? (
+        <Link
+          className="mt-4 inline-flex min-h-10 items-center font-medium text-action-primary underline-offset-4 hover:underline"
+          href={`/worker/schedule/${entry.scheduleEntryId}`}
+        >
+          Ver detalhes
+        </Link>
+      ) : null}
     </article>
   );
 }

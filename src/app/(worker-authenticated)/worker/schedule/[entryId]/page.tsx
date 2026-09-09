@@ -7,14 +7,22 @@ import {
   WorkerScheduleEntryDetail,
 } from "@/modules/worker-schedule";
 import { isAppError } from "@/shared/errors";
+import {
+  getWorkerPresenceAction,
+  WorkerPresenceControl,
+} from "@/modules/worker-presence";
 
 export default async function WorkerScheduleEntryPage({
   params,
 }: PageProps<"/worker/schedule/[entryId]">) {
   const { entryId } = await params;
   let entry;
+  let action;
   try {
-    entry = await getWorkerScheduleEntry(entryId);
+    [entry, action] = await Promise.all([
+      getWorkerScheduleEntry(entryId),
+      getWorkerPresenceAction(entryId),
+    ]);
   } catch (error) {
     if (isAppError(error) && error.code === "NOT_FOUND") notFound();
     throw error;
@@ -26,7 +34,12 @@ export default async function WorkerScheduleEntryPage({
         <ArrowLeft aria-hidden="true" className="size-4" />
         Voltar para minha escala
       </Link>
-      <WorkerScheduleEntryDetail entry={entry} />
+      <WorkerScheduleEntryDetail
+        entry={entry}
+        presenceControl={(
+          <WorkerPresenceControl action={action} scheduleEntryId={entryId} />
+        )}
+      />
     </main>
   );
 }

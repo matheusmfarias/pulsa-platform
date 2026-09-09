@@ -21,6 +21,7 @@
     "test:administration:real": "node tests/integration/administration-real-validation.mjs",
     "test:worker-access:real": "node tests/integration/worker-access-real-validation.mjs",
     "test:worker-schedule:real": "node tests/integration/worker-schedule-real-validation.mjs",
+    "test:worker-presence:real": "node tests/integration/worker-presence-real-validation.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,7 +10,13 @@ import {
   formatWorkerTime,
 } from "./worker-schedule-format";
 
-export function WorkerHomeContent({ home }: { home: WorkerHome }) {
+export function WorkerHomeContent({
+  home,
+  presenceControl,
+}: {
+  home: WorkerHome;
+  presenceControl?: ReactNode;
+}) {
   const primary = home.current ?? home.today;
   const next = home.next?.scheduleEntryId === primary?.scheduleEntryId ? null : home.next;
 
@@ -24,7 +31,10 @@ export function WorkerHomeContent({ home }: { home: WorkerHome }) {
         </p>
         <div className="mt-3">
           {primary ? (
-            <WorkerScheduleCard entry={primary} />
+            <WorkerScheduleCard
+              entry={primary}
+              presenceControl={presenceControl}
+            />
           ) : (
             <div className="rounded-xl border bg-card p-6 shadow-sm">
               <p className="font-medium">Nenhuma jornada programada para hoje.</p>

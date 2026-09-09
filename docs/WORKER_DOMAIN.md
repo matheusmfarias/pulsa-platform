@@ -425,18 +425,19 @@ O Worker usa o mesmo agregado `presences`, a mesma unicidade de uma Presence vá
 ScheduleEntry, os mesmos locks, lifecycle, idempotência e auditoria. Não haverá
 `worker_presences`, tabela de batidas ou cópia de ScheduleEntry.
 
-Na camada de aplicação as ações continuam se chamando `startPresence` e `completePresence`, mas
-elas não chamam os wrappers internos atuais. Uma futura migration deve expor wrappers distintos,
-por exemplo:
+Na camada de aplicação, o módulo `worker-presence` usa wrappers públicos distintos da superfície
+interna:
 
 ```text
 worker_start_presence(schedule_entry_id, source_reference, idempotency_key)
-worker_complete_presence(presence_id, source_reference, idempotency_key)
+worker_complete_presence(schedule_entry_id, idempotency_key)
 ```
 
-Nomes diferentes evitam overload ambíguo no Data API e deixam a fronteira auditável. Internamente
-ambos chamam a mesma implementação privada do domínio 6A, com um parâmetro autoritativo de
-`actor_worker_id` e a verificação dentro da mesma transação/locks.
+Nomes diferentes evitam overload ambíguo no Data API e deixam a fronteira auditável. A migration
+7C refatora `private.start_presence` e `private.complete_presence` para que Backoffice e Worker
+chamem os mesmos cores transacionais de resolução, locks, lifecycle, recibos, persistência e
+auditoria. O caminho Worker acrescenta `actor_worker_id` autoritativo e suas regras mais
+restritivas sem alterar os contratos públicos da 6A.
 
 ### 8.2 Valores derivados
 
@@ -451,17 +452,21 @@ O Worker não envia:
 
 O banco resolve o vínculo por `auth.uid()`, deriva a Organization, trava a ScheduleEntry e o
 contexto Absence/Replacement, resolve a Assignment efetiva e exige que seu `worker_id` seja o
-principal autenticado. `source` é forçado a `app`; horários usam o relógio do banco. O
-`source_reference` e a `idempotency_key` são os únicos identificadores técnicos vindos do app.
+principal autenticado. `source` é forçado a `app`; horários usam o relógio do banco. Na chegada,
+`source_reference` e `idempotency_key` são os únicos identificadores técnicos além da
+ScheduleEntry. Na saída, somente uma nova `idempotency_key` é enviada.
 
 Para saída, o banco exige que `Presence.actual_assignment_id → Worker` seja o Worker autenticado.
-Conhecer `presence_id` de terceiro não concede autoridade.
+O comando localiza a Presence `present` própria pela ScheduleEntry; não recebe `presence_id`. O
+`source_reference` do evento de saída é derivado da Presence aberta, com o UUID da própria
+Presence como fallback histórico quando uma origem manual não tinha referência. Isso permite
+concluir em outro navegador sem transformar storage do cliente em autoridade.
 
 ### 8.3 Primeira fatia concreta da antiga 6C
 
 - `source = app`, definido no servidor/banco;
-- `source_reference`: UUID opaco da jornada gerado pelo cliente e reutilizado para correlacionar
-  chegada e saída; não contém Worker, Organization, aparelho ou PII;
+- `source_reference`: UUID opaco gerado pelo cliente para a chegada; não contém Worker,
+  Organization, aparelho ou PII. A saída reutiliza no banco a referência já persistida;
 - `idempotency_key`: UUID por comando, persistido pelo cliente até resposta terminal e repetido
   sem alteração em retries;
 - mesma chave com mesmo comando/payload canônico retorna o mesmo resultado;
@@ -770,7 +775,19 @@ Contratos implementados:
 - nomes e IDs de outros Workers, Client, Contract, notas e dados administrativos não integram
   os DTOs Worker.
 
-### 7C — Worker Presence — planejada
+### 7B.1 — Worker Schedule / Home consistency — implementada
+
+Escopo:
+
+- Presence própria `present` de revisão superseded continua sendo a jornada atual até sua saída;
+- conclusão/cancelamento devolve a Home à expectativa oficial vigente;
+- data inicial da escala deriva da timezone operacional mais relevante, com UTC apenas sem
+  contexto de Unit.
+
+Critério de saída: Home, escala e detalhe compartilham a mesma verdade sobre realização histórica
+em andamento e data civil, sem reabrir expectativa superseded.
+
+### 7C — Worker Presence — implementada
 
 Escopo:
 
@@ -784,6 +801,20 @@ Escopo:
 Critério de saída: somente o Worker efetivamente esperado registra sua própria chegada/saída,
 com retry seguro e trilha única de auditoria, sem informar Organization/Assignment/Replacement ou
 horário e sem contornar as invariantes da Fase 6A.
+
+Contratos implementados:
+
+- `worker_start_presence(schedule_entry_id, source_reference, idempotency_key)`;
+- `worker_complete_presence(schedule_entry_id, idempotency_key)`;
+- `get_worker_presence_action(schedule_entry_id)` retorna apenas `start`, `complete` ou `null`;
+- `list_worker_presence_history(limit, cursor)` retorna somente Presence própria válida e sinais
+  objetivos;
+- relógio, identidade, Organization, Assignment efetiva, Replacement e origem são resolvidos no
+  banco;
+- o hash idempotente Worker exclui timestamps gerados no banco;
+- a saída deriva `source_reference` da Presence aberta e pode ocorrer após fim, mudança de data
+  civil, supersessão da revisão ou encerramento posterior da Assignment;
+- Home e detalhe usam o mesmo controle de ação e revalidam as projeções no servidor.
 
 ### 7D — Change Awareness / Acknowledgement — planejada/condicional
 

@@ -29,6 +29,23 @@ export type WorkerScheduleRow = {
   was_republished: boolean
 }
 
+export type WorkerPresenceHistoryRow = {
+  arrived_after_start: boolean
+  arrived_at: string
+  departed_at: string | null
+  departed_before_end: boolean
+  ends_at: string
+  job_role_name: string
+  local_date: string
+  operation_name: string
+  presence_status: string
+  schedule_entry_id: string
+  starts_at: string
+  unit_name: string
+  unit_timezone: string
+  worker_role: string
+}
+
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
@@ -1104,6 +1121,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: (WorkerScheduleRow & { home_slot: string })[]
       }
+      get_worker_presence_action: {
+        Args: { schedule_entry_id: string }
+        Returns: string | null
+      }
       get_worker_schedule_anchor_date: {
         Args: Record<PropertyKey, never>
         Returns: string | null
@@ -1115,6 +1136,26 @@ export type Database = {
       list_worker_schedule: {
         Args: { from_date: string; to_date: string }
         Returns: WorkerScheduleRow[]
+      }
+      list_worker_presence_history: {
+        Args: {
+          before_arrived_at?: string | null
+          before_schedule_entry_id?: string | null
+          result_limit?: number
+        }
+        Returns: WorkerPresenceHistoryRow[]
+      }
+      worker_complete_presence: {
+        Args: { idempotency_key: string; schedule_entry_id: string }
+        Returns: Json
+      }
+      worker_start_presence: {
+        Args: {
+          idempotency_key: string
+          schedule_entry_id: string
+          source_reference: string
+        }
+        Returns: Json
       }
       claim_worker_access: {
         Args: { invitation_token: string }

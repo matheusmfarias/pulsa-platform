@@ -3,6 +3,7 @@ import {
   WORKER_JOURNEY_SHORT_LABELS,
   type WorkerScheduleEntry,
 } from "../domain/worker-schedule";
+import type { ReactNode } from "react";
 import {
   formatScheduleUpdate,
   formatUnitLocation,
@@ -14,7 +15,13 @@ function Item({ label, value }: { label: string; value: string }) {
   return <div><dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt><dd className="mt-1 text-sm leading-6">{value}</dd></div>;
 }
 
-export function WorkerScheduleEntryDetail({ entry }: { entry: WorkerScheduleEntry }) {
+export function WorkerScheduleEntryDetail({
+  entry,
+  presenceControl,
+}: {
+  entry: WorkerScheduleEntry;
+  presenceControl?: ReactNode;
+}) {
   const location = formatUnitLocation(entry);
   return (
     <article className="rounded-xl border bg-card p-6 shadow-sm sm:p-8">
@@ -36,6 +43,7 @@ export function WorkerScheduleEntryDetail({ entry }: { entry: WorkerScheduleEntr
         {entry.presenceStatus ? <Item label="Realização própria" value={entry.presenceStatus === "present" ? `Chegada registrada às ${formatWorkerTime(entry.arrivedAt!, entry.unitTimezone)}` : `Concluída: ${formatWorkerTime(entry.arrivedAt!, entry.unitTimezone)} — ${formatWorkerTime(entry.departedAt!, entry.unitTimezone)}`} /> : null}
       </dl>
       {entry.wasRepublished ? <p className="mt-8 border-t pt-5 text-sm text-muted-foreground">{formatScheduleUpdate(entry)}</p> : null}
+      {presenceControl}
     </article>
   );
 }
