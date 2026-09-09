@@ -41,8 +41,8 @@ export async function listWorkerPresenceHistoryRecords(input: {
   const supabase = await createServerSupabaseClient();
   return supabase.rpc("list_worker_presence_history", {
     result_limit: input.limit,
-    before_arrived_at: input.beforeArrivedAt,
-    before_schedule_entry_id: input.beforeScheduleEntryId,
+    before_arrived_at: input.beforeArrivedAt ?? undefined,
+    before_schedule_entry_id: input.beforeScheduleEntryId ?? undefined,
   });
 }
 

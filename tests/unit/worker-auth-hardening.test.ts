@@ -11,8 +11,8 @@ function source(relativePath: string) {
 const migration = source(
   "supabase/migrations/20260909120000_worker_auth_hardening.sql",
 );
-const passwordStateMigration = source(
-  "supabase/migrations/20260909130000_worker_password_state.sql",
+const phase7CleanupMigration = source(
+  "supabase/migrations/20260909150000_phase7_cleanup.sql",
 );
 
 describe("Worker Auth hardening", () => {
@@ -56,21 +56,13 @@ describe("Worker Auth hardening", () => {
     expect(authRepository).toContain("supabase.auth.signInWithPassword(input)");
   });
 
-  it("exposes only the authenticated user's boolean password state", () => {
-    expect(passwordStateMigration).toContain(
-      "function public.get_my_worker_password_state()",
+  it("removes the obsolete password-state RPC without removing access history", () => {
+    expect(phase7CleanupMigration).toMatch(
+      /drop function if exists public\.get_my_worker_password_state\(\);/,
     );
-    expect(passwordStateMigration).toMatch(
-      /returns table \(\s*has_password boolean\s*\)/,
+    expect(phase7CleanupMigration).not.toContain(
+      "get_my_worker_access_history_state",
     );
-    expect(passwordStateMigration).toContain("actor_id uuid := auth.uid()");
-    expect(passwordStateMigration).toContain("where auth_user.id = actor_id");
-    expect(passwordStateMigration).toContain("security definer");
-    expect(passwordStateMigration).toContain(
-      "grant execute on function public.get_my_worker_password_state()\n  to authenticated",
-    );
-    expect(passwordStateMigration).not.toMatch(/returns table \([^)]*encrypted_password/);
-    expect(passwordStateMigration).not.toMatch(/returns table \([^)]*(user_id|email|password_hash)/);
   });
 
   it("validates password confirmation and uses Supabase recovery without enumeration", () => {

@@ -6,51 +6,31 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type WorkerScheduleRow = {
-  arrived_at: string | null
-  break_ends_at: string | null
-  break_starts_at: string | null
-  departed_at: string | null
-  ends_at: string
-  job_role_name: string
-  journey_status: string
-  local_date: string
-  operation_name: string
-  presence_status: string | null
-  published_at: string
-  schedule_entry_id: string
-  schedule_version: number
-  starts_at: string
-  unit_address: string | null
-  unit_city: string | null
-  unit_name: string
-  unit_state: string | null
-  unit_timezone: string
-  was_republished: boolean
-}
-
-export type WorkerPresenceHistoryRow = {
-  arrived_after_start: boolean
-  arrived_at: string
-  departed_at: string | null
-  departed_before_end: boolean
-  ends_at: string
-  job_role_name: string
-  local_date: string
-  operation_name: string
-  presence_status: string
-  schedule_entry_id: string
-  starts_at: string
-  unit_name: string
-  unit_timezone: string
-  worker_role: string
-}
-
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -108,301 +88,6 @@ export type Database = {
             columns: ["schedule_entry_id"]
             isOneToOne: false
             referencedRelation: "schedule_entries"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      worker_access_invitations: {
-        Row: {
-          claimed_at: string | null
-          claimed_by: string | null
-          created_at: string
-          created_by: string
-          expired_at: string | null
-          expires_at: string
-          id: string
-          invitation_email: string
-          invitation_token_hash: string
-          channel: string
-          auth_user_id: string
-          revocation_reason: string | null
-          revoked_at: string | null
-          revoked_by: string | null
-          status: string
-          worker_id: string
-        }
-        Insert: {
-          claimed_at?: string | null
-          claimed_by?: string | null
-          created_at?: string
-          created_by: string
-          expired_at?: string | null
-          expires_at?: string
-          id?: string
-          invitation_email: string
-          invitation_token_hash: string
-          channel?: string
-          auth_user_id: string
-          revocation_reason?: string | null
-          revoked_at?: string | null
-          revoked_by?: string | null
-          status?: string
-          worker_id: string
-        }
-        Update: {
-          claimed_at?: string | null
-          claimed_by?: string | null
-          created_at?: string
-          created_by?: string
-          expired_at?: string | null
-          expires_at?: string
-          id?: string
-          invitation_email?: string
-          invitation_token_hash?: string
-          channel?: string
-          auth_user_id?: string
-          revocation_reason?: string | null
-          revoked_at?: string | null
-          revoked_by?: string | null
-          status?: string
-          worker_id?: string
-        }
-        Relationships: []
-      }
-      worker_access_links: {
-        Row: {
-          activated_at: string
-          activated_by: string
-          created_at: string
-          id: string
-          invitation_id: string
-          profile_id: string
-          revocation_reason: string | null
-          revoked_at: string | null
-          revoked_by: string | null
-          status: string
-          suspended_at: string | null
-          suspended_by: string | null
-          suspension_reason: string | null
-          updated_at: string
-          worker_id: string
-        }
-        Insert: {
-          activated_at?: string
-          activated_by: string
-          created_at?: string
-          id?: string
-          invitation_id: string
-          profile_id: string
-          revocation_reason?: string | null
-          revoked_at?: string | null
-          revoked_by?: string | null
-          status?: string
-          suspended_at?: string | null
-          suspended_by?: string | null
-          suspension_reason?: string | null
-          updated_at?: string
-          worker_id: string
-        }
-        Update: {
-          activated_at?: string
-          activated_by?: string
-          created_at?: string
-          id?: string
-          invitation_id?: string
-          profile_id?: string
-          revocation_reason?: string | null
-          revoked_at?: string | null
-          revoked_by?: string | null
-          status?: string
-          suspended_at?: string | null
-          suspended_by?: string | null
-          suspension_reason?: string | null
-          updated_at?: string
-          worker_id?: string
-        }
-        Relationships: []
-      }
-      presences: {
-        Row: {
-          actual_assignment_id: string
-          arrived_at: string
-          cancellation_reason: string | null
-          cancelled_at: string | null
-          cancelled_by: string | null
-          completed_at: string | null
-          completed_by: string | null
-          corrected_at: string | null
-          corrected_by: string | null
-          correction_reason: string | null
-          created_at: string
-          created_by: string
-          departed_at: string | null
-          id: string
-          organization_id: string
-          replacement_id: string | null
-          schedule_entry_id: string
-          source: string
-          source_reference: string | null
-          status: string
-        }
-        Insert: {
-          actual_assignment_id: string
-          arrived_at: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
-          cancelled_by?: string | null
-          completed_at?: string | null
-          completed_by?: string | null
-          corrected_at?: string | null
-          corrected_by?: string | null
-          correction_reason?: string | null
-          created_at?: string
-          created_by: string
-          departed_at?: string | null
-          id?: string
-          organization_id: string
-          replacement_id?: string | null
-          schedule_entry_id: string
-          source: string
-          source_reference?: string | null
-          status?: string
-        }
-        Update: {
-          actual_assignment_id?: string
-          arrived_at?: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
-          cancelled_by?: string | null
-          completed_at?: string | null
-          completed_by?: string | null
-          corrected_at?: string | null
-          corrected_by?: string | null
-          correction_reason?: string | null
-          created_at?: string
-          created_by?: string
-          departed_at?: string | null
-          id?: string
-          organization_id?: string
-          replacement_id?: string | null
-          schedule_entry_id?: string
-          source?: string
-          source_reference?: string | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "presences_actual_assignment_id_fkey"
-            columns: ["actual_assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "presences_cancelled_by_fkey"
-            columns: ["cancelled_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "presences_completed_by_fkey"
-            columns: ["completed_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "presences_corrected_by_fkey"
-            columns: ["corrected_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "presences_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "presences_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "presences_replacement_id_fkey"
-            columns: ["replacement_id"]
-            isOneToOne: false
-            referencedRelation: "replacements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "presences_schedule_entry_id_fkey"
-            columns: ["schedule_entry_id"]
-            isOneToOne: false
-            referencedRelation: "schedule_entries"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      replacements: {
-        Row: {
-          absence_id: string
-          cancelled_at: string | null
-          cancelled_by: string | null
-          created_at: string
-          created_by: string
-          id: string
-          organization_id: string
-          replacement_assignment_id: string
-          status: string
-        }
-        Insert: {
-          absence_id: string
-          cancelled_at?: string | null
-          cancelled_by?: string | null
-          created_at?: string
-          created_by: string
-          id?: string
-          organization_id: string
-          replacement_assignment_id: string
-          status?: string
-        }
-        Update: {
-          absence_id?: string
-          cancelled_at?: string | null
-          cancelled_by?: string | null
-          created_at?: string
-          created_by?: string
-          id?: string
-          organization_id?: string
-          replacement_assignment_id?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "replacements_absence_id_fkey"
-            columns: ["absence_id"]
-            isOneToOne: false
-            referencedRelation: "absences"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "replacements_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "replacements_replacement_assignment_id_fkey"
-            columns: ["replacement_assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
         ]
@@ -797,6 +482,225 @@ export type Database = {
           },
         ]
       }
+      presences: {
+        Row: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          corrected_at: string | null
+          corrected_by: string | null
+          correction_reason: string | null
+          created_at: string
+          created_by: string
+          departed_at: string | null
+          id: string
+          organization_id: string
+          replacement_id: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference: string | null
+          status: string
+        }
+        Insert: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          corrected_at?: string | null
+          corrected_by?: string | null
+          correction_reason?: string | null
+          created_at?: string
+          created_by: string
+          departed_at?: string | null
+          id?: string
+          organization_id: string
+          replacement_id?: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference?: string | null
+          status?: string
+        }
+        Update: {
+          actual_assignment_id?: string
+          arrived_at?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          corrected_at?: string | null
+          corrected_by?: string | null
+          correction_reason?: string | null
+          created_at?: string
+          created_by?: string
+          departed_at?: string | null
+          id?: string
+          organization_id?: string
+          replacement_id?: string | null
+          schedule_entry_id?: string
+          source?: string
+          source_reference?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presences_actual_assignment_id_fkey"
+            columns: ["actual_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_corrected_by_fkey"
+            columns: ["corrected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_replacement_id_fkey"
+            columns: ["replacement_id"]
+            isOneToOne: false
+            referencedRelation: "replacements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_schedule_entry_id_fkey"
+            columns: ["schedule_entry_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      replacements: {
+        Row: {
+          absence_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          replacement_assignment_id: string
+          status: string
+        }
+        Insert: {
+          absence_id: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          organization_id: string
+          replacement_assignment_id: string
+          status?: string
+        }
+        Update: {
+          absence_id?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          replacement_assignment_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "replacements_absence_id_fkey"
+            columns: ["absence_id"]
+            isOneToOne: false
+            referencedRelation: "absences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replacements_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replacements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replacements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replacements_replacement_assignment_id_fkey"
+            columns: ["replacement_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schedule_entries: {
         Row: {
           assignment_id: string
@@ -910,6 +814,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "schedule_revisions_based_on_same_schedule_fkey"
+            columns: ["schedule_id", "based_on_revision_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_revisions"
+            referencedColumns: ["schedule_id", "id"]
+          },
+          {
             foreignKeyName: "schedule_revisions_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -991,27 +902,6 @@ export type Database = {
           },
         ]
       }
-      profiles: {
-        Row: {
-          created_at: string
-          display_name: string | null
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          display_name?: string | null
-          id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       units: {
         Row: {
           address: string | null
@@ -1058,6 +948,189 @@ export type Database = {
             columns: ["operation_id"]
             isOneToOne: false
             referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_access_invitations: {
+        Row: {
+          auth_user_id: string
+          channel: string
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          created_by: string
+          expired_at: string | null
+          expires_at: string
+          id: string
+          invitation_email: string
+          invitation_token_hash: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          worker_id: string
+        }
+        Insert: {
+          auth_user_id: string
+          channel?: string
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by: string
+          expired_at?: string | null
+          expires_at?: string
+          id?: string
+          invitation_email: string
+          invitation_token_hash: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          worker_id: string
+        }
+        Update: {
+          auth_user_id?: string
+          channel?: string
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string
+          expired_at?: string | null
+          expires_at?: string
+          id?: string
+          invitation_email?: string
+          invitation_token_hash?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_access_invitations_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_invitations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_invitations_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_invitations_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_access_links: {
+        Row: {
+          activated_at: string
+          activated_by: string
+          created_at: string
+          id: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          activated_at?: string
+          activated_by: string
+          created_at?: string
+          id?: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string
+          created_at?: string
+          id?: string
+          invitation_id?: string
+          profile_id?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_access_links_activated_by_fkey"
+            columns: ["activated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_links_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: true
+            referencedRelation: "worker_access_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_links_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_links_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_links_suspended_by_fkey"
+            columns: ["suspended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_access_links_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
             referencedColumns: ["id"]
           },
         ]
@@ -1117,187 +1190,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_worker_home: {
-        Args: Record<PropertyKey, never>
-        Returns: (WorkerScheduleRow & { home_slot: string })[]
-      }
-      get_worker_presence_action: {
-        Args: { schedule_entry_id: string }
-        Returns: string | null
-      }
-      get_worker_schedule_anchor_date: {
-        Args: Record<PropertyKey, never>
-        Returns: string | null
-      }
-      get_worker_schedule_entry: {
-        Args: { target_schedule_entry_id: string }
-        Returns: WorkerScheduleRow[]
-      }
-      list_worker_schedule: {
-        Args: { from_date: string; to_date: string }
-        Returns: WorkerScheduleRow[]
-      }
-      list_worker_presence_history: {
-        Args: {
-          before_arrived_at?: string | null
-          before_schedule_entry_id?: string | null
-          result_limit?: number
+      approve_schedule_revision: {
+        Args: { schedule_revision_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          based_on_revision_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          version: number
         }
-        Returns: WorkerPresenceHistoryRow[]
+        SetofOptions: {
+          from: "*"
+          to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      worker_complete_presence: {
-        Args: { idempotency_key: string; schedule_entry_id: string }
-        Returns: Json
-      }
-      worker_start_presence: {
+      build_audit_metadata: {
         Args: {
-          idempotency_key: string
-          schedule_entry_id: string
-          source_reference: string
+          new_row: Json
+          previous_row: Json
+          tracked_fields: string[]
+          visible_state_fields?: string[]
         }
         Returns: Json
-      }
-      claim_worker_access: {
-        Args: { invitation_token: string }
-        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "worker_access_links"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      claim_my_worker_access: {
-        Args: Record<PropertyKey, never>
-        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "worker_access_links"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      get_worker_access_administration: {
-        Args: { organization_id: string; worker_id: string }
-        Returns: {
-          invitation_email: string | null
-          invitation_expires_at: string | null
-          invitation_id: string | null
-          invitation_status: string | null
-          link_id: string | null
-          link_profile_id: string | null
-          link_status: string | null
-        }[]
-      }
-      get_worker_access_claim: {
-        Args: { invitation_token: string }
-        Returns: {
-          expires_at: string
-          invitation_email: string
-          worker_name: string
-        }[]
-      }
-      get_my_pending_worker_access_claim: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          expires_at: string
-          invitation_email: string
-          worker_name: string
-        }[]
-      }
-      get_my_worker_access_history_state: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          has_prior_access: boolean
-        }[]
-      }
-      get_my_worker_password_state: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          has_password: boolean
-        }[]
-      }
-      invite_worker_access: {
-        Args: {
-          organization_id: string
-          target_email: string
-          invitation_token_hash: string
-          target_auth_user_id: string
-          worker_id: string
-        }
-        Returns: Database["public"]["Tables"]["worker_access_invitations"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "worker_access_invitations"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      resolve_worker_access: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          organization_id: string
-          user_id: string
-          worker_id: string
-          worker_name: string
-        }[]
-      }
-      resume_worker_access: {
-        Args: { organization_id: string; worker_id: string }
-        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "worker_access_links"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      revoke_worker_access: {
-        Args: { organization_id: string; reason: string; worker_id: string }
-        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "worker_access_links"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      revoke_worker_access_invitation: {
-        Args: { invitation_id: string; organization_id: string; reason: string }
-        Returns: Database["public"]["Tables"]["worker_access_invitations"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "worker_access_invitations"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      suspend_worker_access: {
-        Args: { organization_id: string; reason: string; worker_id: string }
-        Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "worker_access_links"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      cancel_presence: {
-        Args: {
-          idempotency_key: string
-          organization_id: string
-          presence_id: string
-          reason: string
-          source?: string
-          source_reference?: string | null
-        }
-        Returns: Database["public"]["Tables"]["presences"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "presences"
-          isOneToOne: true
-          isSetofReturn: false
-        }
       }
       cancel_absence: {
         Args: { absence_id: string; organization_id: string }
@@ -1319,6 +1243,44 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancel_presence: {
+        Args: {
+          idempotency_key: string
+          organization_id: string
+          presence_id: string
+          reason: string
+          source?: string
+          source_reference?: string
+        }
+        Returns: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          corrected_at: string | null
+          corrected_by: string | null
+          correction_reason: string | null
+          created_at: string
+          created_by: string
+          departed_at: string | null
+          id: string
+          organization_id: string
+          replacement_id: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "presences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancel_replacement: {
         Args: { organization_id: string; replacement_id: string }
         Returns: {
@@ -1332,158 +1294,12 @@ export type Database = {
           replacement_assignment_id: string
           status: string
         }
-        SetofOptions: { from: "*"; to: "replacements"; isOneToOne: true; isSetofReturn: false }
-      }
-      create_absence: {
-        Args: {
-          notes?: string | null
-          organization_id: string
-          reason: string
-          schedule_entry_id: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          notes: string | null
-          organization_id: string
-          reason: string
-          reported_at: string
-          reported_by: string
-          schedule_entry_id: string
-          status: string
-        }
         SetofOptions: {
           from: "*"
-          to: "absences"
+          to: "replacements"
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      create_replacement: {
-        Args: { absence_id: string; assignment_id: string; organization_id: string }
-        Returns: {
-          absence_id: string
-          cancelled_at: string | null
-          cancelled_by: string | null
-          created_at: string
-          created_by: string
-          id: string
-          organization_id: string
-          replacement_assignment_id: string
-          status: string
-        }
-        SetofOptions: { from: "*"; to: "replacements"; isOneToOne: true; isSetofReturn: false }
-      }
-      complete_presence: {
-        Args: {
-          departed_at: string
-          idempotency_key: string
-          organization_id: string
-          presence_id: string
-          source?: string
-          source_reference?: string | null
-        }
-        Returns: Database["public"]["Tables"]["presences"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "presences"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      correct_presence: {
-        Args: {
-          arrived_at: string
-          departed_at: string | null
-          idempotency_key: string
-          organization_id: string
-          presence_id: string
-          reason: string
-          source?: string
-          source_reference?: string | null
-        }
-        Returns: Database["public"]["Tables"]["presences"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "presences"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      list_replacement_candidates: {
-        Args: { absence_id: string; organization_id: string }
-        Returns: {
-          assignment_id: string
-          worker_full_name: string
-          worker_id: string
-        }[]
-      }
-      list_presence_operational_day: {
-        Args: {
-          target_client_id?: string | null
-          target_contract_id?: string | null
-          target_date: string
-          target_organization_id: string
-        }
-        Returns: {
-          absence_id: string | null
-          absence_reason: string | null
-          actual_assignment_id: string | null
-          actual_worker_id: string | null
-          actual_worker_name: string | null
-          arrived_after_start: boolean
-          arrived_at: string | null
-          client_id: string
-          client_name: string
-          contract_id: string
-          contract_name: string
-          departed_at: string | null
-          departed_before_end: boolean
-          ends_at: string
-          job_role_id: string
-          job_role_name: string
-          operation_id: string
-          operation_name: string
-          operational_status: string
-          original_worker_id: string
-          original_worker_name: string
-          planned_assignment_id: string
-          position_id: string
-          presence_id: string | null
-          presence_status: string | null
-          replacement_assignment_id: string | null
-          replacement_id: string | null
-          replacement_worker_id: string | null
-          replacement_worker_name: string | null
-          schedule_entry_id: string
-          schedule_id: string
-          schedule_revision_id: string
-          starts_at: string
-          unit_id: string
-          unit_name: string
-          unit_timezone: string
-        }[]
-      }
-      list_uncovered_absence_ids: {
-        Args: {
-          client_id?: string | null
-          contract_id?: string | null
-          organization_id: string
-          result_limit?: number | null
-        }
-        Returns: {
-          absence_id: string
-          starts_at: string
-        }[]
-      }
-      build_audit_metadata: {
-        Args: {
-          new_row: Json
-          previous_row: Json
-          tracked_fields: string[]
-          visible_state_fields?: string[]
-        }
-        Returns: Json
       }
       change_organization_membership_with_audit: {
         Args: {
@@ -1507,33 +1323,181 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      has_organization_permission: {
-        Args: {
-          required_permission: string
-          target_organization_id: string
-        }
-        Returns: boolean
-      }
-      approve_schedule_revision: {
-        Args: { schedule_revision_id: string }
+      claim_my_worker_access: {
+        Args: never
         Returns: {
-          approved_at: string | null
-          approved_by: string | null
-          based_on_revision_id: string | null
+          activated_at: string
+          activated_by: string
           created_at: string
-          created_by: string
           id: string
-          published_at: string | null
-          published_by: string | null
-          schedule_id: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
           status: string
-          submitted_at: string | null
-          submitted_by: string | null
-          version: number
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          worker_id: string
         }
         SetofOptions: {
           from: "*"
-          to: "schedule_revisions"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      claim_worker_access: {
+        Args: { invitation_token: string }
+        Returns: {
+          activated_at: string
+          activated_by: string
+          created_at: string
+          id: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          worker_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      complete_presence: {
+        Args: {
+          departed_at: string
+          idempotency_key: string
+          organization_id: string
+          presence_id: string
+          source?: string
+          source_reference?: string
+        }
+        Returns: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          corrected_at: string | null
+          corrected_by: string | null
+          correction_reason: string | null
+          created_at: string
+          created_by: string
+          departed_at: string | null
+          id: string
+          organization_id: string
+          replacement_id: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "presences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      correct_presence: {
+        Args: {
+          arrived_at: string
+          departed_at: string
+          idempotency_key: string
+          organization_id: string
+          presence_id: string
+          reason: string
+          source?: string
+          source_reference?: string
+        }
+        Returns: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          corrected_at: string | null
+          corrected_by: string | null
+          correction_reason: string | null
+          created_at: string
+          created_by: string
+          departed_at: string | null
+          id: string
+          organization_id: string
+          replacement_id: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "presences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_absence: {
+        Args: {
+          notes?: string
+          organization_id: string
+          reason: string
+          schedule_entry_id: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reason: string
+          reported_at: string
+          reported_by: string
+          schedule_entry_id: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "absences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_replacement: {
+        Args: {
+          absence_id: string
+          assignment_id: string
+          organization_id: string
+        }
+        Returns: {
+          absence_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          replacement_assignment_id: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "replacements"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1564,8 +1528,8 @@ export type Database = {
       create_schedule_entry: {
         Args: {
           assignment_id: string
-          break_ends_at?: string | null
-          break_starts_at?: string | null
+          break_ends_at?: string
+          break_starts_at?: string
           ends_at: string
           schedule_revision_id: string
           starts_at: string
@@ -1632,9 +1596,250 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_my_pending_worker_access_claim: {
+        Args: never
+        Returns: {
+          expires_at: string
+          invitation_email: string
+          worker_name: string
+        }[]
+      }
+      get_my_worker_access_history_state: {
+        Args: never
+        Returns: {
+          has_prior_access: boolean
+        }[]
+      }
+      get_worker_access_administration: {
+        Args: { organization_id: string; worker_id: string }
+        Returns: {
+          invitation_email: string
+          invitation_expires_at: string
+          invitation_id: string
+          invitation_status: string
+          link_id: string
+          link_profile_id: string
+          link_status: string
+        }[]
+      }
+      get_worker_access_claim: {
+        Args: { invitation_token: string }
+        Returns: {
+          expires_at: string
+          invitation_email: string
+          worker_name: string
+        }[]
+      }
+      get_worker_home: {
+        Args: never
+        Returns: {
+          arrived_at: string
+          break_ends_at: string
+          break_starts_at: string
+          departed_at: string
+          ends_at: string
+          home_slot: string
+          job_role_name: string
+          journey_status: string
+          local_date: string
+          operation_name: string
+          presence_status: string
+          published_at: string
+          schedule_entry_id: string
+          schedule_version: number
+          starts_at: string
+          unit_address: string
+          unit_city: string
+          unit_name: string
+          unit_state: string
+          unit_timezone: string
+          was_republished: boolean
+        }[]
+      }
+      get_worker_presence_action: {
+        Args: { schedule_entry_id: string }
+        Returns: string
+      }
+      get_worker_schedule_anchor_date: { Args: never; Returns: string }
+      get_worker_schedule_entry: {
+        Args: { target_schedule_entry_id: string }
+        Returns: {
+          arrived_at: string
+          break_ends_at: string
+          break_starts_at: string
+          departed_at: string
+          ends_at: string
+          job_role_name: string
+          journey_status: string
+          local_date: string
+          operation_name: string
+          presence_status: string
+          published_at: string
+          schedule_entry_id: string
+          schedule_version: number
+          starts_at: string
+          unit_address: string
+          unit_city: string
+          unit_name: string
+          unit_state: string
+          unit_timezone: string
+          was_republished: boolean
+        }[]
+      }
+      has_organization_permission: {
+        Args: { required_permission: string; target_organization_id: string }
+        Returns: boolean
+      }
+      invite_worker_access: {
+        Args: {
+          invitation_token_hash: string
+          organization_id: string
+          target_auth_user_id: string
+          target_email: string
+          worker_id: string
+        }
+        Returns: {
+          auth_user_id: string
+          channel: string
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          created_by: string
+          expired_at: string | null
+          expires_at: string
+          id: string
+          invitation_email: string
+          invitation_token_hash: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          worker_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_invitations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_active_organization_member: {
         Args: { target_organization_id: string }
         Returns: boolean
+      }
+      list_presence_operational_day: {
+        Args: {
+          target_client_id?: string
+          target_contract_id?: string
+          target_date: string
+          target_organization_id: string
+        }
+        Returns: {
+          absence_id: string
+          absence_reason: string
+          actual_assignment_id: string
+          actual_worker_id: string
+          actual_worker_name: string
+          arrived_after_start: boolean
+          arrived_at: string
+          client_id: string
+          client_name: string
+          contract_id: string
+          contract_name: string
+          departed_at: string
+          departed_before_end: boolean
+          ends_at: string
+          job_role_id: string
+          job_role_name: string
+          operation_id: string
+          operation_name: string
+          operational_status: string
+          original_worker_id: string
+          original_worker_name: string
+          planned_assignment_id: string
+          position_id: string
+          presence_id: string
+          presence_status: string
+          replacement_assignment_id: string
+          replacement_id: string
+          replacement_worker_id: string
+          replacement_worker_name: string
+          schedule_entry_id: string
+          schedule_id: string
+          schedule_revision_id: string
+          starts_at: string
+          unit_id: string
+          unit_name: string
+          unit_timezone: string
+        }[]
+      }
+      list_replacement_candidates: {
+        Args: { absence_id: string; organization_id: string }
+        Returns: {
+          assignment_id: string
+          worker_full_name: string
+          worker_id: string
+        }[]
+      }
+      list_uncovered_absence_ids: {
+        Args: {
+          client_id?: string
+          contract_id?: string
+          organization_id: string
+          result_limit?: number
+        }
+        Returns: {
+          absence_id: string
+          starts_at: string
+        }[]
+      }
+      list_worker_presence_history: {
+        Args: {
+          before_arrived_at?: string
+          before_schedule_entry_id?: string
+          result_limit?: number
+        }
+        Returns: {
+          arrived_after_start: boolean
+          arrived_at: string
+          departed_at: string
+          departed_before_end: boolean
+          ends_at: string
+          job_role_name: string
+          local_date: string
+          operation_name: string
+          presence_status: string
+          schedule_entry_id: string
+          starts_at: string
+          unit_name: string
+          unit_timezone: string
+          worker_role: string
+        }[]
+      }
+      list_worker_schedule: {
+        Args: { from_date: string; to_date: string }
+        Returns: {
+          arrived_at: string
+          break_ends_at: string
+          break_starts_at: string
+          departed_at: string
+          ends_at: string
+          job_role_name: string
+          journey_status: string
+          local_date: string
+          operation_name: string
+          presence_status: string
+          published_at: string
+          schedule_entry_id: string
+          schedule_version: number
+          starts_at: string
+          unit_address: string
+          unit_city: string
+          unit_name: string
+          unit_state: string
+          unit_timezone: string
+          was_republished: boolean
+        }[]
       }
       mutate_assignment_with_audit: {
         Args: {
@@ -1719,6 +1924,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mutate_job_role_with_audit: {
+        Args: {
+          description?: string
+          entity_id?: string
+          name?: string
+          operation: string
+          organization_id?: string
+          target_status?: string
+        }
+        Returns: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "job_roles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       mutate_operation_with_audit: {
         Args: {
           contract_id?: string
@@ -1746,31 +1976,6 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "operations"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      mutate_job_role_with_audit: {
-        Args: {
-          description?: string
-          entity_id?: string
-          name?: string
-          operation: string
-          organization_id?: string
-          target_status?: string
-        }
-        Returns: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          organization_id: string
-          status: string
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "job_roles"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1892,6 +2097,41 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      resolve_worker_access: {
+        Args: never
+        Returns: {
+          organization_id: string
+          user_id: string
+          worker_id: string
+          worker_name: string
+        }[]
+      }
+      resume_worker_access: {
+        Args: { organization_id: string; worker_id: string }
+        Returns: {
+          activated_at: string
+          activated_by: string
+          created_at: string
+          id: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          worker_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       return_schedule_revision_to_draft: {
         Args: { schedule_revision_id: string }
         Returns: {
@@ -1912,6 +2152,97 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "schedule_revisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      revoke_worker_access: {
+        Args: { organization_id: string; reason: string; worker_id: string }
+        Returns: {
+          activated_at: string
+          activated_by: string
+          created_at: string
+          id: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          worker_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      revoke_worker_access_invitation: {
+        Args: { invitation_id: string; organization_id: string; reason: string }
+        Returns: {
+          auth_user_id: string
+          channel: string
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          created_by: string
+          expired_at: string | null
+          expires_at: string
+          id: string
+          invitation_email: string
+          invitation_token_hash: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          worker_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "worker_access_invitations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      start_presence: {
+        Args: {
+          arrived_at: string
+          idempotency_key: string
+          organization_id: string
+          schedule_entry_id: string
+          source?: string
+          source_reference?: string
+        }
+        Returns: {
+          actual_assignment_id: string
+          arrived_at: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          corrected_at: string | null
+          corrected_by: string | null
+          correction_reason: string | null
+          created_at: string
+          created_by: string
+          departed_at: string | null
+          id: string
+          organization_id: string
+          replacement_id: string | null
+          schedule_entry_id: string
+          source: string
+          source_reference: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "presences"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1940,19 +2271,28 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      start_presence: {
-        Args: {
-          arrived_at: string
-          idempotency_key: string
-          organization_id: string
-          schedule_entry_id: string
-          source?: string
-          source_reference?: string | null
+      suspend_worker_access: {
+        Args: { organization_id: string; reason: string; worker_id: string }
+        Returns: {
+          activated_at: string
+          activated_by: string
+          created_at: string
+          id: string
+          invitation_id: string
+          profile_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          worker_id: string
         }
-        Returns: Database["public"]["Tables"]["presences"]["Row"]
         SetofOptions: {
           from: "*"
-          to: "presences"
+          to: "worker_access_links"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1960,8 +2300,8 @@ export type Database = {
       update_schedule_entry: {
         Args: {
           assignment_id: string
-          break_ends_at?: string | null
-          break_starts_at?: string | null
+          break_ends_at?: string
+          break_starts_at?: string
           ends_at: string
           entry_id: string
           starts_at: string
@@ -1984,6 +2324,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      worker_complete_presence: {
+        Args: { idempotency_key: string; schedule_entry_id: string }
+        Returns: Json
+      }
+      worker_start_presence: {
+        Args: {
+          idempotency_key: string
+          schedule_entry_id: string
+          source_reference: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
@@ -2002,12 +2354,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2031,11 +2383,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2056,11 +2408,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2081,11 +2433,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2098,11 +2450,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2112,6 +2464,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

@@ -78,6 +78,7 @@ describe("Worker initial authentication flow", () => {
     const template = source("supabase/templates/worker-auth.html");
 
     expect(config).toMatch(/\[auth\.email\][\s\S]*otp_length = 8/);
+    expect(config).toMatch(/\[auth\][\s\S]*minimum_password_length = 8/);
     expect(config).toContain('site_url = "http://localhost:3000"');
     expect(config).toContain('"http://localhost:3000/worker/sign-in**"');
     expect(config).toContain('"http://localhost:3000/worker/reset-password**"');

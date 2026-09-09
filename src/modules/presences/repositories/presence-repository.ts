@@ -19,7 +19,7 @@ export async function startPresenceRecord(
     arrived_at: input.arrived_at,
     idempotency_key: input.idempotency_key,
     source: input.source,
-    source_reference: input.source_reference,
+    source_reference: input.source_reference ?? undefined,
   });
 }
 
@@ -34,7 +34,7 @@ export async function completePresenceRecord(
     departed_at: input.departed_at,
     idempotency_key: input.idempotency_key,
     source: input.source,
-    source_reference: input.source_reference,
+    source_reference: input.source_reference ?? undefined,
   });
 }
 
@@ -47,11 +47,13 @@ export async function correctPresenceRecord(
     organization_id: organizationId,
     presence_id: input.presence_id,
     arrived_at: input.arrived_at,
-    departed_at: input.departed_at,
+    // PostgreSQL accepts null here to clear an optional departure, although
+    // generated function argument types cannot represent parameter nullability.
+    departed_at: input.departed_at as string,
     reason: input.reason,
     idempotency_key: input.idempotency_key,
     source: input.source,
-    source_reference: input.source_reference,
+    source_reference: input.source_reference ?? undefined,
   });
 }
 
@@ -66,7 +68,7 @@ export async function cancelPresenceRecord(
     reason: input.reason,
     idempotency_key: input.idempotency_key,
     source: input.source,
-    source_reference: input.source_reference,
+    source_reference: input.source_reference ?? undefined,
   });
 }
 
@@ -102,10 +104,10 @@ export async function findPresenceOperationalDay(
     target_organization_id: organizationId,
     target_date: date,
     target_client_id:
-      operationalContext.type === "all" ? null : operationalContext.clientId,
+      operationalContext.type === "all" ? undefined : operationalContext.clientId,
     target_contract_id:
       operationalContext.type === "contract"
         ? operationalContext.contractId
-        : null,
+        : undefined,
   });
 }

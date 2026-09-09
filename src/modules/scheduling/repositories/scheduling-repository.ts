@@ -20,12 +20,21 @@ export async function createScheduleRecord(input: CreateScheduleInput) {
 
 export async function createEntryRecord(input: ScheduleEntryInput) {
   const supabase = await createServerSupabaseClient();
-  return supabase.rpc("create_schedule_entry", input);
+  return supabase.rpc("create_schedule_entry", {
+    ...input,
+    break_starts_at: input.break_starts_at ?? undefined,
+    break_ends_at: input.break_ends_at ?? undefined,
+  });
 }
 
 export async function updateEntryRecord(entryId: string, input: UpdateScheduleEntryInput) {
   const supabase = await createServerSupabaseClient();
-  return supabase.rpc("update_schedule_entry", { entry_id: entryId, ...input });
+  return supabase.rpc("update_schedule_entry", {
+    entry_id: entryId,
+    ...input,
+    break_starts_at: input.break_starts_at ?? undefined,
+    break_ends_at: input.break_ends_at ?? undefined,
+  });
 }
 
 export async function deleteEntryRecord(entryId: string) {

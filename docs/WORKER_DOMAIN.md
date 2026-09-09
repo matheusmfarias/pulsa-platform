@@ -1,11 +1,12 @@
 # Pulsa Platform — Pulsa Worker Domain & Architecture
 
-Status: contrato arquitetural da Fase 7; 7A e 7B implementadas, 7C planejada e 7D condicional
+Status: contrato arquitetural vigente da Fase 7; 7A, 7B, 7B.1, 7C, Pilot Polish e
+Worker Auth Hardening implementados; 7D planejada e condicionada à validação operacional
 
 ## 1. Decisão arquitetural
 
-Pulsa Worker será uma superfície mobile-first dentro do mesmo monólito modular Next.js e do
-mesmo projeto Supabase do Backoffice, mas terá uma fronteira própria de identidade,
+Pulsa Worker é uma superfície mobile-first dentro do mesmo monólito modular Next.js e do
+mesmo projeto Supabase do Backoffice, mas tem uma fronteira própria de identidade,
 autorização, rotas, serviços e RPCs.
 
 O compartilhamento termina no domínio operacional e na sessão de autenticação:
@@ -31,7 +32,7 @@ Decisões vinculantes:
 1. `Worker` continua não sendo um usuário de autenticação.
 2. `organization_members` continua exclusivo dos usuários internos do Backoffice. Não será
    criada a role `WORKER` no RBAC atual.
-3. O vínculo entre `auth.users`/`profiles` e `Worker` será uma entidade própria, histórica e
+3. O vínculo entre `auth.users`/`profiles` e `Worker` é uma entidade própria, histórica e
    revogável.
 4. O cliente nunca escolhe `Organization`, `Worker`, `Assignment` ou `Replacement`. O banco os
    resolve a partir de `auth.uid()` e do recurso solicitado.
@@ -57,7 +58,8 @@ A decisão parte do estado efetivamente implementado, e não apenas de documento
   do Backoffice;
 - tabelas protegidas não aceitam DML direto de `authenticated`; mutações críticas usam RPCs
   públicas protegidas, implementação privada e auditoria atômica;
-- `Worker` pertence a uma Organization, mas não possui vínculo com `auth.users`;
+- `Worker` pertence a uma Organization e seu acesso opcional a `auth.users` ocorre somente por
+  `worker_access_links`, nunca por associação automática;
 - `Assignment` preserva o contexto temporal `Worker → Position → Unit → Operation`;
 - Scheduling usa revisões imutáveis e considera oficial a revisão `published` de maior versão de
   cada `Schedule`;
@@ -78,8 +80,7 @@ Worker deliberadamente não terá.
 
 ### 3.1 Entidade de vínculo
 
-Uma futura migration deve criar `worker_access_links` (nome conceitual) separada de
-`organization_members`.
+A implementação usa `worker_access_links`, separada de `organization_members`.
 
 Campos conceituais mínimos:
 
@@ -129,8 +130,8 @@ seu próprio principal. Uma autoridade nunca é herdada pela outra.
 Esse é o estado normal de `Worker`: ausência de vínculo significa apenas “sem acesso ao Pulsa
 Worker”. Não altera status, Assignment, escala, ausência, substituição ou Presence.
 
-Convites pendentes devem ficar em uma entidade de segurança separada,
-`worker_access_invitations` (nome conceitual), para não criar um vínculo antes da prova de posse
+Convites pendentes ficam na entidade de segurança separada
+`worker_access_invitations`, para não criar um vínculo antes da prova de posse
 da conta. Campos mínimos:
 
 - `id` e `worker_id`;
@@ -145,23 +146,30 @@ Somente um convite pendente por Worker deve existir. Convites são curtos, de us
 revogáveis e protegidos contra tentativa repetida. Expiração pode ser materializada na transição
 ou derivada de `expires_at`; ela não deve depender de job agendado para ser segura.
 
-### 3.4 Claim inicial recomendado
+### 3.4 Provisionamento, autenticação inicial e claim
 
-O fluxo recomendado é:
+O fluxo implementado é:
 
 1. Um `DIRECTOR` com permission explícita `worker_access:manage` seleciona o Worker correto e
    confere o e-mail operacional.
-2. O sistema cria um convite de uso único, guarda somente o hash e envia o link/código ao e-mail
-   selecionado.
-3. A página de claim valida o convite antes de iniciar a criação/login por OTP. Respostas públicas
-   não revelam se Worker, conta ou e-mail existem.
-4. O usuário comprova posse do e-mail com OTP do Supabase Auth.
-5. Uma RPC transacional de claim confere novamente token, expiração, status, e-mail verificado,
+2. O sistema prepara administrativamente o Auth User, cria um convite de uso único, guarda
+   somente o hash e envia convite e OTP de oito dígitos ao e-mail selecionado.
+3. O usuário comprova posse do e-mail com o OTP. O deep-link com token continua suportado, mas
+   uma sessão autenticada também pode resolver exclusivamente seu próprio convite pendente por
+   `auth.uid()`, sem selecionar Worker, Organization ou e-mail.
+4. Respostas públicas não revelam se Worker, conta ou e-mail existem.
+5. Uma RPC transacional de claim confere novamente token quando presente, expiração, status,
+   e-mail verificado,
    Worker, unicidades e ausência de vínculo conflitante.
 6. A RPC cria o `profile` neutro se necessário, cria o vínculo `active`, marca o convite como
    `claimed` e registra auditoria na mesma transação.
-7. A partir daí, logins usam OTP com criação automática de usuário desabilitada; autenticar sem
-   vínculo ativo nunca concede acesso.
+7. Se não existe vínculo histórico para o profile, o primeiro claim segue para
+   `/worker/set-password`; o Worker define uma senha mínima de oito caracteres e entra na área.
+   Se existe vínculo histórico, inclusive revogado, o claim é uma reativação e retorna diretamente
+   à área Worker, preservando a senha já definida.
+8. Nos acessos posteriores, e-mail + senha é o fluxo principal. “Entrar com código” permanece
+   disponível como fallback, sempre com criação automática de usuário desabilitada. Autenticar
+   sem vínculo ativo nunca concede acesso.
 
 Somente Worker com `status = active` efetiva o claim na V1. Um convite pode ser preparado durante
 `onboarding`, mas não pode produzir acesso efetivo antes da ativação.
@@ -225,27 +233,33 @@ Histórico de vínculo e auditoria permanecem; nada é hard-deleted como fluxo n
 
 ## 4. Autenticação V1
 
-A V1 usará Supabase Auth com **OTP de seis dígitos por e-mail**, sem senha, precedido pelo convite
-descrito acima.
+A V1 usa Supabase Auth e compartilha a infraestrutura de sessão já existente, mantendo boundaries
+distintos para Backoffice e Worker. Não existe signup público: o Auth User é preparado apenas pelo
+fluxo administrativo de provisionamento de WorkerAccess.
 
-Razões:
+No primeiro acesso, o convite leva ao fluxo de e-mail + OTP de oito dígitos. O Worker pode informar
+um código já recebido ou solicitar um novo; `shouldCreateUser = false` impede que o login crie uma
+conta arbitrária. Após autenticar, o claim resolve o convite vinculado à própria conta. Conta sem
+histórico de WorkerAccess segue para `/worker/set-password`, onde define senha com mínimo de oito
+caracteres. A existência de senha no provedor não é usada para classificar primeiro acesso, pois o
+provisionamento administrativo pode gerar uma credencial interna aleatória.
 
-- reutiliza `@supabase/ssr`, cookies e refresh de sessão já existentes;
-- evita criação, recuperação e suporte de senhas para um público operacional;
-- o código pode ser digitado no mesmo navegador, evitando o problema de magic link abrir outro
-  navegador/perfil no celular;
-- e-mail OTP não exige contratar e operar um provedor SMS antes do piloto;
-- o claim separa prova do canal de autorização ao Worker.
+Nos acessos posteriores, `/worker/sign-in` usa e-mail + senha como mecanismo principal. “Entrar
+com código” mantém OTP por e-mail como fallback. “Esqueci minha senha” usa o recovery do Supabase,
+com resposta pública uniforme para não permitir enumeração, e a redefinição ocorre em rota Worker
+dedicada. A Conta oferece alteração de senha dentro do layout Worker autenticado.
 
-Magic link é suportado pelo stack, mas não será o método principal. Pode ser avaliado como
-fallback depois do piloto. Phone OTP tende a ser ergonomicamente bom em campo, porém exige
-provedor SMS/WhatsApp, rate limits, CAPTCHA, custos, tratamento de SIM swap e recuperação de
-número. Senha não será oferecida ao Worker na V1.
+Na reativação, vínculos revogados permanecem no histórico. Um novo convite e claim criam o novo
+vínculo, mas não obrigam redefinir a senha: a existência de qualquer `worker_access_links` histórico
+para o profile identifica a reativação e o fluxo retorna diretamente a `/worker`.
 
-Configuração de produção precisa incluir SMTP próprio, template de OTP, expiração curta,
-rate limit por IP/destino, proteção antiabuso e mensagens não enumeráveis. O app deve usar
-`shouldCreateUser = false` no login recorrente. A criação de usuário só pode ocorrer dentro do
-fluxo de claim previamente autorizado.
+OTP não é o único mecanismo recorrente de login. Magic link continua suportado pelo stack apenas
+como parte do transporte configurado do Supabase, sem ser a experiência principal. Phone OTP,
+MFA, PWA e canais SMS/WhatsApp permanecem fora da V1.
+
+Configuração de produção deve manter SMTP próprio, templates de OTP/recovery, expiração curta,
+rate limit por IP/destino, proteção antiabuso e mensagens não enumeráveis. Login, OTP ou recovery
+nunca concedem WorkerAccess por si só: a autorização continua resolvida no banco em cada request.
 
 O login interno atual permanece separado. A presença de uma sessão não decide o destino por si
 só: `/app` resolve membership interna; `/worker` resolve vínculo Worker. Um usuário sem a
@@ -266,7 +280,7 @@ Server Action → service → requirePermission()
 → RPC pública RBAC-protected → mutação + audit
 ```
 
-Pulsa Worker terá um fluxo distinto:
+Pulsa Worker usa um fluxo distinto:
 
 ```text
 Server Action / Server Component
@@ -315,14 +329,14 @@ As tabelas de convite/vínculo terão RLS habilitada e nenhum DML direto para `a
 Administração usa RPC auditada com `worker_access:manage`; claim usa uma RPC própria com prova de
 convite e de sessão, não uma permissão interna.
 
-### 5.4 Contratos de leitura sugeridos
+### 5.4 Contratos de leitura implementados
 
-Contratos conceituais, ainda sem assinatura SQL definitiva:
+Contratos públicos estreitos implementados:
 
 - `get_worker_home()`;
 - `list_worker_schedule(from_date, to_date)` com intervalo máximo e paginação;
 - `get_worker_schedule_entry(schedule_entry_id)`;
-- `list_worker_presences(cursor)`.
+- `list_worker_presence_history(limit, cursor)`.
 
 Nenhum recebe `organization_id` ou `worker_id`. Os DTOs não devem reutilizar o read model de
 Supervisor, porque `list_presence_operational_day` contém nomes e IDs de outros Workers,
@@ -332,7 +346,7 @@ Client/Contract e contexto administrativo desnecessário.
 
 A V1 permite exatamente:
 
-- claim de convite, login por OTP e logout;
+- claim de convite, login principal por senha, OTP de primeiro acesso/fallback, recovery e logout;
 - visualizar a jornada atual ou, quando não houver, a próxima jornada oficial;
 - visualizar a escala oficial própria por semana;
 - abrir detalhe de uma jornada própria;
@@ -597,7 +611,7 @@ Metadata é adequada para `actor_worker_id`/superfície porque o schema atual j�
 metadados variáveis de auditoria. Se consultas de auditoria por Worker demonstrarem volume que
 justifique coluna/index dedicado, isso pode evoluir depois.
 
-Também são auditadas, com tipos/ações adicionados por futura migration:
+Também são auditadas pelos contratos implementados de WorkerAccess:
 
 - criação/revogação/expiração/claim de convite;
 - ativação, suspensão, retomada e revogação de vínculo;
@@ -617,7 +631,8 @@ V1 é uma área mobile-first no mesmo Next.js/App Router:
 
 - mesmo repositório, deploy, Supabase Auth, banco e módulos de domínio;
 - route group e layout próprios;
-- módulo próprio `worker-access` para identidade e `worker-portal` para casos de uso;
+- módulos próprios `worker-access`, `worker-schedule` e `worker-presence` para identidade e casos
+  de uso;
 - nenhuma dependência da navegação, layout ou OperationalContext do Backoffice;
 - componentes visuais podem compartilhar primitives, não fluxos administrativos.
 
@@ -629,15 +644,20 @@ PWA instalável pode ser uma evolução pequena após o piloto, mas não deve pr
 offline. Service worker, fila local de Presence e reconciliação são outra capacidade e ficam fora
 da V1. A arquitetura de idempotência deixa esse caminho aberto.
 
-### 12.2 Rotas sugeridas
+### 12.2 Rotas implementadas
 
 ```text
 /worker/sign-in
 /worker/claim
+/worker/set-password     criação inicial de senha, em layout isolado
+/worker/forgot-password
+/worker/reset-password
 /worker                 Home / hoje e próximo
 /worker/schedule        escala oficial própria
 /worker/schedule/[entryId]
 /worker/history         Presence própria
+/worker/account
+/worker/account/password alteração de senha, no layout Worker normal
 ```
 
 `/worker` fica em layout autenticado próprio. `/worker/sign-in` e `/worker/claim` ficam fora
@@ -689,26 +709,15 @@ proteção real contra duplo toque/retry.
 IDs opacos reduzem descoberta casual, mas não substituem autorização. Segurança crítica vive no
 banco; esconder botão, validar rota ou filtrar em React nunca é controle suficiente.
 
-## 14. Compatibilidade e mudanças futuras necessárias
+## 14. Compatibilidade e evolução
 
-Migrations aplicadas são imutáveis. A implementação futura ocorrerá somente por novas
-migrations. Mudanças necessárias:
+As migrations aplicadas são imutáveis e toda evolução continua ocorrendo por novas migrations.
+O checkpoint da Fase 7 mantém implementados: convite e vínculo históricos, RLS e privilégios,
+administração auditada, claim token-based e tokenless, `private.require_worker_access()`, read
+models próprios, wrappers Worker de Presence, revogação no desligamento, auditoria e tipos
+gerados. A limpeza de contratos mortos também deve ocorrer por migration aditiva.
 
-1. criar `worker_access_invitations` e `worker_access_links`, lifecycle, constraints, índices,
-   RLS e privilégios;
-2. adicionar permissions internas `worker_access:read/manage`, inicialmente somente a
-   `DIRECTOR`, mantendo a matriz TypeScript/PostgreSQL sincronizada;
-3. criar RPCs auditadas de convite, claim, suspensão/retomada e revogação;
-4. garantir criação transacional de `profiles` no claim;
-5. criar `private.require_worker_access()` e RPCs de leitura minimizada;
-6. criar wrappers Worker de Presence e adaptar a implementação privada de 6A para receber e
-   auditar o Worker autoritativamente resolvido;
-7. ajustar a mutação auditada de `Worker` para que `terminated` revogue acesso na mesma transação;
-8. estender constraints de `audit_events` apenas com os novos entity types/actions necessários;
-9. gerar novamente `database.types.ts` depois das migrations;
-10. criar módulos e rotas separadas sem alterar `OperationalContext`.
-
-Não é necessário:
+Continua não sendo necessário:
 
 - alterar migrations antigas;
 - adicionar role `WORKER` a `organization_members`;
@@ -719,10 +728,9 @@ Não é necessário:
 - liberar SELECT direto nas tabelas operacionais;
 - criar principal técnico genérico de integração.
 
-Uma nuance necessária: as RPCs Worker podem acrescentar regra de autosserviço mais restrita
-(status do acesso, Worker, Assignment e janela temporal) sem modificar o que o Backoffice pode
-registrar pelo domínio 6A. Isso separa autorização do canal de invariantes universais da
-Presence.
+As RPCs Worker aplicam regras de autosserviço mais restritas (status do acesso, Worker,
+Assignment e janela temporal) sem modificar o que o Backoffice pode registrar pelo domínio 6A.
+Isso separa autorização do canal de invariantes universais da Presence.
 
 ## 15. Roadmap da Fase 7
 
@@ -815,6 +823,32 @@ Contratos implementados:
 - a saída deriva `source_reference` da Presence aberta e pode ocorrer após fim, mudança de data
   civil, supersessão da revisão ou encerramento posterior da Assignment;
 - Home e detalhe usam o mesmo controle de ação e revalidam as projeções no servidor.
+
+### Checkpoint — Pilot Polish — implementado
+
+Escopo entregue:
+
+- navegação mobile com Hoje, Escala, Histórico e Conta;
+- estados e microcopy operacionais consistentes para Home, detalhe e Presence;
+- conta e logout dentro do boundary Worker;
+- experiência controlada para acesso suspenso/revogado, sem converter erros inesperados em
+  indisponibilidade;
+- tela inicial de criação de senha isolada da navegação e alteração posterior dentro de Conta.
+
+### Checkpoint — Worker Auth Hardening — implementado
+
+Escopo entregue:
+
+- claim próprio por `auth.uid()` sem exigir token na URL, preservando o deep-link com token;
+- OTP de oito dígitos para primeiro acesso e fallback, sempre com `shouldCreateUser = false` no
+  login;
+- e-mail + senha como login recorrente principal, senha mínima de oito caracteres e recovery do
+  Supabase com resposta não enumerável;
+- primeiro acesso identificado pela ausência de qualquer `worker_access_links` histórico e
+  direcionado à criação inicial de senha;
+- reativação identificada por vínculo histórico, inclusive `revoked`, sem exigir nova senha;
+- `/worker/set-password` em layout isolado para onboarding e `/worker/account/password` no layout
+  Worker para alteração voluntária.
 
 ### 7D — Change Awareness / Acknowledgement — planejada/condicional
 

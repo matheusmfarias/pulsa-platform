@@ -19,7 +19,7 @@ export async function insertAbsence(
     organization_id: organizationId,
     schedule_entry_id: input.schedule_entry_id,
     reason: input.reason,
-    notes: input.notes,
+    notes: input.notes ?? undefined,
   });
 }
 
@@ -60,13 +60,13 @@ export async function findAbsences(
         organization_id: organizationId,
         client_id:
           operationalContext.type === "all"
-            ? null
+            ? undefined
             : operationalContext.clientId,
         contract_id:
           operationalContext.type === "contract"
             ? operationalContext.contractId
-            : null,
-        result_limit: options.limit ?? null,
+            : undefined,
+        result_limit: options.limit,
       },
     );
     if (selectionError) return { data: null, error: selectionError };
