@@ -1,6 +1,6 @@
 # Pulsa Platform — Pulsa Worker Domain & Architecture
 
-Status: contrato arquitetural da Fase 7; implementação não iniciada
+Status: contrato arquitetural da Fase 7; 7A e 7B implementadas, 7C planejada e 7D condicional
 
 ## 1. Decisão arquitetural
 
@@ -721,7 +721,7 @@ Presence.
 
 ## 15. Roadmap da Fase 7
 
-### 7A — Worker Identity & Access Foundation
+### 7A — Worker Identity & Access Foundation — implementada
 
 Escopo:
 
@@ -737,7 +737,7 @@ somente `/worker`, e perde acesso imediatamente por suspensão, revogação ou d
 reais cobrem claim repetido, conta/Worker já vinculados, token expirado, e-mail divergente,
 outro tenant e chamada direta.
 
-### 7B — Worker Today & Schedule
+### 7B — Worker Today & Schedule — implementada
 
 Escopo:
 
@@ -752,7 +752,20 @@ Critério de saída: o Worker responde “onde, quando, em qual posto e em qual 
 agora/próximo?” sem conseguir consultar outro Worker, outro tenant ou estados internos de
 Scheduling. Todos os casos A–E deste documento têm testes de autorização e projeção.
 
-### 7C — Worker Presence
+Contratos implementados:
+
+- `get_worker_home()` retorna jornada atual, outra jornada própria de hoje e próxima jornada;
+- `list_worker_schedule(from_date, to_date)` limita a consulta a 31 dias civis;
+- `get_worker_schedule_entry(schedule_entry_id)` prova pertencimento antes de devolver detalhe;
+- expectativa atual usa somente a revisão `published` de maior versão por Schedule;
+- detalhe de revisão superseded só permanece acessível quando há Presence própria válida;
+- classificação derivada: `original_expected`, `replacement_expected`, `original_absent`,
+  `original_replaced`, `in_progress` ou `completed`;
+- Presence `cancelled` não é projetada como realização;
+- nomes e IDs de outros Workers, Client, Contract, notas e dados administrativos não integram
+  os DTOs Worker.
+
+### 7C — Worker Presence — planejada
 
 Escopo:
 
@@ -767,7 +780,7 @@ Critério de saída: somente o Worker efetivamente esperado registra sua própri
 com retry seguro e trilha única de auditoria, sem informar Organization/Assignment/Replacement ou
 horário e sem contornar as invariantes da Fase 6A.
 
-### 7D — Change Awareness / Acknowledgement, condicional
+### 7D — Change Awareness / Acknowledgement — planejada/condicional
 
 Escopo inicial possível:
 
@@ -832,4 +845,3 @@ republicação; 7D só entra após o piloto comprovar necessidade de ciência pe
 12. Correção/cancelamento, Absence e Replacement continuam sob controle do Backoffice na V1.
 13. Auditoria distingue Auth User, Worker, app e ação sem duplicar o ledger de Presence.
 14. Ausência de Presence continua sendo desconhecido, nunca ausência automática.
-

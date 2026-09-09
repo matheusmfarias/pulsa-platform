@@ -16,12 +16,12 @@ describe("Worker OTP login", () => {
   });
 
   it("keeps Worker routes outside the Backoffice route group", () => {
-    const workerHome = readFileSync(
-      new URL("../../src/app/(worker-authenticated)/worker/page.tsx", import.meta.url),
+    const workerLayout = readFileSync(
+      new URL("../../src/app/(worker-authenticated)/worker/layout.tsx", import.meta.url),
       "utf8",
     );
-    expect(workerHome).toContain("requireWorkerAccess()");
-    expect(workerHome).not.toContain("OperationalContext");
-    expect(workerHome).not.toContain("requirePermission");
+    expect(workerLayout).toContain("requireWorkerAccess()");
+    expect(workerLayout).not.toContain("OperationalContext");
+    expect(workerLayout).not.toContain("requirePermission");
   });
 });

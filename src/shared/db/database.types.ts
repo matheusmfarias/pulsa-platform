@@ -6,6 +6,29 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type WorkerScheduleRow = {
+  arrived_at: string | null
+  break_ends_at: string | null
+  break_starts_at: string | null
+  departed_at: string | null
+  ends_at: string
+  job_role_name: string
+  journey_status: string
+  local_date: string
+  operation_name: string
+  presence_status: string | null
+  published_at: string
+  schedule_entry_id: string
+  schedule_version: number
+  starts_at: string
+  unit_address: string | null
+  unit_city: string | null
+  unit_name: string
+  unit_state: string | null
+  unit_timezone: string
+  was_republished: boolean
+}
+
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
@@ -1077,6 +1100,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_worker_home: {
+        Args: Record<PropertyKey, never>
+        Returns: (WorkerScheduleRow & { home_slot: string })[]
+      }
+      get_worker_schedule_entry: {
+        Args: { target_schedule_entry_id: string }
+        Returns: WorkerScheduleRow[]
+      }
+      list_worker_schedule: {
+        Args: { from_date: string; to_date: string }
+        Returns: WorkerScheduleRow[]
+      }
       claim_worker_access: {
         Args: { invitation_token: string }
         Returns: Database["public"]["Tables"]["worker_access_links"]["Row"]
