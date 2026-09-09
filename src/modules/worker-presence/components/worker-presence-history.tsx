@@ -31,7 +31,7 @@ export function WorkerPresenceHistory({
   if (page.entries.length === 0) {
     return (
       <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
-        Nenhuma presença registrada.
+        Você ainda não possui jornadas realizadas.
       </div>
     );
   }
@@ -43,8 +43,8 @@ export function WorkerPresenceHistory({
           className="rounded-xl border bg-card p-5 shadow-sm"
           key={`${entry.scheduleEntryId}-${entry.arrivedAt}`}
         >
-          <div className="flex items-start justify-between gap-3">
-            <div>
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
+            <div className="min-w-0">
               <p className="font-semibold capitalize">
                 {formatDate(entry.startsAt, entry.unitTimezone)}
               </p>
@@ -56,7 +56,7 @@ export function WorkerPresenceHistory({
               {entry.presenceStatus === "present" ? "Em andamento" : "Concluída"}
             </span>
           </div>
-          <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
+          <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-muted-foreground">Planejado</dt>
               <dd className="mt-1 font-medium tabular-nums">
@@ -72,11 +72,10 @@ export function WorkerPresenceHistory({
               </dd>
             </div>
           </dl>
-          <p className="mt-4 text-sm text-muted-foreground">
-            {entry.operationName} · {entry.workerRole === "replacement"
-              ? "Atuação como substituto"
-              : "Jornada original"}
-          </p>
+          <p className="mt-4 text-sm text-muted-foreground">{entry.operationName}</p>
+          {entry.workerRole === "replacement" ? (
+            <p className="mt-2 text-sm font-medium">Substituição</p>
+          ) : null}
           {entry.arrivedAfterStart ? (
             <p className="mt-2 text-sm">Chegada após o início previsto.</p>
           ) : null}
@@ -84,7 +83,7 @@ export function WorkerPresenceHistory({
             <p className="mt-1 text-sm">Saída antes do fim previsto.</p>
           ) : null}
           <Link
-            className="mt-3 inline-flex min-h-10 items-center font-medium text-action-primary underline-offset-4 hover:underline"
+            className="mt-3 inline-flex min-h-11 items-center rounded-sm font-medium text-action-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             href={`/worker/schedule/${entry.scheduleEntryId}`}
           >
             Ver jornada
@@ -92,7 +91,7 @@ export function WorkerPresenceHistory({
         </article>
       ))}
       {page.nextCursor ? (
-        <Button asChild className="w-full" variant="outline">
+        <Button asChild className="min-h-11 w-full" variant="outline">
           <Link href={`/worker/history?before=${encodeURIComponent(page.nextCursor.arrivedAt)}&entry=${page.nextCursor.scheduleEntryId}`}>
             Carregar registros anteriores
           </Link>

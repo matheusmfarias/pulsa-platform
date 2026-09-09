@@ -29,7 +29,7 @@ describe("Worker Schedule routes", () => {
     expect(`${layout}${schedule}${detail}`).not.toContain("OperationalContext");
   });
 
-  it("uses the Worker civil anchor only when start is absent", () => {
+  it("uses the Worker civil anchor as the default and Today destination", () => {
     const schedule = source(
       "src/app/(worker-authenticated)/worker/schedule/page.tsx",
     );
@@ -38,8 +38,9 @@ describe("Worker Schedule routes", () => {
     );
     expect(schedule).toContain("getWorkerScheduleAnchorDate()");
     expect(schedule).toMatch(
-      /validDate\(requestedStart\)[\s\S]*\? requestedStart[\s\S]*: await getWorkerScheduleAnchorDate\(\)/,
+      /const anchorDate = await getWorkerScheduleAnchorDate\(\)[\s\S]*validDate\(requestedStart\)[\s\S]*\? requestedStart[\s\S]*: anchorDate/,
     );
+    expect(schedule).toContain(">Hoje</Link>");
     expect(`${schedule}${domain}`).not.toContain("currentUtcDate");
   });
 });

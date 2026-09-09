@@ -29,8 +29,8 @@ export default async function WorkerScheduleEntryPage({
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-28 pt-8 sm:px-6 sm:pt-12">
-      <Link className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" href="/worker/schedule">
+    <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+      <Link className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" href="/worker/schedule">
         <ArrowLeft aria-hidden="true" className="size-4" />
         Voltar para minha escala
       </Link>

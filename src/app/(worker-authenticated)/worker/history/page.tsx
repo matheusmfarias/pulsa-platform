@@ -18,7 +18,7 @@ export default async function WorkerHistoryPage({
   });
 
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-28 pt-8 sm:px-6 sm:pt-12">
+    <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
       <p className="text-sm text-muted-foreground">Realização própria</p>
       <h1 className="mt-1 text-2xl font-semibold tracking-tight">Histórico</h1>
       <section aria-label="Histórico de presença" className="mt-6">

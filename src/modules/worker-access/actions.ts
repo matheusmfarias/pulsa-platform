@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { signOut } from "@/modules/auth/services/sign-out";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 import { logger } from "@/shared/logging";
 
@@ -85,6 +86,11 @@ export async function claimWorkerAccessAction(
     );
   }
   redirect("/worker");
+}
+
+export async function workerLogoutAction(): Promise<void> {
+  await signOut();
+  redirect("/worker/sign-in");
 }
 
 export async function provisionWorkerAccessAction(

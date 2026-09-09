@@ -47,24 +47,28 @@ function PresenceForm({
   return (
     <div className="mt-5 border-t pt-5">
       <form action={submit}>
-        <Button className="w-full sm:w-auto" disabled={pending} type="submit">
+        <Button className="h-12 w-full text-base sm:w-auto sm:min-w-52" disabled={pending} type="submit">
           {action === "start" ? (
             <LogIn aria-hidden="true" className="size-4" />
           ) : (
             <LogOut aria-hidden="true" className="size-4" />
           )}
           {pending
-            ? "Registrando…"
+            ? action === "start"
+              ? "Registrando chegada…"
+              : "Registrando saída…"
             : action === "start"
               ? "Registrar chegada"
               : "Registrar saída"}
         </Button>
       </form>
-      <p aria-live="polite" className="mt-2 text-sm">
+      <p aria-live="polite" className="mt-2 min-h-5 text-sm">
         {state.error ? (
           <span className="text-status-danger-foreground">{state.error}</span>
         ) : state.success ? (
-          <span className="text-muted-foreground">Registro atualizado.</span>
+          <span className="text-status-success-foreground">
+            {action === "start" ? "Chegada registrada." : "Saída registrada."}
+          </span>
         ) : null}
       </p>
     </div>

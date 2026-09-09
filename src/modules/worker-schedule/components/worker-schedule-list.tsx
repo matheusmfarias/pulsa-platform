@@ -5,7 +5,7 @@ export function WorkerScheduleList({ entries }: { entries: WorkerScheduleEntry[]
   if (entries.length === 0) {
     return (
       <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
-        Nenhuma jornada oficial neste período.
+        Nenhuma jornada nesta semana.
       </div>
     );
   }

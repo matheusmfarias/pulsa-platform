@@ -17,9 +17,10 @@ export default async function WorkerSchedulePage({
   searchParams,
 }: PageProps<"/worker/schedule">) {
   const requestedStart = (await searchParams).start;
+  const anchorDate = await getWorkerScheduleAnchorDate();
   const fromDate = validDate(requestedStart)
     ? requestedStart
-    : await getWorkerScheduleAnchorDate();
+    : anchorDate;
   const toDate = addCivilDays(fromDate, 6);
   const entries = await listWorkerSchedule({ fromDate, toDate });
 
@@ -32,23 +33,26 @@ export default async function WorkerSchedulePage({
   const endLabel = formatter.format(new Date(`${toDate}T12:00:00Z`));
 
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-28 pt-8 sm:px-6 sm:pt-12">
-      <div className="flex items-end justify-between gap-4">
+    <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground">Escala oficial</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">Minha escala</h1>
         </div>
-        <p className="text-sm font-medium capitalize">{startLabel} — {endLabel}</p>
+        <div className="sm:text-right">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Semana exibida</p>
+          <p className="mt-1 text-sm font-semibold capitalize">{startLabel} — {endLabel}</p>
+        </div>
       </div>
 
       <nav aria-label="Navegar entre semanas" className="mt-6 grid grid-cols-2 gap-3">
-        <Button asChild variant="outline">
+        <Button asChild className="min-h-11" variant="outline">
           <Link href={`/worker/schedule?start=${addCivilDays(fromDate, -7)}`}>
             <ChevronLeft aria-hidden="true" className="size-4" />
             Semana anterior
           </Link>
         </Button>
-        <Button asChild variant="outline">
+        <Button asChild className="min-h-11" variant="outline">
           <Link href={`/worker/schedule?start=${addCivilDays(fromDate, 7)}`}>
             Próxima semana
             <ChevronRight aria-hidden="true" className="size-4" />
@@ -56,7 +60,16 @@ export default async function WorkerSchedulePage({
         </Button>
       </nav>
 
-      <section aria-label="Jornadas da semana" className="mt-6">
+      {fromDate !== anchorDate ? (
+        <div className="mt-3 text-center">
+          <Button asChild className="min-h-11" variant="ghost">
+            <Link href={`/worker/schedule?start=${anchorDate}`}>Hoje</Link>
+          </Button>
+        </div>
+      ) : null}
+
+      <section aria-labelledby="worker-week-schedule" className="mt-6">
+        <h2 className="sr-only" id="worker-week-schedule">Jornadas da semana</h2>
         <WorkerScheduleList entries={entries} />
       </section>
     </main>

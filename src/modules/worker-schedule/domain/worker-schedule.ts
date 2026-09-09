@@ -47,10 +47,10 @@ export function addCivilDays(value: string, days: number): string {
 }
 
 export const WORKER_JOURNEY_LABELS: Record<WorkerJourneyStatus, string> = {
-  original_expected: "Você está escalado normalmente.",
+  original_expected: "Você está escalado para esta jornada.",
   replacement_expected: "Você está cobrindo esta jornada.",
-  original_absent: "Ausência registrada. Você não é esperado nesta jornada.",
-  original_replaced: "Esta jornada foi coberta. Você não é esperado nesta jornada.",
+  original_absent: "Você não é esperado nesta jornada.",
+  original_replaced: "Esta jornada foi coberta. Você não é esperado.",
   in_progress: "Jornada em andamento.",
   completed: "Jornada concluída.",
 };
