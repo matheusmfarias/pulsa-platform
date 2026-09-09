@@ -25,9 +25,10 @@ function PresenceForm({
 }) {
   const idempotencyKey = useRef<string | null>(null);
   const sourceReference = useRef<string | null>(null);
-  const serverAction = action === "start"
-    ? workerStartPresenceAction.bind(null, scheduleEntryId)
-    : workerCompletePresenceAction.bind(null, scheduleEntryId);
+  const serverAction =
+    action === "start"
+      ? workerStartPresenceAction.bind(null, scheduleEntryId)
+      : workerCompletePresenceAction.bind(null, scheduleEntryId);
   const [state, formAction, pending] = useActionState(
     serverAction,
     initialState,
@@ -47,9 +48,11 @@ function PresenceForm({
     <div className="mt-5 border-t pt-5">
       <form action={submit}>
         <Button className="w-full sm:w-auto" disabled={pending} type="submit">
-          {action === "start"
-            ? <LogIn aria-hidden="true" className="size-4" />
-            : <LogOut aria-hidden="true" className="size-4" />}
+          {action === "start" ? (
+            <LogIn aria-hidden="true" className="size-4" />
+          ) : (
+            <LogOut aria-hidden="true" className="size-4" />
+          )}
           {pending
             ? "Registrando…"
             : action === "start"
@@ -76,5 +79,12 @@ export function WorkerPresenceControl({
   scheduleEntryId: string;
 }) {
   if (!action) return null;
-  return <PresenceForm action={action} scheduleEntryId={scheduleEntryId} />;
+
+  return (
+    <PresenceForm
+      key={`${scheduleEntryId}:${action}`}
+      action={action}
+      scheduleEntryId={scheduleEntryId}
+    />
+  );
 }
