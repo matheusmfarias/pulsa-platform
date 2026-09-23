@@ -64,6 +64,17 @@ describe("Absence Backoffice", () => {
     ).toBeNull();
   });
 
+  it("falls back to the inherited reported Absence on a republished entry", () => {
+    expect(activeAbsenceForScheduleEntry({
+      absences: [{ id: "cancelled", reason: "personal", status: "cancelled" }],
+      inherited_absence: { id: "inherited", reason: "sick", status: "reported" },
+    } as never)).toMatchObject({ id: "inherited" });
+    expect(activeAbsenceForScheduleEntry({
+      absences: [],
+      inherited_absence: { id: "cancelled", reason: "sick", status: "cancelled" },
+    } as never)).toBeNull();
+  });
+
   it("exposes register and cancel actions only with their permissions", () => {
     expect(absenceActionsFor(null, new Set(["absence:create"]))).toEqual([
       "register",

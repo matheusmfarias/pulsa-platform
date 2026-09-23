@@ -710,6 +710,7 @@ export type Database = {
           created_by: string
           ends_at: string
           id: string
+          inherited_absence_id: string | null
           schedule_revision_id: string
           starts_at: string
         }
@@ -721,6 +722,7 @@ export type Database = {
           created_by: string
           ends_at: string
           id?: string
+          inherited_absence_id?: string | null
           schedule_revision_id: string
           starts_at: string
         }
@@ -732,6 +734,7 @@ export type Database = {
           created_by?: string
           ends_at?: string
           id?: string
+          inherited_absence_id?: string | null
           schedule_revision_id?: string
           starts_at?: string
         }
@@ -748,6 +751,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_entries_inherited_absence_id_fkey"
+            columns: ["inherited_absence_id"]
+            isOneToOne: false
+            referencedRelation: "absences"
             referencedColumns: ["id"]
           },
           {
