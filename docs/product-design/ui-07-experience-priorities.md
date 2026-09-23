@@ -1,6 +1,6 @@
 # UI-07 — Experiência orientada ao trabalho
 
-Status: duas rodadas implementadas; observação com usuários ainda pendente.
+Status: três rodadas implementadas; observação com usuários ainda pendente.
 
 ## Problema observado
 
@@ -74,12 +74,28 @@ ser criada apenas com base na aparência da interface.
 As páginas de Ausências, Presença e Colaborador foram conferidas no navegador
 do ambiente de teste. Nenhum registro operacional foi alterado nesta rodada.
 
+## Terceira rodada
+
+- A criação de Escalas explica que o resultado é um rascunho, diferencia começar
+  vazio de copiar uma escala publicada e orienta a conferência das jornadas
+  antes de enviar para aprovação.
+- O formulário sinaliza período invertido, sobreposição conhecida e ausência de
+  escala de origem antes do envio; erros de campo deixam de permanecer visíveis
+  após a pessoa corrigir o campo.
+- A seção de revisão usa termos operacionais e mostra a consequência de publicar.
+  A publicação exige uma confirmação explícita na própria tela.
+- A criação e edição de Alocações explicam o período aberto, mostram os estados
+  dos colaboradores em português e indicam o retorno ao detalhe após salvar.
+
+Os formulários e a validação obrigatória foram conferidos no navegador do
+ambiente de teste. Nenhum registro operacional foi criado nesta rodada.
+
 ## Próximo ciclo de desenho
 
 - Observar com Operações e RH os percursos desta segunda rodada sem fornecer o
   manual antes; usar as dúvidas reais para priorizar as próximas mudanças.
-- Revisar as telas de criação e edição de escala e alocação, em especial
-  validações, consequências de publicação e retorno após salvar.
+- Observar com Operações e RH a criação de escala e alocação e a publicação de
+  uma revisão, verificando se as consequências estão claras antes da ação.
 - Avaliar em telefone real a escala, o registro de presença e os estados vazios
   do Worker; ajustar densidade e texto com base em observação.
 - Validar com as diretorias a nomenclatura dos módulos e os atalhos mais usados

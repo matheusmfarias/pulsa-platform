@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import type { Permission } from "@/modules/authorization";
 
 import { transitionScheduleRevisionAction, type ScheduleActionState } from "../actions";
@@ -28,5 +29,16 @@ export function ScheduleRevisionActions({ scheduleId, revisionId, status, permis
 
 function RevisionActionButton({ scheduleId, revisionId, action, label }: { scheduleId: string; revisionId: string; action: "submit" | "approve" | "return" | "publish" | "copy"; label: string }) {
   const [state, formAction, pending] = useActionState(transitionScheduleRevisionAction.bind(null, scheduleId, revisionId, action), initialState);
-  return <div><form action={formAction}><Button disabled={pending} size="sm" type="submit" variant="outline">{pending ? "Atualizando…" : label}</Button></form>{state.error ? <p className="mt-2 text-sm text-destructive">{state.error}</p> : null}</div>;
+  const [confirming, setConfirming] = useState(false);
+  if (action === "publish" && !confirming) {
+    return <Button onClick={() => setConfirming(true)} size="sm" type="button" variant="outline">{label}</Button>;
+  }
+  return <div className={action === "publish" ? "w-full" : undefined}>
+    {action === "publish" ? <FeedbackMessage className="mb-3" variant="warning">Esta revisão passará a ser a versão oficial da escala. Confira as jornadas e eventuais ausências e coberturas antes de confirmar.</FeedbackMessage> : null}
+    <div className="flex flex-wrap gap-2">
+      {action === "publish" ? <Button disabled={pending} onClick={() => setConfirming(false)} size="sm" type="button" variant="ghost">Voltar</Button> : null}
+      <form action={formAction}><Button disabled={pending} size="sm" type="submit" variant="outline">{pending ? "Atualizando…" : action === "publish" ? "Confirmar publicação" : label}</Button></form>
+    </div>
+    {state.error ? <p className="mt-2 text-sm text-destructive" role="alert">{state.error}</p> : null}
+  </div>;
 }

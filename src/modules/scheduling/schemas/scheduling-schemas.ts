@@ -17,7 +17,7 @@ export const scheduleEntryIdSchema = z.uuid("Entrada de escala inválida.");
 export const createScheduleSchema = z
   .object({
     organization_id: z.uuid("Organização inválida."),
-    operation_id: z.uuid("Operação inválida."),
+    operation_id: z.uuid("Selecione uma operação válida."),
     period_start: dateSchema,
     period_end: dateSchema,
   })

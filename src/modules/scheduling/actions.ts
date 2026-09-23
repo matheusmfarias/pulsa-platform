@@ -24,7 +24,7 @@ import {
   updateScheduleEntry,
 } from "./services/scheduling-services";
 
-type ScheduleField = "operation_id" | "period_start" | "period_end";
+type ScheduleField = "operation_id" | "period_start" | "period_end" | "source_schedule_id";
 
 export type ScheduleActionState = {
   error: string | null;
