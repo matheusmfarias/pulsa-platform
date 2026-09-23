@@ -105,7 +105,7 @@ export function WorkerTable({
                   <div className="mt-1.5 space-y-0.5 font-normal text-xs leading-5 text-muted-foreground sm:hidden">
                     <p className="tabular-nums">CPF {formatCpf(worker.document_number)}</p>
                     <p className="max-w-52 truncate">{contactLabel(worker)}</p>
-                    <p className="max-w-52 truncate">
+                    <p className="break-words">
                       <AssignmentSummary compact worker={worker} />
                     </p>
                   </div>
