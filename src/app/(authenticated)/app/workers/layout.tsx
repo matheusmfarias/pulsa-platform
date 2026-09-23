@@ -1,5 +1,11 @@
 export default function WorkersLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  drawer,
+}: Readonly<{ children: React.ReactNode; drawer: React.ReactNode }>) {
+  return (
+    <>
+      {children}
+      {drawer}
+    </>
+  );
 }

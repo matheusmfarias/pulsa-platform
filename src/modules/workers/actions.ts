@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { z } from "zod";
 
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
@@ -12,6 +12,11 @@ import { workerIdSchema, workerInputSchema } from "./schemas/worker-schemas";
 import { changeWorkerStatus } from "./services/change-worker-status";
 import { createWorker } from "./services/create-worker";
 import { updateWorker } from "./services/update-worker";
+import {
+  parseWorkerListSearchParams,
+  WORKER_CREATED_FEEDBACK,
+  workerListHref,
+} from "./components/worker-list-filters";
 
 type WorkerField =
   | "full_name"
@@ -71,6 +76,55 @@ export async function createWorkerAction(
 
   revalidatePath("/app/workers");
   redirect(`/app/workers/${workerId}`);
+}
+
+function safeWorkerListReturnHref(returnHref: string): string {
+  const baseUrl = new URL("https://pulsa.invalid");
+
+  try {
+    const destination = new URL(returnHref, baseUrl);
+    if (
+      destination.origin !== baseUrl.origin ||
+      destination.pathname !== "/app/workers"
+    ) {
+      return "/app/workers";
+    }
+
+    const filters = parseWorkerListSearchParams({
+      q: destination.searchParams.get("q") ?? undefined,
+      status: destination.searchParams.get("status") ?? undefined,
+    });
+    return workerListHref("/app/workers", filters);
+  } catch {
+    return "/app/workers";
+  }
+}
+
+function workerCreatedReturnHref(returnHref: string): string {
+  const destination = new URL(
+    safeWorkerListReturnHref(returnHref),
+    "https://pulsa.invalid",
+  );
+  destination.searchParams.set("feedback", WORKER_CREATED_FEEDBACK);
+  return `${destination.pathname}${destination.search}`;
+}
+
+export async function createWorkerInDrawerAction(
+  returnHref: string,
+  _previousState: WorkerActionState,
+  formData: FormData,
+): Promise<WorkerActionState> {
+  const input = readWorkerInput(formData);
+  if (!input.success) return invalidInputState(input.error);
+
+  try {
+    await createWorker(input.data);
+  } catch (error) {
+    return actionErrorState(error, "create_worker");
+  }
+
+  revalidatePath("/app/workers");
+  redirect(workerCreatedReturnHref(returnHref), RedirectType.replace);
 }
 
 export async function updateWorkerAction(

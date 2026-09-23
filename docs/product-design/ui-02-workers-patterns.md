@@ -3,6 +3,17 @@
 Este registro documenta decisões observadas e validadas no módulo Workers. Ele
 orienta fases futuras, mas não autoriza replicação automática em outros módulos.
 
+Status: Golden
+
+Golden screen: `/app/workers`
+
+Estados futuros possíveis: Draft → Golden → Adopted.
+
+`/app/workers` é a golden screen inicial do Core List Pattern. Enquanto o
+pattern estiver em Draft, essa tela será o laboratório para validar sua
+composição visual, responsividade e maturidade antes da adoção por outras
+listagens.
+
 ## List View
 
 - Ordem estrutural: contexto e ação principal, controles de refino, quantidade
@@ -14,28 +25,40 @@ orienta fases futuras, mas não autoriza replicação automática em outros mód
 ## Filter Bar
 
 - Busca e status permanecem em uma única superfície compacta.
-- Filtros ativos são descritos em texto e sempre possuem ação explícita para
-  limpeza.
+- A busca continua sendo o controle prioritário.
+- Busca aplica automaticamente após um debounce curto e status aplica no
+  momento da seleção; a listagem não possui etapa ou botão de aplicação.
+- A URL permanece como fonte de verdade dos filtros e é atualizada pelo App
+  Router sem scroll ou reload perceptível da página inteira.
+- Filtros aplicados devem permanecer visualmente claros; preferir chips
+  discretos e individualmente removíveis para filtros ativos.
+- Deve existir uma forma clara de limpar filtros.
 - O estado sem resultados diferencia ausência de cadastro de ausência de
   correspondências.
-- Novos filtros só devem ser adicionados com fonte de dados confiável e ganho
-  operacional demonstrável.
+- Não adicionar filtros sem suporte real de dados e backend.
 
 ## Table
 
 - A tabela usa cabeçalho discreto, linhas de densidade confortável, divisores,
   hover e foco na linha.
 - O container tabular é uma região nomeada e focável para navegação por teclado.
-- No mobile, a tabela não vira coleção de cards: dados secundários são agrupados
-  na célula de identificação, preservando nome, CPF, contato, alocação, status e
-  ação sem overflow.
-- Em telas amplas, os mesmos dados voltam a colunas próprias.
+- A identificação humana continua sendo prioritária.
+- Preservar contexto é prioridade na escolha da estratégia responsiva.
+- O agrupamento de dados secundários na célula principal continua válido em
+  telas estreitas.
+- Overflow horizontal é aceitável quando preservar colunas melhora a comparação
+  entre registros.
+- Quando pertinente, ScrollShadow deve indicar o overflow horizontal real.
+- Ainda não há uma única estratégia responsiva definitiva. A golden screen
+  `/app/workers` será usada para validar a solução final.
 
 ## Empty, loading e error
 
 - Ausência de cadastro pode oferecer o CTA principal quando o RBAC permitir.
 - Ausência por filtro orienta ajuste ou limpeza dos filtros.
 - Loading replica a geometria da página para reduzir mudança brusca de layout.
+- Mudanças de filtro mantêm cabeçalho e toolbar estáveis; o estado pending e o
+  loading ficam restritos à região de resultados.
 - Erros usam FeedbackMessage, linguagem operacional e ação de nova tentativa.
 
 ## Row actions
@@ -57,8 +80,23 @@ orienta fases futuras, mas não autoriza replicação automática em outros mód
 
 ## Form
 
-- Campos são agrupados semanticamente em Identificação e Contato e vínculo.
+- Formulários de página agrupam Identificação e Contato e vínculo; no drawer
+  de criação, Identificação, Contato e Vínculo permanecem seções distintas.
 - A ação primária fica no final; Cancelar é secundária e retorna ao contexto
   adequado de criação ou edição.
 - Required, optional, ajuda e erros continuam governados pelos primitives da
   Foundation V1.
+
+## Criação contextual
+
+- A criação curta acontece em drawer sobre o workspace, não em uma página
+  visualmente independente.
+- `/app/workers/new` representa a listagem de colaboradores com o drawer de
+  criação aberto; filtros relevantes permanecem expressos na URL.
+- Header e footer ficam fixos, enquanto o body pode usar ScrollShadow quando
+  houver overflow real.
+- Em telas pequenas, o mesmo drawer ocupa praticamente toda a viewport.
+- Drawers de formulário preservam o contexto visível e confirmam o descarte
+  somente quando existirem alterações ainda não salvas.
+- Criações concluídas usam feedback de sucesso discreto por toast, sem bloquear
+  a continuidade do trabalho.

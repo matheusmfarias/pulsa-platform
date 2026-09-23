@@ -9,6 +9,13 @@ const containerWidths = {
   form: "max-w-5xl",
 } as const;
 
+const outerContainerWidths = {
+  list: "max-w-[84rem]",
+  detail: "max-w-7xl",
+  "detail-wide": "max-w-7xl",
+  form: "max-w-7xl",
+} as const;
+
 export type ContentContainerSize = keyof typeof containerWidths;
 
 export function PageShell({
@@ -28,7 +35,12 @@ export function ContentContainer({
   ...props
 }: ContentContainerProps) {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div
+      className={cn(
+        "mx-auto w-full px-4 sm:px-6 lg:px-8",
+        outerContainerWidths[size],
+      )}
+    >
       <div
         className={cn("w-full", containerWidths[size], className)}
         {...props}

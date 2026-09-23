@@ -7,7 +7,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function WorkersError({ reset }: { reset: () => void }) {
   return (
-    <PageShell>
+    <PageShell className="py-7 sm:py-8">
       <ContentContainer size="list">
         <PageHeader
           description="A área de colaboradores encontrou uma falha inesperada."

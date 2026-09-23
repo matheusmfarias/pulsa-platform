@@ -2,11 +2,10 @@ import {
   NewWorkerDrawer,
   parseWorkerListSearchParams,
   workerListHref,
-  WorkersWorkspace,
   type WorkerListSearchParams,
 } from "@/modules/workers";
 
-export default async function NewWorkerPage({
+export default async function InterceptedNewWorkerPage({
   searchParams,
 }: {
   searchParams: Promise<WorkerListSearchParams>;
@@ -14,10 +13,5 @@ export default async function NewWorkerPage({
   const filters = parseWorkerListSearchParams(await searchParams);
   const returnHref = workerListHref("/app/workers", filters);
 
-  return (
-    <>
-      <WorkersWorkspace filters={filters} />
-      <NewWorkerDrawer returnHref={returnHref} />
-    </>
-  );
+  return <NewWorkerDrawer closeMode="back" returnHref={returnHref} />;
 }

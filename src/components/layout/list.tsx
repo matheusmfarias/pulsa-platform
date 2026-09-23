@@ -10,7 +10,7 @@ export function ListFilterBar({
   return (
     <form
       className={cn(
-        "mt-6 rounded-surface border border-border-default bg-surface p-4",
+        "mt-6 rounded-surface border border-border-default bg-surface p-3 sm:p-4",
         className,
       )}
       method={method}
@@ -46,6 +46,22 @@ export function ActiveFiltersSummary({
   );
 }
 
+export function ActiveFilters({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      aria-label="Filtros ativos"
+      className={cn(
+        "flex flex-wrap items-center gap-2 border-t border-border-default pt-3",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
 export function ListResultSummary({
   className,
   ...props
@@ -64,24 +80,26 @@ export function ListResultSummary({
 
 export function ListEmptyState({
   title,
+  titleId,
   description,
   action,
   className,
   ...props
 }: Omit<React.ComponentProps<"section">, "title"> & {
   title: React.ReactNode;
+  titleId?: string;
   description?: React.ReactNode;
   action?: React.ReactNode;
 }) {
   return (
     <section
       className={cn(
-        "mt-4 border-y border-dashed border-border-strong px-4 py-10 text-center",
+        "mt-3 border-y border-dashed border-border-strong px-4 py-10 text-center sm:py-12",
         className,
       )}
       {...props}
     >
-      <h2 className="font-medium">{title}</h2>
+      <h2 className="font-semibold" id={titleId}>{title}</h2>
 
       {description ? (
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">

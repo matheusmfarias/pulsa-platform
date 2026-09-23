@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { ScrollShadow } from "@/components/ui/scroll-shadow";
 import { cn } from "@/shared/utils";
 
 export function TableFrame({
@@ -19,24 +20,48 @@ export function TableFrame({
 
 export interface TableScrollAreaProps extends React.ComponentProps<"div"> {
   label: string;
+  shadow?: boolean;
 }
 
 export function TableScrollArea({
   className,
   label,
+  shadow = false,
+  children,
   ...props
 }: TableScrollAreaProps) {
+  const scrollAreaClassName = cn(
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring",
+    className,
+  );
+
+  if (shadow) {
+    return (
+      <ScrollShadow
+        aria-label={label}
+        role="region"
+        scrollAreaClassName={scrollAreaClassName}
+        tabIndex={0}
+        {...props}
+      >
+        {children}
+      </ScrollShadow>
+    );
+  }
+
   return (
     <div
       aria-label={label}
       className={cn(
-        "overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring",
-        className,
+        "overflow-x-auto",
+        scrollAreaClassName,
       )}
       role="region"
       tabIndex={0}
       {...props}
-    />
+    >
+      {children}
+    </div>
   );
 }
 
@@ -51,7 +76,7 @@ export function TableHeader({
   return (
     <thead
       className={cn(
-        "border-b border-border-default bg-subtle/70 text-xs uppercase tracking-wide text-muted-foreground",
+        "border-b border-border-default bg-subtle/60 text-[0.6875rem] uppercase tracking-[0.06em] text-muted-foreground",
         className,
       )}
       {...props}
@@ -65,7 +90,7 @@ export function TableBody({
 }: React.ComponentProps<"tbody">) {
   return (
     <tbody
-      className={cn("divide-y divide-border-default", className)}
+      className={cn("divide-y divide-border-default/80", className)}
       {...props}
     />
   );
@@ -75,7 +100,7 @@ export function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
       className={cn(
-        "transition-colors hover:bg-hover focus-within:bg-hover",
+        "transition-colors hover:bg-hover/60 focus-within:bg-hover/60",
         className,
       )}
       {...props}
@@ -90,7 +115,7 @@ export function TableHead({
   return (
     <th
       className={cn(
-        "h-11 whitespace-nowrap px-4 text-left align-middle font-medium",
+        "h-10 whitespace-nowrap px-4 text-left align-middle font-semibold",
         className,
       )}
       {...props}
