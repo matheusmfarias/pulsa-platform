@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 
 import {
   WORKER_JOURNEY_LABELS,
-  WORKER_JOURNEY_SHORT_LABELS,
   type WorkerScheduleEntry,
 } from "../domain/worker-schedule";
+import { WorkerJourneyBadge } from "./worker-journey-badge";
 import {
   formatScheduleUpdate,
   formatUnitLocation,
@@ -31,16 +31,17 @@ export function WorkerScheduleEntryDetail({
 }) {
   const location = formatUnitLocation(entry);
   return (
-    <article className="rounded-xl border bg-card p-5 shadow-sm sm:p-8">
+    <article className="rounded-surface border border-border-default bg-surface p-5 sm:p-8">
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
         <div>
           <p className="capitalize text-muted-foreground">{formatWorkerDate(entry.startsAt, entry.unitTimezone)}</p>
-          <h1 className="mt-2 whitespace-nowrap text-3xl font-semibold tracking-tight tabular-nums">{formatWorkerTime(entry.startsAt, entry.unitTimezone)} — {formatWorkerTime(entry.endsAt, entry.unitTimezone)}</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{formatWorkerTime(entry.startsAt, entry.unitTimezone)} — {formatWorkerTime(entry.endsAt, entry.unitTimezone)}</h1>
         </div>
-        <span className="rounded-full border px-3 py-1 text-sm font-medium">{WORKER_JOURNEY_SHORT_LABELS[entry.journeyStatus]}</span>
+        <WorkerJourneyBadge status={entry.journeyStatus} />
       </div>
-      <p className="mt-6 rounded-lg bg-muted/60 p-4 text-sm leading-6">{WORKER_JOURNEY_LABELS[entry.journeyStatus]}</p>
-      <dl className="mt-8 grid gap-6 sm:grid-cols-2">
+      <p className="mt-6 rounded-control bg-subtle p-4 text-sm font-medium leading-6">{WORKER_JOURNEY_LABELS[entry.journeyStatus]}</p>
+      <h2 className="mt-8 border-b border-border-default pb-3 text-sm font-semibold">Informações da jornada</h2>
+      <dl className="mt-5 grid gap-6 sm:grid-cols-2">
         <Item label="Unidade" value={entry.unitName} />
         <Item label="Cargo / posto" value={entry.jobRoleName} />
         <Item label="Operação" value={entry.operationName} />

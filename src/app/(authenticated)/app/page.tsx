@@ -3,7 +3,10 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   Building2,
+  CalendarDays,
+  CalendarX2,
   CheckCircle2,
+  ClipboardCheck,
   Gauge,
   Link2,
   MapPin,
@@ -45,7 +48,7 @@ export default async function InternalHomePage() {
       <PageShell>
         <ContentContainer size="list">
           <PageHeader
-            description="Resumo da estrutura e das principais pendências operacionais."
+            description="Veja o que precisa de atenção e acesse as tarefas do dia."
             title="Visão geral"
           />
 
@@ -116,7 +119,7 @@ export default async function InternalHomePage() {
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
-          description="Resumo da estrutura e das principais pendências operacionais."
+          description="Veja o que precisa de atenção e acesse as tarefas do dia."
           title="Visão geral"
         />
 
@@ -228,6 +231,37 @@ export default async function InternalHomePage() {
               Nenhuma pendência operacional identificada.
             </p>
           )}
+        </section>
+
+        <section aria-labelledby="work-shortcuts-heading" className="mt-8">
+          <header>
+            <h2 className="font-semibold" id="work-shortcuts-heading">Ir direto ao trabalho</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Acesse as rotinas mais usadas sem percorrer os cadastros.
+            </p>
+          </header>
+          <div className="mt-3 grid gap-px overflow-hidden rounded-surface border border-border-default bg-border-default sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { href: "/app/presences", label: "Acompanhar presença", description: "Veja quem chegou e quem é esperado.", icon: ClipboardCheck },
+              { href: "/app/absences", label: "Resolver ausências", description: "Consulte faltas e coberturas.", icon: CalendarX2 },
+              { href: "/app/scheduling", label: "Organizar escalas", description: "Planeje e consulte publicações.", icon: CalendarDays },
+              { href: "/app/workers", label: "Ver colaboradores", description: "Encontre pessoas e seus vínculos.", icon: Users },
+            ].map(({ href, label, description, icon: Icon }) => (
+              <Link
+                className="group flex min-h-28 flex-col justify-between gap-3 bg-surface p-4 transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
+                href={href}
+                key={href}
+              >
+                <Icon aria-hidden="true" className="size-5 text-action-primary" />
+                <span>
+                  <span className="flex items-center gap-1.5 text-sm font-semibold">
+                    {label}<ArrowRight aria-hidden="true" className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">{description}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section

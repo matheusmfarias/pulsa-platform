@@ -63,25 +63,26 @@ export const authenticatedNavigation: NavigationGroup[] = [
     ],
   },
   {
-    label: "Comercial",
-    items: [
-      {
-        href: "/app/clients",
-        icon: Building2,
-        label: "Clientes",
-        matches: matchesResource("/app/clients"),
-      },
-      {
-        href: "/app/contracts",
-        icon: FileText,
-        label: "Contratos",
-        matches: matchesResource("/app/contracts"),
-      },
-    ],
-  },
-  {
     label: "Operação",
     items: [
+      {
+        href: "/app/scheduling",
+        icon: CalendarDays,
+        label: "Escalas",
+        matches: matchesResource("/app/scheduling"),
+      },
+      {
+        href: "/app/absences",
+        icon: CalendarX2,
+        label: "Ausências",
+        matches: matchesResource("/app/absences"),
+      },
+      {
+        href: "/app/presences",
+        icon: ClipboardCheck,
+        label: "Presença",
+        matches: matchesResource("/app/presences"),
+      },
       {
         href: "/app/operations",
         icon: BriefcaseBusiness,
@@ -117,24 +118,6 @@ export const authenticatedNavigation: NavigationGroup[] = [
         label: "Alocações",
         matches: matchesResource("/app/assignments"),
       },
-      {
-        href: "/app/scheduling",
-        icon: CalendarDays,
-        label: "Escalas",
-        matches: matchesResource("/app/scheduling"),
-      },
-      {
-        href: "/app/absences",
-        icon: CalendarX2,
-        label: "Ausências",
-        matches: matchesResource("/app/absences"),
-      },
-      {
-        href: "/app/presences",
-        icon: ClipboardCheck,
-        label: "Presença",
-        matches: matchesResource("/app/presences"),
-      },
     ],
   },
   {
@@ -145,6 +128,23 @@ export const authenticatedNavigation: NavigationGroup[] = [
         icon: Users,
         label: "Colaboradores",
         matches: matchesResource("/app/workers"),
+      },
+    ],
+  },
+  {
+    label: "Clientes e contratos",
+    items: [
+      {
+        href: "/app/clients",
+        icon: Building2,
+        label: "Clientes",
+        matches: matchesResource("/app/clients"),
+      },
+      {
+        href: "/app/contracts",
+        icon: FileText,
+        label: "Contratos",
+        matches: matchesResource("/app/contracts"),
       },
     ],
   },
