@@ -194,6 +194,7 @@ export default async function WorkerDetailsPage({
             >
               <WorkerAccessAdministrationPanel
                 access={workerAccess}
+                workerEmail={worker.email}
                 workerId={worker.id}
               />
             </DetailSection>

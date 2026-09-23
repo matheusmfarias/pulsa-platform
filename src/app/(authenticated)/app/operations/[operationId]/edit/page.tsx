@@ -6,6 +6,8 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { listOrganizationMembers } from "@/modules/administration";
+import { getAuthorizationContext } from "@/modules/authorization";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { listContracts } from "@/modules/contracts";
 import {
@@ -24,11 +26,16 @@ export default async function EditOperationPage({
 
   let operation;
   let contracts;
+  let managers;
 
   try {
-    [operation, contracts] = await Promise.all([
+    const authorization = await getAuthorizationContext();
+    [operation, contracts, managers] = await Promise.all([
       getOperationById(route.data),
       listContracts(),
+      authorization.role === "DIRECTOR"
+        ? listOrganizationMembers()
+        : Promise.resolve(undefined),
     ]);
   } catch (error) {
     if (isAppError(error) && error.code === "NOT_FOUND") {
@@ -70,6 +77,7 @@ export default async function EditOperationPage({
           <OperationForm
             cancelHref={detailHref}
             contracts={contracts}
+            managers={managers}
             operation={operation}
           />
         </section>

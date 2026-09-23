@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useCallback, useEffect, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { AssignmentWithContext } from "@/modules/assignments";
@@ -16,7 +17,9 @@ import { activeAbsenceForScheduleEntry, activeReplacementForAbsence, type Schedu
 
 const initialState: ScheduleActionState = { error: null };
 
-function EntryForm({ scheduleId, revisionId, timeZone, assignments, date, entry, onCreate, onCancel }: { scheduleId: string; revisionId: string; timeZone: string; assignments: AssignmentWithContext[]; date: string; entry?: ScheduleEntryWithContext; onCreate?: boolean; onCancel?: () => void }) {
+function EntryForm({ scheduleId, revisionId, timeZone, assignments, date, entry, onCreate, onCancel, onCreateSuccess }: { scheduleId: string; revisionId: string; timeZone: string; assignments: AssignmentWithContext[]; date: string; entry?: ScheduleEntryWithContext; onCreate?: boolean; onCancel?: () => void; onCreateSuccess?: () => void }) {
+  const idPrefix = entry?.id ?? `${scheduleId}-${date}`;
+  const fieldId = (name: string) => `${idPrefix}-${name}`;
   const localStart = entry ? zonedCivilDateTime(entry.starts_at, timeZone) : { date, time: "08:00" };
   const localEnd = entry ? zonedCivilDateTime(entry.ends_at, timeZone) : { date, time: "17:00" };
   const localBreakStart = entry?.break_starts_at ? zonedCivilDateTime(entry.break_starts_at, timeZone).time : "";
@@ -24,17 +27,143 @@ function EntryForm({ scheduleId, revisionId, timeZone, assignments, date, entry,
   const action = onCreate ? createScheduleEntryAction.bind(null, scheduleId) : updateScheduleEntryAction.bind(null, scheduleId, entry!.id);
   const [state, formAction, pending] = useActionState(action, initialState);
   const eligible = eligibleAssignmentsForDate(assignments, localStart.date);
-  return <form action={formAction} className="mt-3 grid gap-2 rounded-surface border border-border-default bg-surface p-3 text-sm sm:grid-cols-2"><input name="schedule_revision_id" type="hidden" value={revisionId} /><input name="time_zone" type="hidden" value={timeZone} /><input name="date" type="hidden" value={localStart.date} />
-    {onCreate ? <Select name="assignment_id" required><option value="">Colaborador com Assignment</option>{eligible.map((assignment) => <option key={assignment.id} value={assignment.id}>{assignment.worker.full_name}</option>)}</Select> : <input name="assignment_id" type="hidden" value={entry!.assignment_id} />}
-    <div className="grid grid-cols-2 gap-2"><Input defaultValue={localStart.time} name="starts_at" required type="time" /><Input defaultValue={localEnd.time} name="ends_at" required type="time" /></div>
-    <div className="grid grid-cols-2 gap-2"><Input defaultValue={localBreakStart} name="break_starts_at" type="time" /><Input defaultValue={localBreakEnd} name="break_ends_at" type="time" /></div>
-    <div className="flex gap-2"><Button disabled={pending || (onCreate && !eligible.length)} size="sm" type="submit">{pending ? "Salvando…" : onCreate ? "Adicionar" : "Salvar"}</Button>{onCancel ? <Button onClick={onCancel} size="sm" type="button" variant="ghost">Cancelar</Button> : null}</div>{state.error ? <FeedbackMessage className="sm:col-span-2" variant="danger">{state.error}</FeedbackMessage> : null}
-  </form>;
+  useEffect(() => {
+    if (onCreate && state.success) onCreateSuccess?.();
+  }, [onCreate, onCreateSuccess, state.success]);
+  return (
+    <form
+      action={formAction}
+      className="mt-3 grid gap-3 rounded-surface border border-border-default bg-surface p-3 text-sm sm:grid-cols-2"
+    >
+      <input name="schedule_revision_id" type="hidden" value={revisionId} />
+      <input name="time_zone" type="hidden" value={timeZone} />
+      <input name="date" type="hidden" value={localStart.date} />
+
+      {onCreate ? (
+        <Field id={fieldId("assignment_id")} label="Colaborador" required>
+          <Select name="assignment_id">
+            <option value="">Selecione o colaborador</option>
+            {eligible.map((assignment) => (
+              <option key={assignment.id} value={assignment.id}>
+                {assignment.worker.full_name}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      ) : (
+        <input name="assignment_id" type="hidden" value={entry!.assignment_id} />
+      )}
+
+      <div className="grid grid-cols-2 gap-3 sm:col-span-2">
+        <Field id={fieldId("starts_at")} label="Início" required>
+          <Input
+            defaultValue={localStart.time}
+            name="starts_at"
+            type="time"
+          />
+        </Field>
+        <Field id={fieldId("ends_at")} label="Fim" required>
+          <Input defaultValue={localEnd.time} name="ends_at" type="time" />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:col-span-2">
+        <Field id={fieldId("break_starts_at")} label="Início do intervalo" optional>
+          <Input
+            defaultValue={localBreakStart}
+            name="break_starts_at"
+            type="time"
+          />
+        </Field>
+        <Field id={fieldId("break_ends_at")} label="Fim do intervalo" optional>
+          <Input
+            defaultValue={localBreakEnd}
+            name="break_ends_at"
+            type="time"
+          />
+        </Field>
+      </div>
+
+      <div className="flex gap-2 sm:col-span-2">
+        <Button
+          disabled={pending || (onCreate && !eligible.length)}
+          size="sm"
+          type="submit"
+        >
+          {pending ? "Salvando…" : onCreate ? "Adicionar" : "Salvar"}
+        </Button>
+        {onCancel ? (
+          <Button onClick={onCancel} size="sm" type="button" variant="ghost">
+            Cancelar
+          </Button>
+        ) : null}
+      </div>
+
+      {state.error ? (
+        <FeedbackMessage className="sm:col-span-2" variant="danger">
+          {state.error}
+        </FeedbackMessage>
+      ) : state.success && !onCreate ? (
+        <FeedbackMessage className="sm:col-span-2" variant="success">
+          {state.success}
+        </FeedbackMessage>
+      ) : null}
+    </form>
+  );
 }
 
 function AddEntryDialog({ scheduleId, revisionId, timeZone, assignments, date }: { scheduleId: string; revisionId: string; timeZone: string; assignments: AssignmentWithContext[]; date: string }) {
   const [open, setOpen] = useState(false);
-  return <><Button onClick={() => setOpen(true)} size="sm" type="button" variant="ghost">Adicionar colaborador</Button>{open ? <div aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-foreground/20 p-4" role="dialog"><div className="w-full max-w-md rounded-surface border border-border-default bg-surface p-5 shadow-lg"><div className="flex items-start justify-between gap-4"><div><h3 className="font-semibold">Adicionar colaborador</h3><p className="mt-1 text-sm text-muted-foreground">{new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`))}</p></div><Button aria-label="Fechar" onClick={() => setOpen(false)} size="sm" type="button" variant="ghost">×</Button></div><EntryForm assignments={assignments} date={date} onCancel={() => setOpen(false)} onCreate revisionId={revisionId} scheduleId={scheduleId} timeZone={timeZone} /></div></div> : null}</>;
+  const closeDialog = useCallback(() => setOpen(false), []);
+  return (
+    <>
+      <Button onClick={() => setOpen(true)} size="sm" type="button" variant="ghost">
+        Adicionar colaborador
+      </Button>
+      {open ? (
+        <div
+          aria-labelledby={`schedule-entry-dialog-${date}`}
+          aria-modal="true"
+          className="fixed inset-0 z-50 grid place-items-center bg-foreground/20 p-4"
+          role="dialog"
+        >
+          <div className="w-full max-w-md rounded-surface border border-border-default bg-surface p-5 shadow-lg">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="font-semibold" id={`schedule-entry-dialog-${date}`}>
+                  Adicionar colaborador
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
+                    new Date(`${date}T00:00:00Z`),
+                  )}
+                </p>
+              </div>
+              <Button
+                aria-label="Fechar"
+                onClick={closeDialog}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                ×
+              </Button>
+            </div>
+            <EntryForm
+              assignments={assignments}
+              date={date}
+              onCancel={closeDialog}
+              onCreate
+              onCreateSuccess={closeDialog}
+              revisionId={revisionId}
+              scheduleId={scheduleId}
+              timeZone={timeZone}
+            />
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
 }
 
 function EntryItem({ scheduleId, revisionId, entry, editable, canCreateAbsence, days, selected, onSelect }: { scheduleId: string; revisionId: string; entry: ScheduleEntryWithContext; editable: boolean; canCreateAbsence: boolean; days: ScheduleWeekDay[]; selected: boolean; onSelect: (id: string, selected: boolean) => void }) {

@@ -19,6 +19,13 @@ import type { Unit } from "../domain/unit";
 
 const initialState: UnitActionState = { error: null };
 
+const BRAZIL_TIME_ZONES = [
+  { value: "America/Noronha", label: "Fernando de Noronha e ilhas (UTC−02:00)" },
+  { value: "America/Sao_Paulo", label: "Brasília e maior parte do Brasil (UTC−03:00)" },
+  { value: "America/Manaus", label: "Manaus e parte da região Norte (UTC−04:00)" },
+  { value: "America/Rio_Branco", label: "Acre e sudoeste da Amazônia (UTC−05:00)" },
+] as const;
+
 export function UnitForm({
   operations,
   unit,
@@ -189,17 +196,28 @@ export function UnitForm({
 
         <div className="mt-5">
           <Field
-            description="Use um identificador IANA, como America/Sao_Paulo."
+            description="Escolha o horário local usado nesta unidade para escalas e presenças."
             error={state.fieldErrors?.timezone}
             id="timezone"
             label="Fuso horário"
             required
           >
-            <Input
+            <Select
               defaultValue={unit?.timezone ?? "America/Sao_Paulo"}
-              maxLength={100}
               name="timezone"
-            />
+            >
+              {!BRAZIL_TIME_ZONES.some((zone) => zone.value === unit?.timezone) &&
+              unit?.timezone ? (
+                <option value={unit.timezone}>
+                  Fuso já configurado ({unit.timezone.split("/").pop()?.replace(/_/g, " ") ?? "personalizado"})
+                </option>
+              ) : null}
+              {BRAZIL_TIME_ZONES.map((zone) => (
+                <option key={zone.value} value={zone.value}>
+                  {zone.label}
+                </option>
+              ))}
+            </Select>
           </Field>
         </div>
       </section>

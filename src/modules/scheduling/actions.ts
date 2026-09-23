@@ -28,6 +28,7 @@ type ScheduleField = "operation_id" | "period_start" | "period_end";
 
 export type ScheduleActionState = {
   error: string | null;
+  success?: string;
   fieldErrors?: Partial<Record<ScheduleField, string[]>>;
 };
 
@@ -54,7 +55,7 @@ export async function createScheduleEntryAction(scheduleId: string, _previousSta
   if (!input.success) return { error: "Revise os horários e o intervalo informados." };
   try { await createScheduleEntry(input.data); } catch (error) { return initialError(error, "create_schedule_entry"); }
   revalidatePath(`/app/scheduling/${scheduleId}`);
-  return { error: null };
+  return { error: null, success: "Entrada adicionada à escala." };
 }
 
 export async function updateScheduleEntryAction(scheduleId: string, entryId: string, _previousState: ScheduleActionState, formData: FormData): Promise<ScheduleActionState> {
@@ -63,7 +64,7 @@ export async function updateScheduleEntryAction(scheduleId: string, entryId: str
   if (!id.success || !input.success) return { error: "Revise os horários e o intervalo informados." };
   try { await updateScheduleEntry(id.data, input.data); } catch (error) { return initialError(error, "update_schedule_entry"); }
   revalidatePath(`/app/scheduling/${scheduleId}`);
-  return { error: null };
+  return { error: null, success: "Horário atualizado." };
 }
 
 export async function deleteScheduleEntryAction(scheduleId: string, entryId: string): Promise<ScheduleActionState> {

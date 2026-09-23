@@ -29,9 +29,11 @@ function Result({ state }: { state: WorkerAccessActionState }) {
 
 export function WorkerAccessAdministrationPanel({
   workerId,
+  workerEmail,
   access,
 }: {
   workerId: string;
+  workerEmail: string | null;
   access: WorkerAccessAdministration;
 }) {
   const [provisionState, provisionAction, provisioning] = useActionState(
@@ -62,9 +64,15 @@ export function WorkerAccessAdministrationPanel({
       <form action={provisionAction} className="max-w-lg space-y-4">
         <div className="space-y-2">
           <Label htmlFor="worker-access-email">E-mail confirmado para o convite</Label>
-          <Input id="worker-access-email" name="email" type="email" required />
+          <Input
+            defaultValue={workerEmail ?? ""}
+            id="worker-access-email"
+            name="email"
+            type="email"
+            required
+          />
           <p className="text-xs leading-5 text-muted-foreground">
-            A conta será ligada explicitamente a este colaborador. CPF e e-mail cadastral não são usados para associação automática.
+            Confirme que o colaborador pode receber o convite neste endereço. A conta será ligada explicitamente a este cadastro.
           </p>
         </div>
         <Result state={provisionState} />

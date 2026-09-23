@@ -9,6 +9,10 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  ORGANIZATION_ROLE_LABELS,
+  type OrganizationMember,
+} from "@/modules/administration/domain/organization-member";
 import type { ContractWithClient } from "@/modules/contracts";
 
 import {
@@ -22,11 +26,13 @@ const initialState: OperationActionState = { error: null };
 
 export function OperationForm({
   contracts,
+  managers,
   operation,
   defaultContractId,
   cancelHref,
 }: {
   contracts: ContractWithClient[];
+  managers?: OrganizationMember[];
   operation?: Operation;
   defaultContractId?: string;
   cancelHref: string;
@@ -170,19 +176,49 @@ export function OperationForm({
             />
           </Field>
 
-          <Field
-            description="Informe o identificador de um membro ativo da organização."
-            error={state.fieldErrors?.manager_user_id}
-            id="manager_user_id"
-            label="Identificador do gestor responsável"
-            optional
-          >
-            <Input
-              defaultValue={operation?.manager_user_id ?? ""}
+          {managers ? (
+            <Field
+              description="Opcional. Escolha um membro ativo da organização."
+              error={state.fieldErrors?.manager_user_id}
+              id="manager_user_id"
+              label="Gestor responsável"
+              optional
+            >
+              <Select
+                defaultValue={operation?.manager_user_id ?? ""}
+                name="manager_user_id"
+              >
+                <option value="">Sem gestor responsável</option>
+                {managers
+                  .filter(
+                    (member) =>
+                      member.status === "active" ||
+                      member.profile_id === operation?.manager_user_id,
+                  )
+                  .sort((left, right) =>
+                    (left.profile?.display_name ?? "").localeCompare(
+                      right.profile?.display_name ?? "",
+                      "pt-BR",
+                    ),
+                  )
+                  .map((member) => (
+                    <option
+                      disabled={member.status !== "active"}
+                      key={member.profile_id}
+                      value={member.profile_id}
+                    >
+                      {member.profile?.display_name || "Membro sem nome"} — {ORGANIZATION_ROLE_LABELS[member.role]}{member.status !== "active" ? " (inativo)" : ""}
+                    </option>
+                  ))}
+              </Select>
+            </Field>
+          ) : (
+            <input
               name="manager_user_id"
-              placeholder="UUID de um membro ativo"
+              type="hidden"
+              value={operation?.manager_user_id ?? ""}
             />
-          </Field>
+          )}
         </div>
       </section>
 

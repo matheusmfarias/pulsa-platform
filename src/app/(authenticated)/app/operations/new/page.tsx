@@ -7,6 +7,8 @@ import {
 } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { listOrganizationMembers } from "@/modules/administration";
+import { getAuthorizationContext } from "@/modules/authorization";
 import { contractIdSchema, listContracts } from "@/modules/contracts";
 import { OperationForm } from "@/modules/operations";
 import { toPublicErrorMessage } from "@/shared/errors";
@@ -24,9 +26,16 @@ export default async function NewOperationPage({
   );
 
   let contracts;
+  let managers;
 
   try {
-    contracts = await listContracts({ status: "active" });
+    const authorization = await getAuthorizationContext();
+    [contracts, managers] = await Promise.all([
+      listContracts({ status: "active" }),
+      authorization.role === "DIRECTOR"
+        ? listOrganizationMembers()
+        : Promise.resolve(undefined),
+    ]);
   } catch (error) {
     return (
       <PageShell>
@@ -76,6 +85,7 @@ export default async function NewOperationPage({
             <OperationForm
               cancelHref="/app/operations"
               contracts={contracts}
+              managers={managers}
               defaultContractId={
                 requestedContract.success
                   ? requestedContract.data

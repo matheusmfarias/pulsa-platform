@@ -185,21 +185,25 @@ h1("3. Preparar a estrutura da operação")
 add("A ordem abaixo evita campos vazios e opções indisponíveis nos formulários. Use um cliente e uma unidade fictícios na demonstração.")
 step(1, "Em <b>Clientes</b>, clique em <b>Novo cliente</b>. Informe razão social, nome fantasia e CNPJ; salve. Abra o cliente para conferir o cadastro.")
 step(2, "Em <b>Contratos</b>, clique em <b>Novo contrato</b>. Escolha o cliente, informe o nome do contrato e as datas de vigência. A referência externa é opcional.")
-step(3, "Em <b>Operações</b>, clique em <b>Nova operação</b>. Escolha o contrato, dê um nome e informe o período. A descrição ajuda a reconhecer o trabalho. O campo de identificador do gestor é opcional; deixe em branco na demonstração se não houver orientação da equipe.")
-step(4, "Em <b>Unidades</b>, clique em <b>Nova unidade</b>. Escolha a operação, informe nome e localização. Confira o fuso horário, pois ele orienta a exibição dos horários de escala e presença.")
-step(5, "Em <b>Cargos</b>, cadastre a função que pode ser reutilizada, por exemplo, Promotor. Em <b>Postos</b>, vincule esse cargo a uma unidade e informe o <b>Efetivo base necessário</b>.")
+step(3, "Abra o contrato salvo e, nas ações de situação, passe de <b>Rascunho</b> para <b>Ativo</b>. Um contrato recém-criado ainda não está pronto para a operação.")
+step(4, "Em <b>Operações</b>, clique em <b>Nova operação</b>. Escolha o contrato ativo, dê um nome e informe o período. A descrição ajuda a reconhecer o trabalho. A Direção pode atribuir um gestor responsável opcional, selecionando-o pelo nome e papel.")
+step(5, "Em <b>Unidades</b>, clique em <b>Nova unidade</b>. Escolha a operação, informe nome e localização. Selecione a região de fuso horário da unidade; ela orienta a exibição dos horários de escala e presença.")
+step(6, "Abra a operação e use as ações de situação nesta ordem: <b>Avançar para implantação</b> e depois <b>Ativar operação</b>. A operação nasce em Planejamento; precisa chegar a Ativa para a jornada operacional da demonstração.")
+step(7, "Em <b>Cargos</b>, cadastre a função que pode ser reutilizada, por exemplo, Promotor. Em <b>Postos</b>, vincule esse cargo a uma unidade e informe o <b>Efetivo base necessário</b>.")
 box("Cargo, posto e efetivo base", "<b>Cargo</b> é a função reutilizável. <b>Posto</b> é essa função em uma unidade concreta. <b>Efetivo base</b> é a quantidade estrutural desejada naquele posto; não é uma escala publicada nem prova de presença.")
 
 h1("4. Cadastrar colaboradores e alocar")
 h2("Cadastrar uma pessoa")
 step(1, "Entre em <b>Colaboradores</b> e clique em <b>Novo colaborador</b>. Preencha <b>Nome completo</b> e <b>CPF</b>; contato e datas de vínculo são opcionais.")
 step(2, "Clique em <b>Cadastrar colaborador</b>. O registro aparece na lista. Use a busca por nome ou CPF e o filtro de situação para localizá-lo depois.")
-step(3, "Abra o nome para ver dados, alocação atual e histórico. Use <b>Editar</b> para corrigir informações cadastrais, se o seu perfil permitir.")
+step(3, "Abra o colaborador e use <b>Ativar colaborador</b> nas ações de situação. Repita para cada pessoa fictícia que participará da escala.")
+step(4, "No detalhe, confira dados, alocação atual e histórico. Use <b>Editar</b> para corrigir informações cadastrais, se o seu perfil permitir.")
 box("Cadastro não é acesso ao aplicativo", "Criar um colaborador não cria automaticamente uma conta para ele entrar no Pulsa Worker. O convite de acesso é uma etapa separada, disponível à Direção.")
 h2("Vincular a um posto")
 step(1, "Entre em <b>Alocações</b> e clique em <b>Nova alocação</b>. Selecione o colaborador e o posto.")
 step(2, "Informe a <b>Data inicial</b>. A data final é opcional. Salve e abra o registro para conferir unidade, cargo, posto e período.")
-step(3, "Quando a relação terminar, altere sua situação pelo detalhe da alocação, conforme as ações exibidas para o seu perfil.")
+step(3, "No detalhe da alocação, passe a situação de <b>Pendente</b> para <b>Ativa</b>. Faça isso para cada pessoa que será usada na programação e confira se a vigência cobre o dia da escala.")
+step(4, "Quando a relação terminar, altere sua situação pelo detalhe da alocação, conforme as ações exibidas para o seu perfil.")
 add("Uma alocação diz <b>onde a pessoa está vinculada</b>. Ela não diz em quais dias ou horários a pessoa foi programada e não confirma que ela compareceu.")
 
 h1("5. Planejar e publicar uma escala")
@@ -208,7 +212,7 @@ step(2, "Abra a escala criada. Use as visões <b>Semanal</b>, <b>Dia</b> ou <b>C
 step(3, "Enquanto a revisão estiver em rascunho, clique em <b>Adicionar colaborador</b> no dia e posto desejados. Selecione uma pessoa com alocação elegível e informe início, fim e, se houver, intervalo.")
 step(4, "Revise unidade, colaborador, horário e período. Para ajustes, abra <b>Editar · remover · copiar para dias</b> na entrada. As ações de edição dependem do estado da revisão.")
 step(5, "Quando estiver pronta, use <b>Enviar para aprovação</b>, depois <b>Aprovar</b> e <b>Publicar</b>. Somente a versão publicada passa a ser a programação oficial. Uma publicação posterior cria uma nova revisão; a anterior permanece no histórico.")
-box("O que conferir antes de publicar", "A operação e o período estão corretos? Cada pessoa tem alocação válida? Os horários e o fuso da unidade estão corretos? Uma escala em rascunho ou aprovada ainda não é a versão oficial para o colaborador.", warn=True)
+box("O que conferir antes de publicar", "O contrato e a operação estão ativos? Cada colaborador está ativo e com alocação ativa e vigente? O período, os horários e o fuso da unidade estão corretos? Uma escala em rascunho ou aprovada ainda não é a versão oficial para o colaborador.", warn=True)
 
 h1("6. Tratar ausência e substituição")
 h2("Registrar uma ausência")
@@ -230,8 +234,8 @@ box("Leitura correta dos estados", "<b>Escala</b> é o planejado; <b>Ausência</
 h1("8. Usar o Pulsa Worker")
 add("Esta é a área do próprio colaborador, separada do Backoffice. Ela é mais simples e foi desenhada para uso no celular.")
 h2("Convidar e ativar")
-step(1, "No Backoffice, abra o detalhe de um colaborador e procure <b>Acesso ao Pulsa Worker</b>. A Direção pode informar o e-mail confirmado e clicar em <b>Provisionar e convidar</b>.")
-step(2, "O colaborador usa o e-mail do convite e um código recebido para confirmar a identidade e ativar o vínculo. No primeiro acesso, ele cria sua senha.")
+step(1, "No Backoffice, abra o detalhe de um colaborador e procure <b>Acesso ao Pulsa Worker</b>. O e-mail cadastrado aparece preenchido; confirme com a pessoa que ela pode receber o convite nesse endereço e clique em <b>Provisionar e convidar</b>.")
+step(2, "A pessoa abre o convite, informa o e-mail e o código recebido e confirma que o acesso pertence a ela. No primeiro acesso, ativa o vínculo e cria sua senha. A conta Worker fica separada da conta interna do Backoffice.")
 step(3, "Se o acesso precisar ser interrompido, a Direção pode <b>Suspender</b> ou <b>Revogar acesso</b>, informando o motivo. <b>Reativar acesso</b> está disponível para vínculo suspenso.")
 h2("O que o colaborador vê")
 grid(["Área", "Uso"], [
@@ -240,7 +244,7 @@ grid(["Área", "Uso"], [
     ["Histórico", "Mostra os próprios registros de presença."],
     ["Conta", "Mostra dados da conta, alteração de senha e saída."],
 ], [92, CONTENT_W - 92])
-add("Quando a jornada permitir, o detalhe mostra <b>Registrar chegada</b> ou <b>Registrar saída</b>. O colaborador não escolhe outra pessoa, unidade ou horário ao fazer esse registro.")
+add("Quando a jornada permitir, o detalhe mostra <b>Registrar chegada</b> ou <b>Registrar saída</b>. O colaborador não escolhe outra pessoa, unidade ou horário ao fazer esse registro. Se uma substituição cobrir a jornada, a pessoa originalmente escalada vê que a jornada foi coberta e que não é esperada.")
 
 h1("9. Acompanhar e administrar")
 h2("Visão geral")
@@ -252,8 +256,8 @@ add("O menu <b>Administração</b> é reservado à Direção. Em <b>Usuários</b
 h1("10. Roteiro sugerido para a apresentação")
 grid(["Tempo", "Demonstração"], [
     ["5 min", "Entrar, mostrar o menu e o seletor de cliente/contrato."],
-    ["10 min", "Criar cliente, contrato, operação, unidade, cargo e posto fictícios."],
-    ["8 min", "Cadastrar colaborador e vinculá-lo a um posto."],
+    ["10 min", "Criar cliente, contrato, operação, unidade, cargo e posto fictícios; ativar contrato e operação."],
+    ["8 min", "Cadastrar dois colaboradores, ativá-los, criar as alocações e ativá-las."],
     ["10 min", "Criar escala, adicionar jornada, aprovar e publicar."],
     ["7 min", "Registrar ausência, definir substituto e acompanhar presença."],
     ["5 min", "Mostrar a Visão geral, o detalhe do colaborador, acesso Worker e auditoria."],
@@ -262,7 +266,7 @@ add("Peça que cada pessoa execute ao menos uma ação no ambiente de demonstra�
 
 h1("11. Perguntas frequentes")
 h2("Cadastrei a pessoa, mas ela não aparece na escala. Por quê?")
-add("Confirme se ela está ativa, se possui alocação elegível no posto e na data e se você está na operação e no período corretos.")
+add("Confirme se o contrato e a operação estão ativos, se a pessoa está ativa e se possui alocação ativa e vigente no posto e na data. Depois confira se você está na operação e no período corretos.")
 h2("A escala foi salva. O colaborador já consegue vê-la?")
 add("Confira se a revisão foi <b>Publicada</b>. Rascunho, pendência de aprovação e aprovação são etapas anteriores à publicação oficial.")
 h2("A ausência desaparece quando escolho um substituto?")
