@@ -135,7 +135,8 @@ try {
     "Recurring Worker login created an arbitrary Auth User",
   );
 
-  const provisionedEmail = `worker-access-provisioned-${marker}@example.invalid`;
+  const provisionedEmail = process.env.SUPABASE_TEST_OTP_RECIPIENT
+    ?? `worker-access-provisioned-${marker}@example.invalid`;
   const { data: provisionedAuth, error: provisionedAuthError } =
     await admin.auth.admin.createUser({
       email: provisionedEmail,
@@ -400,7 +401,7 @@ try {
     JSON.stringify({
       explicitProvisioning: true,
       recurringLoginDoesNotCreateUsers: true,
-      provisionedAccountReceivesOtp: otpDeliverySkipped ? "not_tested" : true,
+      provisionedOtpSendAccepted: otpDeliverySkipped ? "not_tested" : true,
       organizationMemberIsolation: true,
       oneToOneCurrentLinks: true,
       claimOwnershipAndIdempotency: true,

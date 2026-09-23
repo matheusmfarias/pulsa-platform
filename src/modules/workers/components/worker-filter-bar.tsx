@@ -46,8 +46,13 @@ export function WorkerFilterBar({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = React.useTransition();
   const suppressDebounceRef = React.useRef(false);
+  const debounceTimerRef = React.useRef<number | null>(null);
   const appliedQuery = searchParams.get("q") ?? "";
   const status = readStatusFilter(searchParams.get("status"));
+  const requestedStatusRef = React.useRef(status);
+  React.useEffect(() => {
+    requestedStatusRef.current = status;
+  }, [status]);
   const [queryDraft, setQueryDraft] = React.useState({
     source: appliedQuery,
     value: appliedQuery,
@@ -60,14 +65,21 @@ export function WorkerFilterBar({ children }: { children: React.ReactNode }) {
     (updates: { query?: string; status?: WorkerStatusFilter }) => {
       const filters = parseWorkerListSearchParams({
         q: updates.query ?? query,
-        status: updates.status ?? status,
+        status: updates.status ?? requestedStatusRef.current,
       });
       startTransition(() => {
         router.replace(workerListHref("/app/workers", filters), { scroll: false });
       });
     },
-    [query, router, status],
+    [query, router],
   );
+
+  function cancelPendingSearch() {
+    if (debounceTimerRef.current !== null) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }
 
   React.useEffect(() => {
     if (suppressDebounceRef.current) {
@@ -78,19 +90,26 @@ export function WorkerFilterBar({ children }: { children: React.ReactNode }) {
     if (query.trim() === appliedQuery) return;
 
     const timeout = window.setTimeout(() => {
+      debounceTimerRef.current = null;
       replaceFilters({ query });
     }, WORKER_SEARCH_DEBOUNCE_MS);
+    debounceTimerRef.current = timeout;
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      if (debounceTimerRef.current === timeout) debounceTimerRef.current = null;
+    };
   }, [appliedQuery, query, replaceFilters]);
 
   function clearQuery() {
+    cancelPendingSearch();
     suppressDebounceRef.current = true;
     setQueryDraft({ source: appliedQuery, value: "" });
     replaceFilters({ query: "" });
   }
 
   function clearAllFilters() {
+    cancelPendingSearch();
     suppressDebounceRef.current = true;
     setQueryDraft({ source: appliedQuery, value: "" });
     startTransition(() => router.replace("/app/workers", { scroll: false }));
@@ -131,6 +150,8 @@ export function WorkerFilterBar({ children }: { children: React.ReactNode }) {
               label="Status"
               onValueChange={(value) => {
                 if (value !== status) {
+                  cancelPendingSearch();
+                  requestedStatusRef.current = value;
                   suppressDebounceRef.current = true;
                   replaceFilters({ status: value });
                 }

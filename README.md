@@ -42,9 +42,11 @@ para aplicar mudanças não validadas.
 - `npm run build`
 - `npm run e2e` (requer o navegador Chromium do Playwright)
 
-O teste E2E incluído cobre somente a renderização pública do login. Um teste de autenticação
-real depende de um projeto Supabase isolado e credenciais de teste, por isso não faz parte da
-CI nesta fase.
+Os E2E públicos cobrem o login e o redirecionamento sem sessão. O E2E autenticado
+de `/app/workers` exige as variáveis explícitas `SUPABASE_TEST_*` e
+`SUPABASE_TEST_CONFIRMATION=integration-test`; ele cria uma organização e uma
+conta temporárias no projeto de teste, exercita o cadastro no drawer e limpa
+seus dados mutáveis ao final. Sem essas variáveis, o cenário é ignorado na CI.
 
 ## Testes de integração reais
 
@@ -78,8 +80,13 @@ npm run test:worker-presence:real
 O teste de acesso Worker verifica por padrão o envio de OTP para uma conta de
 teste provisionada. Em um ambiente isolado sem entrega de e-mail, defina
 `SUPABASE_TEST_SKIP_EMAIL_DELIVERY=1` apenas para esse teste. O resultado
-`provisionedAccountReceivesOtp: "not_tested"` indica explicitamente que a
-entrega ainda precisa ser validada em um ambiente com SMTP funcional.
+`provisionedOtpSendAccepted: "not_tested"` indica explicitamente que o envio
+ainda precisa ser validado em um ambiente com SMTP funcional. Mesmo quando o
+envio é aceito pela API, confirme o recebimento na caixa de teste.
+Para executar esse cenário com entrega real, use
+`SUPABASE_TEST_OTP_RECIPIENT` com uma caixa de teste dedicada e descartável.
+O teste cria e remove uma conta Auth para esse endereço; não use um e-mail que
+já pertença a uma conta existente.
 
 ## Administração
 
