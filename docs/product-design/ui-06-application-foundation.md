@@ -89,6 +89,7 @@ A Visão geral prioriza exceções e pendências antes de indicadores de volume.
 A ordem conceitual é:
 
 Requer atenção
+→ Acessos às rotinas do dia
 → Indicadores operacionais
 → Resumo das operações
 

@@ -1,6 +1,6 @@
 # UI-07 — Experiência orientada ao trabalho
 
-Status: primeira rodada implementada; observação com usuários ainda pendente.
+Status: duas rodadas implementadas; observação com usuários ainda pendente.
 
 ## Problema observado
 
@@ -56,12 +56,30 @@ Registrar, para cada tarefa, se foi concluída sem ajuda, o primeiro clique,
 termos incompreendidos e etapas desnecessárias. Nenhuma regra de negócio deve
 ser criada apenas com base na aparência da interface.
 
+## Segunda rodada
+
+- A consulta de Ausências passou a selecionar explicitamente o vínculo original
+  da entrada de escala. A nova referência de ausência herdada tornara a relação
+  ambígua no PostgREST e impedia a página de carregar (`PGRST201`).
+- A listagem mostra filtros com seleção clara, resultado vazio específico e
+  nome de quem cobre a jornada também na apresentação compacta.
+- O detalhe informa de imediato se há cobertura, oferece o caminho até a
+  presença do dia e usa termos operacionais em vez de `ScheduleEntry` e IDs.
+- A tela de Presença apresenta o panorama diário em uma superfície compacta e
+  liga jornadas sem cobertura à lista de ausências. Horários realizados ficam
+  visíveis também quando a tabela esconde colunas secundárias.
+- O detalhe do colaborador prioriza alocação atual e histórico. Contato,
+  administração do acesso Worker e mudanças de situação aparecem depois.
+
+As páginas de Ausências, Presença e Colaborador foram conferidas no navegador
+do ambiente de teste. Nenhum registro operacional foi alterado nesta rodada.
+
 ## Próximo ciclo de desenho
 
-- Revisar as telas de ausência e presença em conjunto: contexto da jornada,
-  responsável, ação principal e histórico devem ser compreensíveis sem o manual.
-- Revisar o percurso Colaboradores → detalhe → alocação para RH, especialmente
-  relações entre colaborador, cargo, posto e unidade.
+- Observar com Operações e RH os percursos desta segunda rodada sem fornecer o
+  manual antes; usar as dúvidas reais para priorizar as próximas mudanças.
+- Revisar as telas de criação e edição de escala e alocação, em especial
+  validações, consequências de publicação e retorno após salvar.
 - Avaliar em telefone real a escala, o registro de presença e os estados vazios
   do Worker; ajustar densidade e texto com base em observação.
 - Validar com as diretorias a nomenclatura dos módulos e os atalhos mais usados

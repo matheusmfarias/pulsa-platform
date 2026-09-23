@@ -74,6 +74,12 @@ export function PresenceOperationalTable({
                   <TableCell className="hidden xl:table-cell"><p>{row.unit_name}</p><p className="mt-0.5 text-xs text-muted-foreground">{row.job_role_name}</p></TableCell>
                   <TableCell className="px-2 xl:px-4">
                     <PresenceStatusBadge status={row.operational_status} />
+                    {row.arrived_at ? (
+                      <p className="mt-1 text-xs tabular-nums text-muted-foreground xl:hidden">
+                        Chegada {formatTime(row.arrived_at, row.unit_timezone)}
+                        {row.departed_at ? ` · Saída ${formatTime(row.departed_at, row.unit_timezone)}` : ""}
+                      </p>
+                    ) : null}
                     {row.arrived_after_start ? <p className="mt-1 text-xs font-medium text-status-warning-foreground">Chegada após início</p> : null}
                     {row.departed_before_end ? <p className="mt-1 text-xs font-medium text-status-warning-foreground">Saída antes do fim</p> : null}
                   </TableCell>

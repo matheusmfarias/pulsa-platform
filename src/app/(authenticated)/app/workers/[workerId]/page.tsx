@@ -148,7 +148,7 @@ export default async function WorkerDetailsPage({
               ]}
             />
           }
-          description="Dados cadastrais e contexto operacional do colaborador."
+          description="Consulte o local de trabalho, o vínculo e o histórico do colaborador."
           metadata={
             <div className="flex flex-wrap items-center gap-3">
               <WorkerStatusBadge status={worker.status} />
@@ -162,46 +162,19 @@ export default async function WorkerDetailsPage({
 
         <div className="mt-8 divide-y divide-border-default border-y border-border-default">
           <DetailSection
-            description="Registro operacional da pessoa; não representa uma conta de acesso ao sistema."
-            id="worker-data"
-            title="Dados do colaborador"
-          >
-            <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-              <DetailItem
-                label="E-mail"
-                value={worker.email ?? "Não informado"}
-              />
-              <DetailItem
-                label="Telefone"
-                value={worker.phone ?? "Não informado"}
-              />
-              <DetailItem
-                label="Início do vínculo"
-                value={formatDate(worker.engagement_start_date)}
-              />
-              <DetailItem
-                label="Fim do vínculo"
-                value={formatDate(worker.engagement_end_date)}
-              />
-            </dl>
-          </DetailSection>
-
-          {workerAccess ? (
-            <DetailSection
-              description="Identidade de acesso do Pulsa Worker. Este vínculo não cria membership interno."
-              id="worker-access"
-              title="Acesso ao Pulsa Worker"
-            >
-              <WorkerAccessAdministrationPanel
-                access={workerAccess}
-                workerEmail={worker.email}
-                workerId={worker.id}
-              />
-            </DetailSection>
-          ) : null}
-
-          <DetailSection
-            description="A alocação registra a relação temporal vigente entre o colaborador e um posto."
+            actions={
+              worker.status === "active" ? (
+                <PermissionGate permission="assignment:create">
+                  <Button asChild size="sm" variant={activeAssignment ? "outline" : "default"}>
+                    <Link href={"/app/assignments/new?workerId=" + worker.id}>
+                      <Plus aria-hidden="true" className="size-4" />
+                      Nova alocação
+                    </Link>
+                  </Button>
+                </PermissionGate>
+              ) : null
+            }
+            description="Cargo e local de trabalho vinculados ao colaborador neste momento."
             id="current-assignment"
             title="Alocação atual"
           >
@@ -290,18 +263,6 @@ export default async function WorkerDetailsPage({
           </DetailSection>
 
           <DetailSection
-            actions={
-              worker.status === "active" ? (
-                <PermissionGate permission="assignment:create">
-                  <Button asChild size="sm">
-                    <Link href={"/app/assignments/new?workerId=" + worker.id}>
-                      <Plus aria-hidden="true" className="size-4" />
-                      Nova alocação
-                    </Link>
-                  </Button>
-                </PermissionGate>
-              ) : null
-            }
             description="Relações anteriores e vigentes, da mais recente para a mais antiga."
             id="assignment-history"
             title="Histórico de alocações"
@@ -352,6 +313,33 @@ export default async function WorkerDetailsPage({
               </ul>
             )}
           </DetailSection>
+
+          <DetailSection
+            description="Dados de contato e período do vínculo."
+            id="worker-data"
+            title="Dados do colaborador"
+          >
+            <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+              <DetailItem label="E-mail" value={worker.email ?? "Não informado"} />
+              <DetailItem label="Telefone" value={worker.phone ?? "Não informado"} />
+              <DetailItem label="Início do vínculo" value={formatDate(worker.engagement_start_date)} />
+              <DetailItem label="Fim do vínculo" value={formatDate(worker.engagement_end_date)} />
+            </dl>
+          </DetailSection>
+
+          {workerAccess ? (
+            <DetailSection
+              description="Acesso ao aplicativo em que o colaborador consulta a escala e registra presença."
+              id="worker-access"
+              title="Acesso ao Pulsa Worker"
+            >
+              <WorkerAccessAdministrationPanel
+                access={workerAccess}
+                workerEmail={worker.email}
+                workerId={worker.id}
+              />
+            </DetailSection>
+          ) : null}
 
           <PermissionGate permission="worker:update">
             <DetailSection

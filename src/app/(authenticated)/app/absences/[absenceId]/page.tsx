@@ -12,8 +12,8 @@ import {
   absenceActionsFor,
   absenceIdSchema,
   getAbsenceDetailsById,
-  isAbsenceWithoutCoverage,
 } from "@/modules/absences";
+import { formatAbsenceJourney } from "@/modules/absences/components/absence-date-format";
 import { getAuthorizationContext, ROLE_PERMISSIONS } from "@/modules/authorization";
 import {
   listReplacementCandidates,
@@ -78,6 +78,13 @@ export default async function AbsenceDetailsPage({
   const candidates = canCreateReplacement
     ? await listReplacementCandidates(absence.id)
     : [];
+  const journeyPeriod = formatAbsenceJourney(entry.starts_at, entry.ends_at, unit.timezone);
+  const presenceDate = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: unit.timezone,
+  }).format(new Date(entry.starts_at));
 
   return (
     <PageShell>
@@ -85,16 +92,42 @@ export default async function AbsenceDetailsPage({
         <PageHeader
           actions={canCancel && !activeReplacement ? <AbsenceCancelAction absenceId={absence.id} scheduleId={scheduleId} /> : undefined}
           breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Ausências", href: "/app/absences" }, { label: entry.assignment.worker.full_name }]} />}
-          description="Registro histórico associado à entrada planejada da escala."
+          description={`${journeyPeriod} · ${unit.name}`}
           metadata={<AbsenceStatusBadge status={absence.status} />}
           title={entry.assignment.worker.full_name}
         />
+        {absence.status === "reported" ? (
+          activeReplacement?.replacement_assignment ? (
+            <FeedbackMessage className="mt-6" variant="success">
+              <p className="font-medium">Cobertura definida</p>
+              <p className="mt-1">
+                A cobertura desta jornada está atribuída a {activeReplacement.replacement_assignment.worker.full_name}.
+                <Link className="ml-1 font-semibold underline underline-offset-2" href={`/app/presences?date=${presenceDate}`}>
+                  Ver presença do dia
+                </Link>
+              </p>
+            </FeedbackMessage>
+          ) : (
+            <FeedbackMessage className="mt-6" variant="warning">
+              <p className="font-medium">Esta jornada está sem cobertura.</p>
+              {canCreateReplacement ? (
+                <Link className="mt-1 inline-block font-semibold underline underline-offset-2" href="#absence-replacement">
+                  Definir substituto
+                </Link>
+              ) : null}
+            </FeedbackMessage>
+          )
+        ) : (
+          <FeedbackMessage className="mt-6" variant="info">
+            Esta ausência foi cancelada. O registro permanece no histórico.
+          </FeedbackMessage>
+        )}
         <div className="mt-8 divide-y divide-border-default border-y border-border-default">
           <DetailSection id="absence-schedule-entry" title="Entrada de escala">
             <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
               <DetailItem label="Colaborador" value={entry.assignment.worker.full_name} />
               <DetailItem
-                label="ScheduleEntry"
+                label="Na escala"
                 value={<Link className="underline-offset-4 hover:underline" href={`/app/scheduling/${scheduleId}`}>Ver na escala</Link>}
               />
               <DetailItem label="Operação" value={unit.operation.name} />
@@ -102,7 +135,7 @@ export default async function AbsenceDetailsPage({
               <DetailItem label="Posto" value={position.job_role.name} />
               <DetailItem
                 label="Data e horário"
-                value={`${formatDateTime(entry.starts_at, unit.timezone)} — ${formatDateTime(entry.ends_at, unit.timezone)}`}
+                value={journeyPeriod}
               />
             </dl>
           </DetailSection>
@@ -117,19 +150,18 @@ export default async function AbsenceDetailsPage({
               />
               <DetailItem
                 label="Registrada por"
-                value={absence.reporter.display_name || absence.reported_by}
+                value={absence.reporter.display_name || "Membro da equipe"}
               />
             </dl>
           </DetailSection>
           <DetailSection id="absence-replacement" title="Substituição">
-            {isAbsenceWithoutCoverage(absence) ? <FeedbackMessage variant="warning">Esta ausência ainda não possui substituto definido.</FeedbackMessage> : null}
             {activeReplacement?.replacement_assignment ? (
               <div className="space-y-5">
                 <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
                   <DetailItem label="Substituto" value={activeReplacement.replacement_assignment.worker.full_name} />
                   <DetailItem label="Posto" value={activeReplacement.replacement_assignment.position.job_role.name} />
                   <DetailItem label="Unidade" value={activeReplacement.replacement_assignment.position.unit.name} />
-                  <DetailItem label="Data e horário" value={`${formatDateTime(entry.starts_at, unit.timezone)} — ${formatDateTime(entry.ends_at, unit.timezone)}`} />
+                  <DetailItem label="Data e horário" value={journeyPeriod} />
                   <DetailItem label="Status" value="Ativa" />
                 </dl>
                 {canCancelReplacement ? <ReplacementCancelControl absenceId={absence.id} replacementId={activeReplacement.id} scheduleId={scheduleId} /> : null}

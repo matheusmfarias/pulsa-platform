@@ -20,7 +20,7 @@ export default async function AbsencesPage({ searchParams }: PageProps<"/app/abs
         <ContentContainer size="list">
           <PageHeader
             breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Ausências" }]} />}
-            description="Acompanhe impedimentos registrados sobre entradas de escala."
+            description="Veja quem não poderá cumprir a jornada e acompanhe a cobertura."
             title="Ausências"
           />
           <FeedbackMessage className="mt-6" variant="danger">
@@ -36,26 +36,34 @@ export default async function AbsencesPage({ searchParams }: PageProps<"/app/abs
       <ContentContainer size="list">
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Ausências" }]} />}
-          description="Acompanhe impedimentos registrados sobre entradas de escala."
+          description="Veja quem não poderá cumprir a jornada e acompanhe a cobertura."
           title="Ausências"
         />
         <div className="mt-5 sm:mt-6">
-          <div className="mb-4 flex items-center gap-2"><Button asChild size="sm" variant={withoutCoverage ? "outline" : "default"}><Link href="/app/absences?coverage=uncovered">Sem cobertura</Link></Button>{withoutCoverage ? <Button asChild size="sm" variant="ghost"><Link href="/app/absences">Limpar filtro</Link></Button> : null}</div>
+          <nav aria-label="Filtrar ausências por cobertura" className="mb-4 flex flex-wrap items-center gap-2">
+            <Button asChild size="sm" variant={withoutCoverage ? "outline" : "default"}>
+              <Link aria-current={!withoutCoverage ? "page" : undefined} href="/app/absences">Todas</Link>
+            </Button>
+            <Button asChild size="sm" variant={withoutCoverage ? "default" : "outline"}>
+              <Link aria-current={withoutCoverage ? "page" : undefined} href="/app/absences?coverage=uncovered">Sem cobertura</Link>
+            </Button>
+          </nav>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium tabular-nums text-foreground">{absences.length}</span>{" "}
+            {absences.length === 1 ? "ausência encontrada" : "ausências encontradas"}
+            {withoutCoverage ? " sem cobertura" : ""}
+          </p>
           {absences.length ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium tabular-nums text-foreground">
-                  {absences.length}
-                </span>{" "}
-                {absences.length === 1 ? "ausência encontrada" : "ausências encontradas"}
-              </p>
-              <AbsenceTable absences={absences} />
-            </>
+            <AbsenceTable absences={absences} />
           ) : (
-            <section className="rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:mt-4 sm:py-10">
-              <h2 className="font-medium">Nenhuma ausência registrada</h2>
+            <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+              <h2 className="font-medium">
+                {withoutCoverage ? "Nenhuma ausência sem cobertura" : "Nenhuma ausência registrada"}
+              </h2>
               <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                As ausências registradas nas entradas de escala aparecerão aqui.
+                {withoutCoverage
+                  ? "As ausências com substituto definido continuam disponíveis em Todas."
+                  : "As ausências registradas na escala aparecerão aqui."}
               </p>
             </section>
           )}

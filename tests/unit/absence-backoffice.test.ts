@@ -49,6 +49,11 @@ describe("Absence Backoffice", () => {
     );
   });
 
+  it("selects the original schedule entry relationship after absence inheritance was added", () => {
+    const repository = readFileSync(resolve("src/modules/absences/repositories/absence-repository.ts"), "utf8");
+    expect(repository).toContain("schedule_entry:schedule_entries!absences_schedule_entry_id_fkey!inner(");
+  });
+
   it("recognizes only a reported Absence as active on a ScheduleEntry", () => {
     const entry = {
       absences: [

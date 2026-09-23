@@ -18,17 +18,13 @@ import {
   isAbsenceWithoutCoverage,
   type AbsenceWithContext,
 } from "../domain/absence";
+import { formatAbsenceJourney } from "./absence-date-format";
 import { AbsenceStatusBadge } from "./absence-status-badge";
 
 function formatEntryDateTime(absence: AbsenceWithContext) {
   const entry = absence.schedule_entry;
   const timeZone = entry.assignment.position.unit.timezone;
-  const format = new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone,
-  });
-  return `${format.format(new Date(entry.starts_at))} — ${format.format(new Date(entry.ends_at))}`;
+  return formatAbsenceJourney(entry.starts_at, entry.ends_at, timeZone);
 }
 
 export function AbsenceTable({ absences }: { absences: AbsenceWithContext[] }) {
@@ -43,7 +39,7 @@ export function AbsenceTable({ absences }: { absences: AbsenceWithContext[] }) {
               <TableHead className="hidden xl:table-cell">Operação</TableHead>
               <TableHead className="hidden xl:table-cell">Unidade / Posto</TableHead>
               <TableHead className="w-32 px-2 xl:w-auto xl:px-4">Motivo</TableHead>
-              <TableHead className="w-28 px-2 xl:w-32 xl:px-4">Status</TableHead>
+              <TableHead className="w-44 px-2 xl:w-32 xl:px-4">Situação</TableHead>
               <TableHead className="hidden xl:table-cell">Substituição</TableHead>
               <TableHead className="w-12 px-1 text-right xl:px-4">
                 <span className="sr-only">Ações</span>
@@ -87,6 +83,11 @@ export function AbsenceTable({ absences }: { absences: AbsenceWithContext[] }) {
                   <TableCell className="px-2 xl:px-4">
                     <AbsenceStatusBadge status={absence.status} />
                     {withoutCoverage ? <p className="mt-1 text-xs font-medium text-status-warning-foreground">Sem cobertura</p> : null}
+                    {activeReplacement?.replacement_assignment ? (
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground xl:hidden">
+                        Coberta por {activeReplacement.replacement_assignment.worker.full_name}
+                      </p>
+                    ) : null}
                   </TableCell>
                   <TableCell className="hidden text-sm text-muted-foreground xl:table-cell">
                     {activeReplacement?.replacement_assignment
