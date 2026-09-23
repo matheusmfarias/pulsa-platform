@@ -193,7 +193,7 @@ try {
     position_id: position.id,
     start_date: "2199-03-01",
   });
-  assert(crossOrganizationError?.code === "23514", "Cross-organization Assignment was accepted");
+  assert(crossOrganizationError?.code === "42501", "Cross-organization Assignment was not denied by authorization");
 
   const temporaryEmail = `assignment-rls-${suffix}@example.invalid`;
   const { data: temporaryUser, error: temporaryUserError } = await admin.auth.admin.createUser({ email: temporaryEmail, password: randomUUID(), email_confirm: true });

@@ -67,7 +67,19 @@ npm run test:audit:real
 npm run test:history:real
 npm run test:rbac:real
 npm run test:administration:real
+npm run test:scheduling:real
+npm run test:absence:real
+npm run test:presence:real
+npm run test:worker-access:real
+npm run test:worker-schedule:real
+npm run test:worker-presence:real
 ```
+
+O teste de acesso Worker verifica por padrão o envio de OTP para uma conta de
+teste provisionada. Em um ambiente isolado sem entrega de e-mail, defina
+`SUPABASE_TEST_SKIP_EMAIL_DELIVERY=1` apenas para esse teste. O resultado
+`provisionedAccountReceivesOtp: "not_tested"` indica explicitamente que a
+entrega ainda precisa ser validada em um ambiente com SMTP funcional.
 
 ## Administração
 
