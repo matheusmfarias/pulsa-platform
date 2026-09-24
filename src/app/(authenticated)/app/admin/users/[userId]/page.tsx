@@ -8,6 +8,7 @@ import {
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
+  ResendOrganizationInvitation,
   MembershipRoleForm,
   MembershipStatusAction,
   MembershipStatusBadge,
@@ -53,7 +54,7 @@ export default async function AdministrationUserDetailPage({
       </PageShell>
     );
   }
-  const displayName = member.profile?.display_name ?? "Usuário sem nome cadastrado";
+  const displayName = member.profile?.display_name ?? member.email ?? "Usuário sem nome cadastrado";
   return (
     <PageShell>
       <ContentContainer size="detail">
@@ -75,6 +76,10 @@ export default async function AdministrationUserDetailPage({
           <section className="py-6">
             <h2 className="font-semibold">Dados do usuário</h2>
             <dl className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">E-mail</dt>
+                <dd className="mt-1 break-all text-sm">{member.email ?? "Indisponível"}</dd>
+              </div>
               <div>
                 <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Nome de exibição
@@ -105,6 +110,13 @@ export default async function AdministrationUserDetailPage({
               <p className="mt-2 break-all font-mono">{member.profile_id}</p>
             </details>
           </section>
+          {member.invitationPending ? (
+            <section className="py-6">
+              <h2 className="font-semibold">Convite pendente</h2>
+              <p className="mt-1 max-w-xl text-sm text-muted-foreground">Esta pessoa ainda não entrou na conta. Ela pode ativar o acesso com o código recebido por e-mail.</p>
+              <div className="mt-4"><ResendOrganizationInvitation profileId={member.profile_id} /></div>
+            </section>
+          ) : null}
           <section className="py-6">
             <h2 className="font-semibold">Alterar papel</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">

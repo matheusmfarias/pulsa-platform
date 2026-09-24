@@ -19,6 +19,8 @@ export {
 export { MembershipRoleForm } from "./components/membership-role-form";
 export { MembershipStatusAction } from "./components/membership-status-action";
 export { MembershipStatusBadge } from "./components/membership-status-badge";
+export { InviteOrganizationUser } from "./components/invite-organization-user";
+export { ResendOrganizationInvitation } from "./components/resend-organization-invitation";
 export {
   AUDIT_PAGE_SIZE,
   auditEventIdSchema,

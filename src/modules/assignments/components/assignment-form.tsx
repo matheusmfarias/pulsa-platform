@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { PositionWithContext } from "@/modules/positions";
 import { WORKER_STATUS_LABELS, type Worker } from "@/modules/workers/domain/worker";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import {
   createAssignmentAction,
@@ -39,7 +40,7 @@ export function AssignmentForm({
     ? updateAssignmentAction.bind(null, assignment.id)
     : createAssignmentAction;
 
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
   const [startDate, setStartDate] = useState(assignment?.start_date ?? "");
   const [endDate, setEndDate] = useState(assignment?.end_date ?? "");
   const [edited, setEdited] = useState<{ actionState: AssignmentActionState; fields: string[] }>({ actionState: state, fields: [] });
@@ -51,7 +52,7 @@ export function AssignmentForm({
   const changeEndDate = (value: string) => { setEndDate(value); markEdited("end_date"); };
 
   return (
-    <form action={formAction} className="space-y-8" noValidate>
+    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="assignment-relation-heading">
         <div>
           <h2 className="font-semibold" id="assignment-relation-heading">

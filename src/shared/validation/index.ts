@@ -1,4 +1,5 @@
 export {
+  getCoreAppEnvironment,
   getPublicEnvironment,
   getSupabaseAdminEnvironment,
   getWorkerAppEnvironment,

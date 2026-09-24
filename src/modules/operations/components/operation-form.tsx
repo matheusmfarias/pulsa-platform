@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -41,10 +41,10 @@ export function OperationForm({
     ? updateOperationAction.bind(null, operation.id)
     : createOperationAction;
 
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-8" noValidate>
+    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="operation-context-heading">
         <div>
           <h2 className="font-semibold" id="operation-context-heading">

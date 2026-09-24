@@ -169,6 +169,7 @@ add("Para encontrar uma página ou tarefa, use <b>Buscar no Pulsa</b> no menu. N
 h2("Entrar e sair")
 step(1, "Abra o endereço do Pulsa informado pela equipe e use <b>E-mail</b> e <b>Senha</b> na tela de entrada. Clique em <b>Entrar</b>.")
 step(2, "Ao terminar, use o menu da conta para <b>Sair</b>. Não compartilhe a senha nem deixe a sessão aberta em um computador compartilhado.")
+add("Se você recebeu um convite para uma conta interna, clique em <b>Recebeu um convite? Ative seu acesso</b> na tela de entrada. Informe o e-mail convidado e o código de 8 dígitos recebido, confirme e crie uma senha. Depois, entre com esse e-mail e senha. Se o código expirar, use <b>Enviar novo código</b> ou peça à Direção para reenviar o convite.", "small")
 h2("Escolher o recorte da consulta")
 add("No alto do menu lateral há o seletor que mostra <b>Todos os clientes</b>. Ele permite trabalhar com um cliente ou contrato específico. Para voltar à visão completa, selecione <b>Todos os clientes</b> novamente. A escolha muda o recorte de algumas listas e da Visão geral; ela não altera cadastros nem concede acesso extra.")
 box("Se um botão não aparece", "O sistema mostra ações conforme o perfil de cada pessoa. Peça à pessoa responsável pelos acessos para confirmar seu perfil antes de interpretar a ausência de um botão como defeito.")
@@ -252,7 +253,8 @@ h2("Visão geral")
 add("A <b>Visão geral</b> começa em <b>Requer atenção</b>: por exemplo, ausências sem cobertura, postos abaixo do efetivo base e colaboradores ativos sem alocação. Clique em uma pendência para investigar. Em <b>Ir direto ao trabalho</b>, abra as rotinas mais usadas. Para consultar os números da estrutura ativa, clique em <b>Ver indicadores</b>.")
 box("Como interpretar os números", "<b>Alocações ativas</b> contam vínculos vigentes. <b>Efetivo base</b> soma a necessidade estrutural dos postos. Esses números não medem, por si, a cobertura da escala ou a presença do dia.")
 h2("Administração")
-add("O menu <b>Administração</b> é reservado à Direção. Em <b>Usuários</b>, abra uma pessoa para escolher um <b>Novo papel</b> e clicar em <b>Salvar papel</b>, ou para <b>Desativar acesso</b> após ler a confirmação. O último Diretor ativo não pode ser desativado. Essa tela não cria contas internas. Em <b>Auditoria</b>, consulte quem fez mudanças e quando; abra um evento para ver o detalhe. No celular, as listas mostram cada item em vez de colunas comprimidas.")
+add("O menu <b>Administração</b> é reservado à Direção. Em <b>Usuários</b>, clique em <b>Convidar usuário</b>, informe nome, e-mail e papel, e confirme o envio. A pessoa ativa a conta com o código recebido no próprio e-mail e define a senha. A lista mostra o e-mail e indica <b>Convite pendente</b> até a ativação; abra o usuário para reenviar o código se necessário.")
+add("No detalhe do usuário, escolha um <b>Novo papel</b> e clique em <b>Salvar papel</b>, ou use <b>Desativar acesso</b> após ler a confirmação. O último Diretor ativo não pode ser desativado. Em <b>Auditoria</b>, consulte quem fez mudanças e quando; abra um evento para ver o detalhe. No celular, as listas mostram cada item em vez de colunas comprimidas.")
 
 h1("10. Roteiro sugerido para a apresentação")
 grid(["Tempo", "Demonstração"], [
@@ -278,7 +280,7 @@ h2("Posso usar o Pulsa como relógio de ponto oficial?")
 add("A função atual registra <b>presença operacional</b>. Ela não substitui um sistema trabalhista de ponto.")
 
 h1("12. Limites da versão atual")
-add("Este guia descreve as funções disponíveis agora. <b>Ocorrências, tarefas, checklists, fotos, chamados, cálculo de folha, ponto trabalhista e indicadores avançados</b> ainda não fazem parte desta jornada. O cadastro de novas contas internas também não é feito pela tela de Usuários.")
+add("Este guia descreve as funções disponíveis agora. <b>Ocorrências, tarefas, checklists, fotos, chamados, cálculo de folha, ponto trabalhista e indicadores avançados</b> ainda não fazem parte desta jornada. Para convidar uma conta interna, use um e-mail que ainda não possua conta no Pulsa; a vinculação de uma conta existente exige apoio do suporte.")
 add("As regras finais de operação, responsabilidade por cada etapa e nomenclatura do dia a dia devem ser revisadas com a Diretoria de Operações e RH antes de um piloto real. O guia ensina a usar as telas existentes; não substitui a política operacional da Pulsa.")
 box("Encerramento da sessão", "Ao final da demonstração, volte a <b>Todos os clientes</b>, confira os registros fictícios criados e saia da conta. Guarde comentários sobre dificuldades e termos pouco claros para ajustar o produto.")
 

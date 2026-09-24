@@ -8,6 +8,7 @@ const publicEnvironmentSchema = z.object({
 const workerAppEnvironmentSchema = z.object({
   WORKER_APP_URL: z.url(),
 });
+const coreAppEnvironmentSchema = z.object({ CORE_APP_URL: z.url() });
 
 export type PublicEnvironment = z.infer<typeof publicEnvironmentSchema>;
 
@@ -41,6 +42,16 @@ export function getWorkerAppEnvironment() {
   });
   if (!result.success) {
     throw new Error("WORKER_APP_URL ausente ou inválida. Consulte .env.example.");
+  }
+  return result.data;
+}
+
+export function getCoreAppEnvironment() {
+  const result = coreAppEnvironmentSchema.safeParse({
+    CORE_APP_URL: process.env.CORE_APP_URL ?? process.env.WORKER_APP_URL,
+  });
+  if (!result.success) {
+    throw new Error("CORE_APP_URL ausente ou inválida. Consulte .env.example.");
   }
   return result.data;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -41,10 +41,10 @@ export function UnitForm({
     ? updateUnitAction.bind(null, unit.id)
     : createUnitAction;
 
-  const [state, action, pending] = useActionState(handler, initialState);
+  const [state, action, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(handler, initialState);
 
   return (
-    <form action={action} className="space-y-8" noValidate>
+    <form action={action} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="unit-context-heading">
         <div>
           <h2 className="font-semibold" id="unit-context-heading">

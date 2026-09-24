@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useId } from "react";
+import { useId } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 import {
   organizationRoleSchema,
   type OrganizationRole,
@@ -27,11 +28,11 @@ export function MembershipRoleForm({
   currentRole: OrganizationRole;
 }) {
   const action = changeMembershipRoleAction.bind(null, profileId);
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
   const roleId = useId();
 
   return (
-    <form action={formAction} className="max-w-sm space-y-4">
+    <form action={formAction} className="max-w-sm space-y-4" onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <Field id={roleId} label="Novo papel">
         <Select name="role" defaultValue={currentRole}>
           {organizationRoleSchema.options.map((role) => (

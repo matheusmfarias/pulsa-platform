@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 import { logger } from "@/shared/logging";
+import { requireActiveOrganization } from "@/modules/organizations";
+import { getAuthUserById, markCoreAuthUserActivated } from "@/modules/administration/infrastructure/supabase-core-auth-admin";
 
 import { loginSchema } from "./schemas/login-schema";
 import { authenticate } from "./services/authenticate";
@@ -30,6 +32,16 @@ export async function loginAction(
 
   try {
     await authenticate(input.data);
+    try {
+      const context = await requireActiveOrganization();
+      const user = await getAuthUserById(context.userId);
+      if (user?.app_metadata?.pulsa_surface === "core" && !user.app_metadata?.pulsa_core_activated_at) {
+        await markCoreAuthUserActivated(context.userId, context.organizationId);
+      }
+    } catch {
+      // Authentication remains available if invitation metadata cannot be refreshed.
+      logger.error({ event: "authentication.activation_marker_failed" });
+    }
   } catch (error) {
     if (!isAppError(error)) {
       logger.error({

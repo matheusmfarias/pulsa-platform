@@ -2,7 +2,7 @@
 
 import { CalendarX2, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useId, useState } from "react";
+import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -10,6 +10,7 @@ import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { createAbsenceAction, type AbsenceActionState } from "../actions";
 import {
@@ -40,7 +41,7 @@ export function ScheduleEntryAbsenceControl({
   const [open, setOpen] = useState(false);
   const reasonId = useId();
   const notesId = useId();
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(
     createAbsenceAction.bind(null, scheduleId, scheduleEntryId),
     initialState,
   );
@@ -87,7 +88,7 @@ export function ScheduleEntryAbsenceControl({
       </Button>
       {open ? (
         <Dialog description="A jornada continuará visível na escala planejada." onOpenChange={setOpen} open={open} title="Registrar ausência">
-            <form action={formAction} className="space-y-4">
+            <form action={formAction} className="space-y-4" onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
               <Field id={reasonId} label="Motivo" required>
                 <Select name="reason">
                   {ABSENCE_REASONS.map((reason) => (

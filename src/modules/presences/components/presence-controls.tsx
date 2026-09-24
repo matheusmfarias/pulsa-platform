@@ -8,6 +8,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import {
   cancelPresenceAction,
@@ -108,7 +109,7 @@ function PresenceDetails({
 }) {
   const [open, setOpen] = useState(false);
   const correctCommand = correctPresenceAction.bind(null, row.presence_id!);
-  const [correctionState, correctionAction, correctionPending] = useActionState(
+  const [correctionState, correctionAction, correctionPending, correctionPreservationRef, correctionPreservationSubmit, correctionPreservationReset] = usePreservedActionState(
     async (previousState: PresenceActionState, formData: FormData) => {
       const arrivedAt = String(formData.get("arrived_at") ?? "");
       const departedAt = String(formData.get("departed_at") ?? "");
@@ -122,7 +123,7 @@ function PresenceDetails({
     },
     initialState,
   );
-  const [cancellationState, cancellationAction, cancellationPending] = useActionState(
+  const [cancellationState, cancellationAction, cancellationPending, cancellationPreservationRef, cancellationPreservationSubmit, cancellationPreservationReset] = usePreservedActionState(
     cancelPresenceAction.bind(null, row.presence_id!),
     initialState,
   );
@@ -143,7 +144,7 @@ function PresenceDetails({
             {canCorrect ? (
               <details className="mt-5 border-t border-border-default pt-4">
                 <summary className="cursor-pointer text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Corrigir horários</summary>
-                <form action={correctionAction} className="mt-4 space-y-3">
+                <form action={correctionAction} className="mt-4 space-y-3" onReset={correctionPreservationReset} onSubmit={correctionPreservationSubmit} ref={correctionPreservationRef}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="grid gap-1.5 text-sm">Chegada<Input defaultValue={dateTimeLocalValue(row.arrived_at, row.unit_timezone)} name="arrived_at" required type="datetime-local" /></label>
                   <label className="grid gap-1.5 text-sm">Saída<Input defaultValue={dateTimeLocalValue(row.departed_at, row.unit_timezone)} disabled={row.presence_status !== "completed"} name="departed_at" required={row.presence_status === "completed"} type="datetime-local" /></label>
@@ -157,7 +158,7 @@ function PresenceDetails({
             {canCancel ? (
               <details className="mt-5 border-t border-border-default pt-4">
                 <summary className="cursor-pointer text-sm font-semibold text-status-danger-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Cancelar presença</summary>
-                <form action={cancellationAction} className="mt-4 space-y-3">
+                <form action={cancellationAction} className="mt-4 space-y-3" onReset={cancellationPreservationReset} onSubmit={cancellationPreservationSubmit} ref={cancellationPreservationRef}>
                 <label className="grid gap-1.5 text-sm">Justificativa<Textarea maxLength={1000} name="reason" required /></label>
                 {cancellationState.error ? <FeedbackMessage variant="danger">{cancellationState.error}</FeedbackMessage> : null}
                 <Button disabled={cancellationPending} size="sm" type="submit" variant="destructive">{cancellationPending ? "Cancelando…" : "Cancelar presença"}</Button>

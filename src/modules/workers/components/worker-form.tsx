@@ -21,6 +21,7 @@ import {
 } from "../actions";
 import { formatCpf } from "../domain/document-number";
 import type { Worker } from "../domain/worker";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 import {
   formatBrazilianPhoneInput,
   formatCpfInput,
@@ -244,8 +245,8 @@ export function WorkerForm({
     : createReturnHref
       ? createWorkerInDrawerAction.bind(null, createReturnHref)
       : createWorkerAction;
-  const [state, formAction, pending] = React.useActionState(action, initialState);
-  const formRef = React.useRef<HTMLFormElement>(null);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
+  const formRef = preservationRef;
   const initialSnapshotRef = React.useRef<string | null>(null);
   const drawer = presentation === "drawer";
 
@@ -258,19 +259,19 @@ export function WorkerForm({
         String(value),
       ]),
     );
-  }, []);
+  }, [formRef]);
 
   React.useEffect(() => {
     initialSnapshotRef.current = readSnapshot();
     onDirtyChange?.(false);
-  }, [onDirtyChange, readSnapshot]);
+  }, [formRef, onDirtyChange, readSnapshot]);
 
   React.useEffect(() => {
     if (!state.fieldErrors) return;
     const firstInvalidField =
       formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
     firstInvalidField?.focus();
-  }, [state.fieldErrors]);
+  }, [formRef, state.fieldErrors]);
 
   if (drawer) {
     return (
@@ -278,6 +279,8 @@ export function WorkerForm({
         action={formAction}
         className="flex min-h-0 flex-1 flex-col"
         noValidate
+        onReset={preservationReset}
+        onSubmit={preservationSubmit}
         onInput={() => {
           queueMicrotask(() => {
             onDirtyChange?.(readSnapshot() !== initialSnapshotRef.current);
@@ -297,7 +300,7 @@ export function WorkerForm({
   }
 
   return (
-    <form action={formAction} className="space-y-6" noValidate ref={formRef}>
+    <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={formRef}>
       <WorkerFormSections drawer={false} state={state} worker={worker} />
       <div className="flex flex-col-reverse gap-2 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
         <Button asChild variant="ghost">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import {
 const initialState: WorkerAccessActionState = { error: null };
 
 export function WorkerForgotPasswordForm() {
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(
     requestWorkerPasswordResetAction,
     initialState,
   );
@@ -28,7 +28,7 @@ export function WorkerForgotPasswordForm() {
   }
 
   return (
-    <form action={formAction} className="mt-7 space-y-5" noValidate>
+    <form action={formAction} className="mt-7 space-y-5" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <div className="space-y-2">
         <Label htmlFor="worker-recovery-email">E-mail</Label>
         <Input

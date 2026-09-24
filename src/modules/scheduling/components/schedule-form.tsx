@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -9,6 +9,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { OperationWithContext } from "@/modules/operations";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { createScheduleAction, type ScheduleActionState } from "../actions";
 import type { PublishedScheduleCopySource } from "../services/scheduling-services";
@@ -20,7 +21,7 @@ function formatCivilDate(value: string) {
 }
 
 export function ScheduleForm({ organizationId, operations, copySources, schedulePeriods }: { organizationId: string; operations: OperationWithContext[]; copySources: PublishedScheduleCopySource[]; schedulePeriods: Array<{ id: string; operation_id: string; period_start: string; period_end: string }> }) {
-  const [state, formAction, pending] = useActionState(createScheduleAction, initialState);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(createScheduleAction, initialState);
   const [mode, setMode] = useState<"blank" | "copy">("blank");
   const [operationId, setOperationId] = useState("");
   const [periodStart, setPeriodStart] = useState("");
@@ -38,7 +39,7 @@ export function ScheduleForm({ organizationId, operations, copySources, schedule
   const changePeriodEnd = (value: string) => { setPeriodEnd(value); markEdited("period_end"); };
 
   return (
-    <form action={formAction} className="space-y-8" noValidate>
+    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <input name="organization_id" type="hidden" value={organizationId} />
       <fieldset className="space-y-3">
         <legend className="text-sm font-semibold">1. Ponto de partida</legend>

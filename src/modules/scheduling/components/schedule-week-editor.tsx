@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { AssignmentWithContext } from "@/modules/assignments";
 import { ScheduleEntryAbsenceControl } from "@/modules/absences/components/schedule-entry-absence-control";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { copyScheduleEntryToDaysAction, createScheduleEntryAction, deleteScheduleEntriesAction, deleteScheduleEntryAction, type ScheduleActionState, updateScheduleEntryAction } from "../actions";
 import { buildSchedulePositionGroups, eligibleAssignmentsForDate, isScheduleRevisionEditable, scheduleWeekDays, type ScheduleWeekDay, zonedCivilDateTime } from "../domain/weekly-schedule";
@@ -28,7 +29,7 @@ function EntryForm({ scheduleId, revisionId, timeZone, assignments, date, entry,
   const localBreakStart = entry?.break_starts_at ? zonedCivilDateTime(entry.break_starts_at, timeZone).time : "";
   const localBreakEnd = entry?.break_ends_at ? zonedCivilDateTime(entry.break_ends_at, timeZone).time : "";
   const action = onCreate ? createScheduleEntryAction.bind(null, scheduleId) : updateScheduleEntryAction.bind(null, scheduleId, entry!.id);
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
   const eligible = eligibleAssignmentsForDate(assignments, localStart.date);
   useEffect(() => {
     if (onCreate && state.success) onCreateSuccess?.();
@@ -37,6 +38,9 @@ function EntryForm({ scheduleId, revisionId, timeZone, assignments, date, entry,
     <form
       action={formAction}
       className="grid gap-4 text-sm sm:grid-cols-2"
+      onReset={preservationReset}
+      onSubmit={preservationSubmit}
+      ref={preservationRef}
     >
       <input name="schedule_revision_id" type="hidden" value={revisionId} />
       <input name="time_zone" type="hidden" value={timeZone} />
@@ -153,7 +157,7 @@ function EntryItem({ scheduleId, revisionId, entry, editable, canCreateAbsence, 
   const end = zonedCivilDateTime(entry.ends_at, timeZone).time;
   const pause = entry.break_starts_at && entry.break_ends_at ? `${zonedCivilDateTime(entry.break_starts_at, timeZone).time}–${zonedCivilDateTime(entry.break_ends_at, timeZone).time}` : null;
   const [deleteState, deleteAction, deleting] = useActionState(deleteScheduleEntryAction.bind(null, scheduleId, entry.id), initialState);
-  const [copyState, copyAction, copying] = useActionState(copyScheduleEntryToDaysAction.bind(null, scheduleId, revisionId, entry.id), initialState);
+  const [copyState, copyAction, copying, copyPreservationRef, copyPreservationSubmit, copyPreservationReset] = usePreservedActionState(copyScheduleEntryToDaysAction.bind(null, scheduleId, revisionId, entry.id), initialState);
   const entryDay = zonedCivilDateTime(entry.starts_at, timeZone).date;
   const activeAbsence = activeAbsenceForScheduleEntry(entry);
   const activeReplacement = activeAbsence ? activeReplacementForAbsence(activeAbsence) : null;
@@ -186,7 +190,7 @@ function EntryItem({ scheduleId, revisionId, entry, editable, canCreateAbsence, 
             <Button aria-pressed={mode === "edit"} onClick={() => setMode("edit")} size="sm" type="button" variant={mode === "edit" ? "default" : "outline"}>Editar horários</Button>
             {targetDays.length ? <Button aria-pressed={mode === "copy"} onClick={() => setMode("copy")} size="sm" type="button" variant={mode === "copy" ? "default" : "outline"}>Copiar para dias</Button> : null}
           </div>
-          {mode === "edit" ? <EntryForm assignments={[]} date={entryDay} entry={entry} revisionId={revisionId} scheduleId={scheduleId} timeZone={timeZone} /> : <form action={copyAction} className="space-y-4 text-sm" onSubmit={() => setCopyAttempted(true)}>
+          {mode === "edit" ? <EntryForm assignments={[]} date={entryDay} entry={entry} revisionId={revisionId} scheduleId={scheduleId} timeZone={timeZone} /> : <form action={copyAction} className="space-y-4 text-sm" onReset={copyPreservationReset} onSubmit={(event) => { copyPreservationSubmit(event); setCopyAttempted(true); }} ref={copyPreservationRef}>
             <p className="text-muted-foreground">Escolha os dias desta semana que receberão a mesma jornada.</p>
             <div className="grid gap-2 sm:grid-cols-2">{targetDays.map((day) => <label className="flex min-h-11 items-center gap-3 rounded-control border border-border-default px-3 py-2 capitalize hover:bg-hover" key={day.key}><input checked={copyTargets.includes(day.key)} className="size-4 accent-primary" name="target_dates" onChange={(event) => setCopyTargets((current) => event.target.checked ? [...current, day.key] : current.filter((key) => key !== day.key))} type="checkbox" value={day.key} />{day.label}</label>)}</div>
             <Button disabled={copying || !copyTargets.length} type="submit">{copying ? "Copiando…" : "Copiar jornada"}</Button>

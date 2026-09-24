@@ -45,6 +45,21 @@ export async function mutateOrganizationMembership(
   });
 }
 
+export async function createOrganizationMembership(
+  organizationId: string,
+  profileId: string,
+  displayName: string,
+  role: string,
+) {
+  const supabase = await createServerSupabaseClient();
+  return supabase.rpc("create_organization_member_with_audit", {
+    organization_id: organizationId,
+    target_profile_id: profileId,
+    target_display_name: displayName,
+    target_role: role,
+  });
+}
+
 export async function findAuditEvents(
   organizationId: string,
   filters: AuditListFilters,

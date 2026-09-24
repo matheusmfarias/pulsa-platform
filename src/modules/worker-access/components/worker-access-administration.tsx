@@ -9,6 +9,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import type { WorkerAccessAdministration } from "../domain/worker-access";
 import {
@@ -44,7 +45,7 @@ function ReasonAction({
 }) {
   const [open, setOpen] = useState(false);
   const reasonId = useId();
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(
     async (previousState: WorkerAccessActionState, formData: FormData) => {
       const result = await action(previousState, formData);
       if (result.success) setOpen(false);
@@ -61,7 +62,7 @@ function ReasonAction({
       {!open && state.success ? <div className="mt-3"><Result state={state} /></div> : null}
       {open ? (
         <Dialog description={description} onOpenChange={setOpen} open={open} title={label}>
-          <form action={formAction} className="space-y-5">
+          <form action={formAction} className="space-y-5" onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
             <Field id={reasonId} label="Motivo" required>
               <Textarea maxLength={1000} name="reason" rows={4} />
             </Field>
@@ -88,7 +89,7 @@ export function WorkerAccessAdministrationPanel({
   workerEmail: string | null;
   access: WorkerAccessAdministration;
 }) {
-  const [provisionState, provisionAction, provisioning] = useActionState(
+  const [provisionState, provisionAction, provisioning, provisionPreservationRef, provisionPreservationSubmit, provisionPreservationReset] = usePreservedActionState(
     provisionWorkerAccessAction.bind(null, workerId),
     initialState,
   );
@@ -99,7 +100,7 @@ export function WorkerAccessAdministrationPanel({
 
   if (!access.linkStatus && access.invitationStatus !== "pending") {
     return (
-      <form action={provisionAction} className="max-w-lg space-y-4">
+      <form action={provisionAction} className="max-w-lg space-y-4" onReset={provisionPreservationReset} onSubmit={provisionPreservationSubmit} ref={provisionPreservationRef}>
         <div className="space-y-2">
           <Label htmlFor="worker-access-email">E-mail para o convite</Label>
           <Input

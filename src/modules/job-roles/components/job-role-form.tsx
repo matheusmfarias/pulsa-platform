@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +23,9 @@ export function JobRoleForm({ jobRole }: { jobRole?: JobRole }) {
   const handler = jobRole
     ? updateJobRoleAction.bind(null, jobRole.id)
     : createJobRoleAction;
-  const [state, action, pending] = useActionState(handler, initialState);
+  const [state, action, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(handler, initialState);
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <form action={action} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <div className="space-y-2">
         <Label htmlFor="name">Nome</Label>
         <Input

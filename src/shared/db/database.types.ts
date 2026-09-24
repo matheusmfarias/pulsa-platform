@@ -1333,6 +1333,28 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_organization_member_with_audit: {
+        Args: {
+          organization_id: string
+          target_profile_id: string
+          target_display_name: string
+          target_role: string
+        }
+        Returns: {
+          created_at: string
+          organization_id: string
+          profile_id: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "organization_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       claim_my_worker_access: {
         Args: never
         Returns: {

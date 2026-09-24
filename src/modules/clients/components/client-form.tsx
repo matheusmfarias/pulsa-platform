@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -29,10 +29,10 @@ export function ClientForm({
     ? updateClientAction.bind(null, client.id)
     : createClientAction;
 
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-8" noValidate>
+    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="client-identification-heading">
         <div>
           <h2 className="font-semibold" id="client-identification-heading">

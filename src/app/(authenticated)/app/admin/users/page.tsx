@@ -20,6 +20,7 @@ import {
   TableScrollArea,
 } from "@/components/ui/table";
 import {
+  InviteOrganizationUser,
   MembershipStatusBadge,
   ORGANIZATION_ROLE_LABELS,
   listOrganizationMembers,
@@ -66,10 +67,11 @@ export default async function AdministrationUsersPage() {
           }
           description="Veja quem tem acesso à organização e qual é o papel de cada pessoa."
           title="Usuários"
+          actions={<InviteOrganizationUser />}
         />
         <details className="mt-4 text-sm text-muted-foreground">
           <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Sobre os dados desta lista</summary>
-          <p className="mt-2">Os e-mails não estão disponíveis aqui. Colaboradores operacionais são gerenciados na área Colaboradores.</p>
+          <p className="mt-2">Esta lista reúne usuários internos. Colaboradores operacionais são gerenciados na área Colaboradores.</p>
         </details>
         {members.length === 0 ? (
           <section className="mt-6 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
@@ -85,11 +87,13 @@ export default async function AdministrationUsersPage() {
                     className="min-w-0 font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                     href={`/app/admin/users/${member.profile_id}`}
                   >
-                    {member.profile?.display_name ?? "Usuário sem nome cadastrado"}
+                    {member.profile?.display_name ?? member.email ?? "Usuário sem nome cadastrado"}
                   </Link>
                   <MembershipStatusBadge status={member.status} />
                 </div>
                 <p className="text-sm text-muted-foreground">{ORGANIZATION_ROLE_LABELS[member.role]} · Entrada em {formatDate(member.created_at)}</p>
+                <p className="break-all text-sm text-muted-foreground">{member.email ?? "E-mail indisponível"}</p>
+                {member.invitationPending ? <p className="text-xs font-medium text-status-warning-foreground">Convite pendente</p> : null}
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/app/admin/users/${member.profile_id}`}>
                     Gerenciar acesso <ArrowRight aria-hidden="true" className="size-4" />
@@ -118,15 +122,13 @@ export default async function AdministrationUsersPage() {
                           className="block truncate font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                           href={`/app/admin/users/${member.profile_id}`}
                         >
-                          {member.profile?.display_name ??
+                          {member.profile?.display_name ?? member.email ??
                             "Usuário sem nome cadastrado"}
                         </Link>
-                        <p
-                          className="mt-1 truncate font-mono text-xs text-muted-foreground"
-                          title={member.profile_id}
-                        >
-                          {member.profile_id}
+                        <p className="mt-1 truncate text-xs text-muted-foreground" title={member.email ?? undefined}>
+                          {member.email ?? "E-mail indisponível"}
                         </p>
+                        {member.invitationPending ? <p className="mt-1 text-xs font-medium text-status-warning-foreground">Convite pendente</p> : null}
                       </TableCell>
                       <TableCell>
                         {ORGANIZATION_ROLE_LABELS[member.role]}

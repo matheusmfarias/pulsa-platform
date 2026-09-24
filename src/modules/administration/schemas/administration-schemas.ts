@@ -20,6 +20,11 @@ export const membershipStatusInputSchema = z.object({
   profileId: profileIdSchema,
   status: membershipStatusSchema,
 });
+export const inviteOrganizationUserSchema = z.object({
+  displayName: z.string().trim().min(2, "Informe o nome da pessoa.").max(120),
+  email: z.string().trim().toLowerCase().pipe(z.email("Informe um e-mail válido.")),
+  role: organizationRoleSchema,
+});
 
 const dateSchema = z
   .string()
