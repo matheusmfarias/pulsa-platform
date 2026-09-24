@@ -132,3 +132,18 @@ presença.
 Todos os fluxos principais do manual, incluindo chegada e saída pelo Worker,
 foram exercitados. Os registros fictícios da demonstração foram mantidos no
 ambiente de teste para revisão.
+
+## Atualização do guia em 24/09/2026
+
+O PDF foi regenerado após as mudanças de interface. O texto agora acompanha os
+grupos do menu e a busca de páginas, o botão **Gerenciar** da jornada, a
+confirmação de publicação, os rótulos atuais de convite e suspensão do Worker,
+o formulário de papel e a confirmação de desativação de acesso. A Visão geral
+também orienta abrir **Ver indicadores** quando necessário.
+
+As nove páginas foram renderizadas e conferidas visualmente, sem cortes ou
+sobreposições. Esta atualização alinha instruções e telas; não constitui um novo
+teste ponta a ponta com registros nem validação de compreensão com as diretorias.
+Na revisão de interface de 24/09, a página de Auditoria retornou erro de
+carregamento no ambiente de teste. Esse ponto precisa ser resolvido antes de
+usar a Auditoria na demonstração.
