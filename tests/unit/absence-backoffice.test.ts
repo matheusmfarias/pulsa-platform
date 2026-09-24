@@ -16,9 +16,9 @@ const clientId = "00000000-0000-4000-8000-000000000101";
 const contractId = "00000000-0000-4000-8000-000000000201";
 
 describe("Absence Backoffice", () => {
-  it("adds Ausências to Operação navigation", () => {
+  it("includes Ausências in Rotina navigation", () => {
     expect(
-      authenticatedNavigation.find((group) => group.label === "Operação")?.items,
+      authenticatedNavigation.find((group) => group.label === "Rotina")?.items,
     ).toContainEqual(
       expect.objectContaining({ href: "/app/absences", label: "Ausências" }),
     );

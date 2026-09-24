@@ -1,10 +1,11 @@
 "use client";
 
-import { CalendarX2, ExternalLink, X } from "lucide-react";
+import { CalendarX2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
@@ -85,30 +86,8 @@ export function ScheduleEntryAbsenceControl({
         Registrar ausência
       </Button>
       {open ? (
-        <div
-          aria-modal="true"
-          className="fixed inset-0 z-50 grid place-items-center bg-foreground/20 p-4"
-          role="dialog"
-        >
-          <div className="w-full max-w-md rounded-surface border border-border-default bg-surface p-5 shadow-lg">
-            <header className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="font-semibold">Registrar ausência</h3>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  A entrada continuará visível na escala planejada.
-                </p>
-              </div>
-              <Button
-                aria-label="Fechar"
-                onClick={() => setOpen(false)}
-                size="icon"
-                type="button"
-                variant="ghost"
-              >
-                <X aria-hidden="true" className="size-4" />
-              </Button>
-            </header>
-            <form action={formAction} className="mt-5 space-y-4">
+        <Dialog description="A jornada continuará visível na escala planejada." onOpenChange={setOpen} open={open} title="Registrar ausência">
+            <form action={formAction} className="space-y-4">
               <Field id={reasonId} label="Motivo" required>
                 <Select name="reason">
                   {ABSENCE_REASONS.map((reason) => (
@@ -138,12 +117,11 @@ export function ScheduleEntryAbsenceControl({
                   Voltar
                 </Button>
                 <Button disabled={pending} type="submit">
-                  {pending ? "Registrando…" : "Confirmar"}
+                  {pending ? "Registrando…" : "Registrar ausência"}
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
+        </Dialog>
       ) : null}
     </>
   );

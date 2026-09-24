@@ -32,8 +32,8 @@ describe("Scheduling Backoffice", () => {
     expect(repository).toContain("inherited_absence:absences!schedule_entries_inherited_absence_id_fkey(");
   });
 
-  it("includes Escalas in the Operação navigation group", () => {
-    expect(authenticatedNavigation.find((group) => group.label === "Operação")?.items).toContainEqual(expect.objectContaining({ href: "/app/scheduling", label: "Escalas" }));
+  it("includes Escalas in the Rotina navigation group", () => {
+    expect(authenticatedNavigation.find((group) => group.label === "Rotina")?.items).toContainEqual(expect.objectContaining({ href: "/app/scheduling", label: "Escalas" }));
   });
 
   it("applies OperationalContext to the Schedule query path", () => {

@@ -20,7 +20,7 @@ const table = readFileSync(
 describe("Supervisor operational Presence UI", () => {
   it("adds Presença to operational navigation and keeps context navigation safe", () => {
     expect(
-      authenticatedNavigation.find((group) => group.label === "Operação")?.items,
+      authenticatedNavigation.find((group) => group.label === "Rotina")?.items,
     ).toContainEqual(
       expect.objectContaining({ href: "/app/presences", label: "Presença" }),
     );

@@ -1,6 +1,6 @@
 # UI-07 — Experiência orientada ao trabalho
 
-Status: três rodadas implementadas; observação com usuários ainda pendente.
+Status: quatro rodadas implementadas; observação com usuários ainda pendente.
 
 ## Problema observado
 
@@ -90,13 +90,34 @@ do ambiente de teste. Nenhum registro operacional foi alterado nesta rodada.
 Os formulários e a validação obrigatória foram conferidos no navegador do
 ambiente de teste. Nenhum registro operacional foi criado nesta rodada.
 
+## Quarta rodada
+
+- O menu do Core foi agrupado por rotina, estrutura, pessoas, clientes e
+  administração. A rotina fica aberta inicialmente; os outros grupos se abrem
+  conforme a página atual e guardam a preferência de cada navegador.
+- Uma busca de páginas e tarefas está disponível no menu e no cabeçalho móvel.
+  Termos usuais, como “falta”, levam ao módulo correspondente. No computador,
+  Ctrl/Cmd+K abre a busca; setas e Enter permitem navegar sem mouse.
+- Os indicadores da Visão geral passaram a ser consultados sob demanda, após
+  pendências e atalhos. O detalhe da escala mantém aprovação visível e recolhe
+  datas e histórico quando não são necessários para a tarefa atual.
+- As janelas de jornada, ausência, substituição e presença usam um componente
+  de diálogo com título, foco inicial, Escape e retorno do foco. O menu móvel
+  também usa um diálogo modal nativo. Confirmações de cancelamento de ausência
+  e remoção em lote apresentam a consequência antes da ação.
+- No Worker, a tela Hoje deixa de repetir o atalho para Escala já presente na
+  navegação fixa. A mensagem vazia aponta diretamente para esse item.
+
+O Core foi conferido no navegador em largura de computador e telefone,
+incluindo busca, menu e janela de jornada. O acesso Worker da sessão atual não
+estava disponível; a mudança pontual nessa tela foi verificada por código e
+pelos testes existentes. Não houve alteração de registros operacionais.
+
 ## Próximo ciclo de desenho
 
-- Observar com Operações e RH os percursos desta segunda rodada sem fornecer o
-  manual antes; usar as dúvidas reais para priorizar as próximas mudanças.
-- Observar com Operações e RH a criação de escala e alocação e a publicação de
-  uma revisão, verificando se as consequências estão claras antes da ação.
+- Observar com Operações e RH os percursos de ausência, presença, escala e
+  alocação sem fornecer o manual antes; registrar dúvidas e etapas evitáveis.
+- Validar com as diretorias os novos grupos do menu, os termos de busca e os
+  atalhos mais usados antes de consolidar a nomenclatura.
 - Avaliar em telefone real a escala, o registro de presença e os estados vazios
   do Worker; ajustar densidade e texto com base em observação.
-- Validar com as diretorias a nomenclatura dos módulos e os atalhos mais usados
-  antes de uma reorganização maior da navegação.

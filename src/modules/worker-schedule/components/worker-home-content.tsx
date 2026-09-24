@@ -1,8 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
-
 import type { WorkerHome } from "../domain/worker-schedule";
 import { WorkerJourneyBadge } from "./worker-journey-badge";
 import { WorkerScheduleCard } from "./worker-schedule-card";
@@ -51,7 +49,7 @@ export function WorkerHomeContent({
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {next
                   ? "Sua próxima jornada está logo abaixo."
-                  : "Consulte sua escala para acompanhar as próximas jornadas."}
+                  : "Abra Escala para acompanhar as próximas jornadas."}
               </p>
             </div>
           )}
@@ -96,9 +94,6 @@ export function WorkerHomeContent({
         </section>
       ) : null}
 
-      <Button asChild className="mt-8 min-h-11 w-full sm:w-auto" variant="outline">
-        <Link href="/worker/schedule">Ver minha escala</Link>
-      </Button>
     </main>
   );
 }

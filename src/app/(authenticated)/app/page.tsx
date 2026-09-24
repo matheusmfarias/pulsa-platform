@@ -5,6 +5,7 @@ import {
   Building2,
   CalendarDays,
   CalendarX2,
+  ChevronDown,
   CheckCircle2,
   ClipboardCheck,
   Gauge,
@@ -264,11 +265,9 @@ export default async function InternalHomePage() {
           </div>
         </section>
 
-        <section
-          aria-labelledby="indicators-heading"
-          className="mt-8"
-        >
-          <header>
+        <details className="group mt-8 border-t border-border-default pt-5">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring [&::-webkit-details-marker]:hidden">
+            <span>
             <h2
               className="font-semibold"
               id="indicators-heading"
@@ -279,7 +278,13 @@ export default async function InternalHomePage() {
             <p className="mt-1 text-sm text-muted-foreground">
               Estrutura ativa dentro do contexto selecionado.
             </p>
-          </header>
+            </span>
+            <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-primary">
+              <span className="group-open:hidden">Ver indicadores</span>
+              <span className="hidden group-open:inline">Ocultar indicadores</span>
+              <ChevronDown aria-hidden="true" className="size-4 transition-transform group-open:rotate-180" />
+            </span>
+          </summary>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {kpis.map(({ label, value, icon: Icon }) => (
@@ -345,7 +350,7 @@ export default async function InternalHomePage() {
               </div>
             </article>
           </div>
-        </section>
+        </details>
 
         <section
           aria-labelledby="operations-heading"

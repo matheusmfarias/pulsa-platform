@@ -26,16 +26,19 @@ export function AlertDialog({
   title: React.ReactNode;
 }) {
   const dialogRef = React.useRef<HTMLDialogElement>(null);
+  const returnFocusRef = React.useRef<HTMLElement | null>(null);
   const titleId = React.useId();
   const descriptionId = React.useId();
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
+    if (open) returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
     return () => {
       if (dialog.open) dialog.close();
+      if (open) returnFocusRef.current?.focus();
     };
   }, [open]);
 

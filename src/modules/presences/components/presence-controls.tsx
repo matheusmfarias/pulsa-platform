@@ -1,9 +1,10 @@
 "use client";
 
-import { Eye, LogIn, LogOut, X } from "lucide-react";
+import { Eye, LogIn, LogOut } from "lucide-react";
 import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -132,24 +133,17 @@ function PresenceDetails({
         <Eye aria-hidden="true" className="size-4" />
       </Button>
       {open ? (
-        <div aria-modal="true" className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-foreground/20 p-4" role="dialog">
-          <div className="my-6 w-full max-w-xl rounded-surface border border-border-default bg-surface p-5 shadow-lg">
-            <header className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="font-semibold">Planejado × realizado</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{row.actual_worker_name}</p>
-              </div>
-              <Button aria-label="Fechar" onClick={() => setOpen(false)} size="icon" type="button" variant="ghost"><X aria-hidden="true" className="size-4" /></Button>
-            </header>
-            <dl className="mt-5 grid gap-3 rounded-control bg-subtle p-4 text-sm sm:grid-cols-2">
+        <Dialog className="max-w-xl" description={row.actual_worker_name} onOpenChange={setOpen} open={open} title="Planejado × realizado">
+            <dl className="grid gap-3 rounded-control bg-subtle p-4 text-sm sm:grid-cols-2">
               <div><dt className="text-muted-foreground">Planejado</dt><dd className="mt-1 font-medium">{formatDateTime(row.starts_at, row.unit_timezone)} — {formatDateTime(row.ends_at, row.unit_timezone)}</dd></div>
               <div><dt className="text-muted-foreground">Realizado</dt><dd className="mt-1 font-medium">{formatDateTime(row.arrived_at, row.unit_timezone)} — {formatDateTime(row.departed_at, row.unit_timezone)}</dd></div>
               <div><dt className="text-muted-foreground">Contexto</dt><dd className="mt-1">{row.operation_name} · {row.unit_name}</dd></div>
               <div><dt className="text-muted-foreground">Posto</dt><dd className="mt-1">{row.job_role_name}</dd></div>
             </dl>
             {canCorrect ? (
-              <form action={correctionAction} className="mt-5 space-y-3">
-                <h3 className="text-sm font-semibold">Corrigir horários</h3>
+              <details className="mt-5 border-t border-border-default pt-4">
+                <summary className="cursor-pointer text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Corrigir horários</summary>
+                <form action={correctionAction} className="mt-4 space-y-3">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="grid gap-1.5 text-sm">Chegada<Input defaultValue={dateTimeLocalValue(row.arrived_at, row.unit_timezone)} name="arrived_at" required type="datetime-local" /></label>
                   <label className="grid gap-1.5 text-sm">Saída<Input defaultValue={dateTimeLocalValue(row.departed_at, row.unit_timezone)} disabled={row.presence_status !== "completed"} name="departed_at" required={row.presence_status === "completed"} type="datetime-local" /></label>
@@ -157,18 +151,20 @@ function PresenceDetails({
                 <label className="grid gap-1.5 text-sm">Justificativa<Textarea maxLength={1000} name="reason" required /></label>
                 {correctionState.error ? <FeedbackMessage variant="danger">{correctionState.error}</FeedbackMessage> : null}
                 <Button disabled={correctionPending} size="sm" type="submit">{correctionPending ? "Salvando…" : "Salvar correção"}</Button>
-              </form>
+                </form>
+              </details>
             ) : null}
             {canCancel ? (
-              <form action={cancellationAction} className="mt-6 space-y-3 border-t border-border-default pt-5">
-                <h3 className="text-sm font-semibold">Cancelar presença</h3>
+              <details className="mt-5 border-t border-border-default pt-4">
+                <summary className="cursor-pointer text-sm font-semibold text-status-danger-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Cancelar presença</summary>
+                <form action={cancellationAction} className="mt-4 space-y-3">
                 <label className="grid gap-1.5 text-sm">Justificativa<Textarea maxLength={1000} name="reason" required /></label>
                 {cancellationState.error ? <FeedbackMessage variant="danger">{cancellationState.error}</FeedbackMessage> : null}
                 <Button disabled={cancellationPending} size="sm" type="submit" variant="destructive">{cancellationPending ? "Cancelando…" : "Cancelar presença"}</Button>
-              </form>
+                </form>
+              </details>
             ) : null}
-          </div>
-        </div>
+        </Dialog>
       ) : null}
     </>
   );

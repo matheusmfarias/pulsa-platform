@@ -13,6 +13,7 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  Search,
   ScrollText,
   Tags,
   UserCog,
@@ -21,13 +22,12 @@ import {
   Users,
   X,
   Ellipsis,
-  Settings,
   ChevronDown,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { OperationalContextSwitcher } from "@/components/shared/operational-context-switcher";
@@ -49,7 +49,7 @@ type NavigationGroup = { items: NavigationItem[]; label?: string };
 const matchesResource = (href: string) => (pathname: string) =>
   pathname === href || pathname.startsWith(`${href}/`);
 
-const SIDEBAR_GROUPS_STORAGE_KEY = "pulsa-sidebar-collapsed-groups";
+const SIDEBAR_GROUPS_STORAGE_KEY = "pulsa-sidebar-group-preferences-v2";
 
 export const authenticatedNavigation: NavigationGroup[] = [
   {
@@ -63,7 +63,7 @@ export const authenticatedNavigation: NavigationGroup[] = [
     ],
   },
   {
-    label: "Operação",
+    label: "Rotina",
     items: [
       {
         href: "/app/scheduling",
@@ -83,6 +83,17 @@ export const authenticatedNavigation: NavigationGroup[] = [
         label: "Presença",
         matches: matchesResource("/app/presences"),
       },
+      {
+        href: "/app/assignments",
+        icon: UserRoundCheck,
+        label: "Alocações",
+        matches: matchesResource("/app/assignments"),
+      },
+    ],
+  },
+  {
+    label: "Estrutura",
+    items: [
       {
         href: "/app/operations",
         icon: BriefcaseBusiness,
@@ -111,12 +122,6 @@ export const authenticatedNavigation: NavigationGroup[] = [
         matches: (pathname) =>
           pathname === "/app/positions" ||
           /^\/app\/units\/[^/]+\/positions(?:\/|$)/.test(pathname),
-      },
-      {
-        href: "/app/assignments",
-        icon: UserRoundCheck,
-        label: "Alocações",
-        matches: matchesResource("/app/assignments"),
       },
     ],
   },
@@ -172,6 +177,127 @@ export function isNavigationItemActive(item: NavigationItem, pathname: string) {
   return item.matches?.(pathname) ?? pathname === item.href;
 }
 
+const navigationKeywords: Record<string, string> = {
+  "/app/presences": "ponto chegada registro comparecimento",
+  "/app/absences": "faltas cobertura substituição",
+  "/app/scheduling": "jornadas planejamento publicação",
+  "/app/assignments": "vínculo colaborador posto",
+  "/app/workers": "pessoas funcionários equipe rh",
+  "/app/positions": "vagas efetivo",
+  "/app/admin/users": "acessos permissões",
+};
+
+function normalizeSearch(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+function NavigationSearch({ collapsed = false, shortcut = false, showAdministration }: { collapsed?: boolean; shortcut?: boolean; showAdministration: boolean }) {
+  const router = useRouter();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const titleId = useId();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const navigation = showAdministration ? [...authenticatedNavigation, administrationNavigation] : authenticatedNavigation;
+  const results = navigation.flatMap((group) => group.items.map((item) => ({ ...item, group: group.label ?? "Início" })))
+    .filter((item) => normalizeSearch(`${item.label} ${item.group} ${navigationKeywords[item.href] ?? ""}`).includes(normalizeSearch(query)));
+  const currentIndex = Math.min(activeIndex, Math.max(0, results.length - 1));
+
+  useEffect(() => {
+    if (!shortcut) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setOpen((current) => !current);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [shortcut]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!open || !dialog) return;
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : triggerRef.current;
+    if (!dialog.open) dialog.showModal();
+    inputRef.current?.focus();
+    return () => {
+      if (dialog.open) dialog.close();
+      returnFocusRef.current?.focus();
+    };
+  }, [open]);
+
+  function choose(href: string) {
+    setOpen(false);
+    router.push(href);
+  }
+
+  return <>
+    <button
+      aria-label="Buscar página ou tarefa"
+      className={cn("flex min-h-10 items-center rounded-control border border-border-default bg-surface text-sm text-muted-foreground transition-colors hover:bg-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring", collapsed ? "w-10 justify-center" : "w-full gap-2 px-3")}
+      onClick={() => { setQuery(""); setActiveIndex(0); setOpen(true); }}
+      ref={triggerRef}
+      type="button"
+    >
+      <Search aria-hidden="true" className="size-4 shrink-0" />
+      {!collapsed ? <><span className="min-w-0 flex-1 truncate text-left">Buscar no Pulsa</span>{shortcut ? <kbd className="shrink-0 rounded border border-border-default px-1.5 py-0.5 text-[11px]">Ctrl K</kbd> : null}</> : null}
+    </button>
+    <dialog
+      aria-labelledby={titleId}
+      className="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-surface border border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/30"
+      onCancel={(event) => { event.preventDefault(); setOpen(false); }}
+      onClick={(event) => { if (event.target === dialogRef.current) setOpen(false); }}
+      ref={dialogRef}
+    >
+      <div className="border-b border-border-default px-4 py-4">
+        <h2 className="text-sm font-semibold" id={titleId}>Ir para uma página</h2>
+        <div className="mt-3 flex items-center gap-2">
+          <Search aria-hidden="true" className="size-4 text-muted-foreground" />
+          <input
+            aria-activedescendant={results.length ? `${titleId}-result-${currentIndex}` : undefined}
+            aria-controls={`${titleId}-results`}
+            aria-expanded="true"
+            aria-label="Buscar página ou tarefa"
+            aria-autocomplete="list"
+            className="h-9 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            onChange={(event) => { setQuery(event.target.value); setActiveIndex(0); }}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowDown") { event.preventDefault(); setActiveIndex((current) => Math.min(current + 1, results.length - 1)); }
+              if (event.key === "ArrowUp") { event.preventDefault(); setActiveIndex((current) => Math.max(current - 1, 0)); }
+              if (event.key === "Enter" && results[currentIndex]) { event.preventDefault(); choose(results[currentIndex].href); }
+            }}
+            placeholder="Ex.: falta, presença, colaborador"
+            ref={inputRef}
+            role="combobox"
+            type="search"
+            value={query}
+          />
+        </div>
+      </div>
+      <div className="max-h-[min(26rem,60dvh)] overflow-y-auto p-2" id={`${titleId}-results`} role="listbox">
+        {results.length ? results.map((item, index) => {
+          const Icon = item.icon;
+          return <button
+            aria-selected={index === currentIndex}
+            className={cn("flex min-h-12 w-full items-center gap-3 rounded-control px-3 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring", index === currentIndex ? "bg-primary/10 text-primary" : "hover:bg-hover")}
+            id={`${titleId}-result-${index}`}
+            key={item.href}
+            onClick={() => choose(item.href)}
+            onMouseEnter={() => setActiveIndex(index)}
+            role="option"
+            type="button"
+          ><Icon aria-hidden="true" className="size-4 shrink-0" /><span className="flex-1 font-medium">{item.label}</span><span className="text-xs text-muted-foreground">{item.group}</span></button>;
+        }) : <p className="px-3 py-8 text-center text-sm text-muted-foreground">Nenhuma página encontrada. Tente outro termo.</p>}
+      </div>
+      <p className="border-t border-border-default px-4 py-2 text-xs text-muted-foreground">Use as setas para escolher e Enter para abrir. Esc fecha a busca.</p>
+    </dialog>
+  </>;
+}
+
 function NavigationLinks({
   collapsed = false,
   onNavigate,
@@ -183,7 +309,7 @@ function NavigationLinks({
 }) {
   const pathname = usePathname() ?? "/app";
 
-  const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
+  const [groupPreferences, setGroupPreferences] = useState<Record<string, boolean>>({});
 
   const navigation = showAdministration
     ? [...authenticatedNavigation, administrationNavigation]
@@ -198,10 +324,12 @@ function NavigationLinks({
 
         const parsed: unknown = JSON.parse(stored);
 
-        if (!Array.isArray(parsed)) return;
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return;
 
-        setCollapsedGroups(
-          parsed.filter((value): value is string => typeof value === "string"),
+        setGroupPreferences(
+          Object.fromEntries(
+            Object.entries(parsed).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean"),
+          ),
         );
       } catch {
         // Preferências inválidas não devem impedir a navegação.
@@ -211,11 +339,9 @@ function NavigationLinks({
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  function toggleGroup(label: string) {
-    setCollapsedGroups((current) => {
-      const next = current.includes(label)
-        ? current.filter((group) => group !== label)
-        : [...current, label];
+  function toggleGroup(label: string, collapsedNow: boolean) {
+    setGroupPreferences((current) => {
+      const next = { ...current, [label]: !collapsedNow };
 
       window.localStorage.setItem(
         SIDEBAR_GROUPS_STORAGE_KEY,
@@ -229,18 +355,15 @@ function NavigationLinks({
   return (
     <nav
       aria-label="Navegação principal"
-      className={cn(
-        "transition-[gap] duration-200",
-        collapsed ? "space-y-3" : "space-y-3",
-      )}
+      className="space-y-3"
     >
       {navigation.map((group, groupIndex) => {
         const groupId = `navigation-group-${groupIndex}`;
 
-        const groupCollapsed =
-          !collapsed &&
-          Boolean(group.label) &&
-          collapsedGroups.includes(group.label!);
+        const activeGroup = group.items.some((item) => isNavigationItemActive(item, pathname));
+        const defaultCollapsed = group.label !== "Rotina" && !activeGroup;
+        const groupCollapsed = !collapsed && Boolean(group.label) &&
+          (groupPreferences[group.label!] ?? defaultCollapsed);
 
         return (
           <section
@@ -259,7 +382,7 @@ function NavigationLinks({
                   id={groupId}
                   aria-expanded={!groupCollapsed}
                   aria-controls={`${groupId}-items`}
-                  onClick={() => toggleGroup(group.label!)}
+                  onClick={() => toggleGroup(group.label!, groupCollapsed)}
                   className={cn(
                     "group/sidebar-section mb-1 flex min-h-9 w-full items-center justify-between rounded-lg px-3 py-2",
                     "text-xs font-semibold text-muted-foreground",
@@ -282,20 +405,9 @@ function NavigationLinks({
 
             <div
               id={group.label ? `${groupId}-items` : undefined}
-              className={cn(
-                !collapsed &&
-                  group.label &&
-                  "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
-                !collapsed &&
-                  group.label &&
-                  (groupCollapsed
-                    ? "grid-rows-[0fr] opacity-0"
-                    : "grid-rows-[1fr] opacity-100"),
-              )}
+              className={cn(groupCollapsed && "hidden")}
             >
-              <div
-                className={cn(!collapsed && group.label && "overflow-hidden")}
-              >
+              <div>
                 <div className="space-y-1">
                   {group.items.map((item) => {
                     const Icon = item.icon;
@@ -487,17 +599,6 @@ function AccountNavigation({
           </div>
 
           <div className="pt-1.5">
-            <button
-              type="button"
-              role="menuitem"
-              disabled
-              title="Configurações ainda não disponíveis"
-              className="flex min-h-9 w-full cursor-not-allowed items-center gap-2.5 rounded-md px-2.5 text-left text-sm text-muted-foreground opacity-50"
-            >
-              <Settings className="size-4 shrink-0" aria-hidden="true" />
-              Configurações
-            </button>
-
             <form action={logoutAction}>
               <button
                 type="submit"
@@ -602,6 +703,10 @@ export function DesktopNavigation({
         />
       </div>
 
+      <div className="shrink-0 border-b border-border px-3 py-3">
+        <NavigationSearch collapsed={collapsed} shortcut showAdministration={showAdministration} />
+      </div>
+
       <div className="relative min-h-0 flex-1">
         <div
           className={cn(
@@ -645,45 +750,51 @@ export function MobileNavigation({
   showAdministration: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const menuDialogRef = useRef<HTMLDialogElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
+    const dialog = menuDialogRef.current;
+    const menuButton = menuButtonRef.current;
+    if (!dialog) return;
+    dialog.showModal();
     closeButtonRef.current?.focus();
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      if (dialog.open) dialog.close();
+      menuButton?.focus();
+    };
   }, [isOpen]);
 
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="size-10 p-0 lg:hidden"
-        aria-label="Abrir menu de navegação"
-        aria-expanded={isOpen}
-        aria-controls="authenticated-navigation-drawer"
-        onClick={() => setIsOpen(true)}
-      >
-        <Menu className="size-5" aria-hidden="true" />
-      </Button>
+      <div className="flex items-center gap-2 lg:hidden">
+        <Button
+          ref={menuButtonRef}
+          type="button"
+          variant="outline"
+          size="sm"
+          className="size-10 p-0"
+          aria-label="Abrir menu de navegação"
+          aria-expanded={isOpen}
+          aria-controls="authenticated-navigation-drawer"
+          onClick={() => setIsOpen(true)}
+        >
+          <Menu className="size-5" aria-hidden="true" />
+        </Button>
+        <NavigationSearch collapsed showAdministration={showAdministration} />
+      </div>
       {isOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-foreground/20"
-            aria-label="Fechar menu de navegação"
-            onClick={() => setIsOpen(false)}
-          />
+        <dialog
+          aria-label="Menu de navegação"
+          className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-transparent p-0 text-foreground backdrop:bg-foreground/20 lg:hidden"
+          onCancel={(event) => { event.preventDefault(); setIsOpen(false); }}
+          onClick={(event) => { if (event.target === event.currentTarget) setIsOpen(false); }}
+          ref={menuDialogRef}
+        >
           <aside
             id="authenticated-navigation-drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu de navegação"
             className="relative flex h-full w-[min(18rem,calc(100vw-2rem))] flex-col border-r border-border bg-card shadow-lg"
           >
             <div className="flex h-16 items-center justify-between border-b px-5">
@@ -717,7 +828,7 @@ export function MobileNavigation({
             </div>
             <AccountNavigation email={email} />
           </aside>
-        </div>
+        </dialog>
       ) : null}
     </>
   );
