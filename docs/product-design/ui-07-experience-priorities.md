@@ -113,6 +113,20 @@ incluindo busca, menu e janela de jornada. O acesso Worker da sessão atual não
 estava disponível; a mudança pontual nessa tela foi verificada por código e
 pelos testes existentes. Não houve alteração de registros operacionais.
 
+## Correção da programação semanal
+
+Uma revisão visual posterior revelou que a edição de uma jornada ainda abria
+dentro da célula estreita da grade. Isso espremia campos e rótulos e aumentava
+a altura da linha inteira. A célula agora mostra apenas colaborador, horário e
+um acesso para gerenciar a jornada. Edição, cópia e remoção aparecem em uma
+janela própria, com espaço para os campos e confirmação antes da remoção.
+
+A cópia oferece apenas datas dentro do período da escala e exige a escolha de
+ao menos um dia. Em telefone, a programação deixa de listar dias fora do
+período. A navegação anterior/próxima só aparece quando há outro período para
+abrir. Desktop e telefone foram conferidos no navegador sem enviar alterações
+operacionais.
+
 ## Próximo ciclo de desenho
 
 - Observar com Operações e RH os percursos de ausência, presença, escala e
