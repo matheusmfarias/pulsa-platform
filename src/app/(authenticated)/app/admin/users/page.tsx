@@ -64,18 +64,41 @@ export default async function AdministrationUsersPage() {
               items={[{ label: "Administração" }, { label: "Usuários" }]}
             />
           }
-          description="Memberships existentes na organização. Usuários administrativos e colaboradores operacionais são identidades independentes."
+          description="Veja quem tem acesso à organização e qual é o papel de cada pessoa."
           title="Usuários"
         />
-        <FeedbackMessage className="mt-6" variant="info">
-          Os e-mails dos usuários não estão disponíveis nesta área.
-        </FeedbackMessage>
+        <details className="mt-4 text-sm text-muted-foreground">
+          <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Sobre os dados desta lista</summary>
+          <p className="mt-2">Os e-mails não estão disponíveis aqui. Colaboradores operacionais são gerenciados na área Colaboradores.</p>
+        </details>
         {members.length === 0 ? (
           <section className="mt-6 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
-            <h2 className="font-medium">Nenhuma membership encontrada</h2>
+            <h2 className="font-medium">Nenhum usuário encontrado</h2>
           </section>
         ) : (
-          <TableFrame className="mt-6">
+          <>
+          <ul className="mt-6 divide-y divide-border-default overflow-hidden rounded-surface border border-border-default md:hidden">
+            {members.map((member) => (
+              <li className="space-y-3 p-4" key={member.profile_id}>
+                <div className="flex items-start justify-between gap-3">
+                  <Link
+                    className="min-w-0 font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                    href={`/app/admin/users/${member.profile_id}`}
+                  >
+                    {member.profile?.display_name ?? "Usuário sem nome cadastrado"}
+                  </Link>
+                  <MembershipStatusBadge status={member.status} />
+                </div>
+                <p className="text-sm text-muted-foreground">{ORGANIZATION_ROLE_LABELS[member.role]} · Entrada em {formatDate(member.created_at)}</p>
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/app/admin/users/${member.profile_id}`}>
+                    Gerenciar acesso <ArrowRight aria-hidden="true" className="size-4" />
+                  </Link>
+                </Button>
+              </li>
+            ))}
+          </ul>
+          <TableFrame className="mt-6 hidden md:block">
             <TableScrollArea label="Tabela de usuários">
               <Table className="min-w-full table-fixed lg:min-w-[780px] lg:table-auto">
                 <TableHeader>
@@ -96,7 +119,7 @@ export default async function AdministrationUsersPage() {
                           href={`/app/admin/users/${member.profile_id}`}
                         >
                           {member.profile?.display_name ??
-                            "Sem nome de exibição"}
+                            "Usuário sem nome cadastrado"}
                         </Link>
                         <p
                           className="mt-1 truncate font-mono text-xs text-muted-foreground"
@@ -128,6 +151,7 @@ export default async function AdministrationUsersPage() {
               </Table>
             </TableScrollArea>
           </TableFrame>
+          </>
         )}
       </ContentContainer>
     </PageShell>

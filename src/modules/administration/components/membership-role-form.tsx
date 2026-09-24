@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useId } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import {
   organizationRoleSchema,
@@ -27,26 +28,20 @@ export function MembershipRoleForm({
 }) {
   const action = changeMembershipRoleAction.bind(null, profileId);
   const [state, formAction, pending] = useActionState(action, initialState);
+  const roleId = useId();
 
   return (
-    <form action={formAction} className="space-y-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Select
-          name="role"
-          defaultValue={currentRole}
-          aria-label="Papel da membership"
-          className="min-w-64"
-        >
+    <form action={formAction} className="max-w-sm space-y-4">
+      <Field id={roleId} label="Novo papel">
+        <Select name="role" defaultValue={currentRole}>
           {organizationRoleSchema.options.map((role) => (
-            <option key={role} value={role}>
-              {ORGANIZATION_ROLE_LABELS[role]}
-            </option>
+            <option key={role} value={role}>{ORGANIZATION_ROLE_LABELS[role]}</option>
           ))}
         </Select>
-        <Button type="submit" variant="outline" disabled={pending}>
-          {pending ? "Salvando…" : "Alterar papel"}
-        </Button>
-      </div>
+      </Field>
+      <Button type="submit" variant="outline" disabled={pending}>
+        {pending ? "Salvando…" : "Salvar papel"}
+      </Button>
       {state.error ? (
         <FeedbackMessage variant="danger">{state.error}</FeedbackMessage>
       ) : null}

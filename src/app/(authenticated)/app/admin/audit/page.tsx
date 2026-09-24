@@ -94,6 +94,19 @@ export default async function AdministrationAuditPage({
       </PageShell>
     );
   }
+  const fieldLabels: Record<string, string> = {
+    description: "Descrição",
+    name: "Nome",
+    status: "Status",
+    role: "Papel",
+  };
+  const events = result.items.map((event) => {
+    const metadata = readAuditMetadata(event.metadata);
+    const summary = metadata.changes.length > 0
+      ? metadata.changes.map((field) => fieldLabels[field] ?? field).join(", ")
+      : "Sem campos resumidos";
+    return { event, summary };
+  });
   return (
     <PageShell>
       <ContentContainer size="list">
@@ -159,7 +172,7 @@ export default async function AdministrationAuditPage({
             Página {result.page} de {result.pageCount}
           </p>
         </div>
-        {result.items.length === 0 ? (
+        {events.length === 0 ? (
           <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
             <h2 className="font-medium">Nenhum evento encontrado</h2>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -167,7 +180,27 @@ export default async function AdministrationAuditPage({
             </p>
           </section>
         ) : (
-          <TableFrame className="mt-4">
+          <>
+            <ul className="mt-4 divide-y divide-border-default overflow-hidden rounded-surface border border-border-default md:hidden">
+              {events.map(({ event, summary }) => (
+                <li className="space-y-2 p-4" key={event.id}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                    <p className="font-semibold">
+                      {AUDIT_ACTION_LABELS[event.action]} · {AUDIT_ENTITY_LABELS[event.entity_type]}
+                    </p>
+                    <time className="text-xs tabular-nums text-muted-foreground" dateTime={event.created_at}>
+                      {formatDateTime(event.created_at)}
+                    </time>
+                  </div>
+                  <p className="text-sm">Por {event.actor?.display_name ?? "Ator sem nome"}</p>
+                  <p className="text-sm text-muted-foreground">{summary}</p>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={`/app/admin/audit/${event.id}`}>Ver evento</Link>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <TableFrame className="mt-4 hidden md:block">
             <TableScrollArea label="Tabela de auditoria">
               <Table className="min-w-full table-fixed xl:min-w-[1050px] xl:table-auto">
                 <TableHeader>
@@ -181,24 +214,8 @@ export default async function AdministrationAuditPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {result.items.map((event) => {
-                    const metadata = readAuditMetadata(event.metadata);
-                    const summary =
-                      metadata.changes.length > 0
-                        ? metadata.changes
-                            .map(
-                              (field) =>
-                                ({
-                                  description: "Descrição",
-                                  name: "Nome",
-                                  status: "Status",
-                                  role: "Papel",
-                                })[field] ?? field,
-                            )
-                            .join(", ")
-                        : "Sem campos resumidos";
-                    return (
-                      <TableRow key={event.id} className="align-top">
+                  {events.map(({ event, summary }) => (
+                    <TableRow key={event.id} className="align-top">
                         <TableCell className="whitespace-nowrap tabular-nums">
                           {formatDateTime(event.created_at)}
                         </TableCell>
@@ -229,13 +246,13 @@ export default async function AdministrationAuditPage({
                             </Link>
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableScrollArea>
-          </TableFrame>
+            </TableFrame>
+          </>
         )}
         <nav
           aria-label="Paginação da auditoria"

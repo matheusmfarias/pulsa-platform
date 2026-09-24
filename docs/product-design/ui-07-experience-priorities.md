@@ -127,6 +127,30 @@ período. A navegação anterior/próxima só aparece quando há outro período 
 abrir. Desktop e telefone foram conferidos no navegador sem enviar alterações
 operacionais.
 
+## Casos adicionais de excesso de controles
+
+- **Acesso ao Pulsa Worker no detalhe do colaborador:** a página mantinha duas
+  justificativas abertas lado a lado com ações sensíveis. Agora mostra o estado
+  e as ações disponíveis; cada justificativa abre em uma janela identificada,
+  com consequência explícita e confirmação. Um acesso revogado é apresentado
+  como revogado, sem oferecer reativação indevida.
+- **Situação do colaborador:** inativação e encerramento deixam de ser envios
+  imediatos. Cada ação confirma sua consequência em uma janela própria.
+- **Administração de usuários:** o formulário de papel deixou de impor largura
+  mínima em telas estreitas. Termos técnicos saíram da leitura principal; o
+  identificador fica sob consulta opcional. A desativação do acesso exige
+  confirmação em uma janela. As listas de Usuários e Auditoria passam a
+  apresentar itens completos no telefone, em vez de comprimir cinco ou seis
+  colunas.
+- **Publicação de escala:** a confirmação deixa de expandir a seção de
+  aprovação e passa a abrir em uma janela, preservando a disposição da página.
+
+As telas de colaborador e usuários foram conferidas no navegador em desktop e
+telefone. A Auditoria apresentou um erro de carregamento no ambiente de teste;
+seu novo layout foi verificado por código e build, mas ficou sem conferência
+visual com dados. Nenhuma ação de negócio foi enviada durante a revisão visual.
+Regras de acesso e transições permanecem sob os serviços existentes.
+
 ## Próximo ciclo de desenho
 
 - Observar com Operações e RH os percursos de ausência, presença, escala e

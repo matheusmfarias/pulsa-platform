@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import type { Permission } from "@/modules/authorization";
 
@@ -30,15 +31,27 @@ export function ScheduleRevisionActions({ scheduleId, revisionId, status, permis
 function RevisionActionButton({ scheduleId, revisionId, action, label }: { scheduleId: string; revisionId: string; action: "submit" | "approve" | "return" | "publish" | "copy"; label: string }) {
   const [state, formAction, pending] = useActionState(transitionScheduleRevisionAction.bind(null, scheduleId, revisionId, action), initialState);
   const [confirming, setConfirming] = useState(false);
-  if (action === "publish" && !confirming) {
-    return <Button onClick={() => setConfirming(true)} size="sm" type="button" variant="outline">{label}</Button>;
+  if (action === "publish") {
+    return <>
+      <Button onClick={() => setConfirming(true)} size="sm" type="button" variant="outline">{label}</Button>
+      {confirming ? <Dialog
+        description="Esta revisão passará a ser a versão oficial da escala. Confira as jornadas e eventuais ausências e coberturas antes de confirmar."
+        onOpenChange={setConfirming}
+        open={confirming}
+        title="Publicar escala"
+      >
+        <form action={formAction} className="space-y-4">
+          {state.error ? <FeedbackMessage variant="danger">{state.error}</FeedbackMessage> : null}
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button disabled={pending} onClick={() => setConfirming(false)} type="button" variant="ghost">Voltar</Button>
+            <Button disabled={pending} type="submit">{pending ? "Publicando…" : "Confirmar publicação"}</Button>
+          </div>
+        </form>
+      </Dialog> : null}
+    </>;
   }
-  return <div className={action === "publish" ? "w-full" : undefined}>
-    {action === "publish" ? <FeedbackMessage className="mb-3" variant="warning">Esta revisão passará a ser a versão oficial da escala. Confira as jornadas e eventuais ausências e coberturas antes de confirmar.</FeedbackMessage> : null}
-    <div className="flex flex-wrap gap-2">
-      {action === "publish" ? <Button disabled={pending} onClick={() => setConfirming(false)} size="sm" type="button" variant="ghost">Voltar</Button> : null}
-      <form action={formAction}><Button disabled={pending} size="sm" type="submit" variant="outline">{pending ? "Atualizando…" : action === "publish" ? "Confirmar publicação" : label}</Button></form>
-    </div>
-    {state.error ? <p className="mt-2 text-sm text-destructive" role="alert">{state.error}</p> : null}
+  return <div>
+    <form action={formAction}><Button disabled={pending} size="sm" type="submit" variant="outline">{pending ? "Atualizando…" : label}</Button></form>
+    {state.error ? <FeedbackMessage className="mt-2" variant="danger">{state.error}</FeedbackMessage> : null}
   </div>;
 }

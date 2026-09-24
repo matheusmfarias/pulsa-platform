@@ -53,7 +53,7 @@ export default async function AdministrationUserDetailPage({
       </PageShell>
     );
   }
-  const displayName = member.profile?.display_name ?? "Sem nome de exibição";
+  const displayName = member.profile?.display_name ?? "Usuário sem nome cadastrado";
   return (
     <PageShell>
       <ContentContainer size="detail">
@@ -67,22 +67,14 @@ export default async function AdministrationUserDetailPage({
               ]}
             />
           }
-          description="Membership administrativa da organização atual."
+          description="Consulte e gerencie o papel e o acesso desta pessoa à organização."
           metadata={<MembershipStatusBadge status={member.status} />}
           title={displayName}
         />
         <div className="mt-8 divide-y divide-border-default border-y border-border-default">
           <section className="py-6">
-            <h2 className="font-semibold">Identidade e membership</h2>
+            <h2 className="font-semibold">Dados do usuário</h2>
             <dl className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Profile ID
-                </dt>
-                <dd className="mt-1 break-all font-mono text-sm">
-                  {member.profile_id}
-                </dd>
-              </div>
               <div>
                 <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Nome de exibição
@@ -108,12 +100,15 @@ export default async function AdministrationUserDetailPage({
                 </dd>
               </div>
             </dl>
+            <details className="mt-5 text-sm text-muted-foreground">
+              <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Identificador para suporte</summary>
+              <p className="mt-2 break-all font-mono">{member.profile_id}</p>
+            </details>
           </section>
           <section className="py-6">
             <h2 className="font-semibold">Alterar papel</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Os papéis usam a matriz fixa do sistema; permissions individuais
-              não podem ser editadas.
+              O papel define as áreas e ações disponíveis para esta pessoa.
             </p>
             <div className="mt-4">
               <MembershipRoleForm
@@ -125,10 +120,10 @@ export default async function AdministrationUserDetailPage({
           <section className="py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="font-semibold">Status da membership</h2>
+                <h2 className="font-semibold">Acesso à organização</h2>
                 <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                  A inativação preserva o histórico e remove o contexto ativo da
-                  organização. O último Diretor ativo não pode ser inativado.
+                  Ao desativar o acesso, a pessoa deixa de entrar nesta organização.
+                  O histórico permanece disponível. O último Diretor ativo não pode ser desativado.
                 </p>
               </div>
               <MembershipStatusAction
