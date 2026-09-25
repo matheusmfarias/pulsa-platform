@@ -7,8 +7,10 @@ import { AppError } from "@/shared/errors";
 
 import {
   absenceSchema,
+  absenceListItemSchema,
   absenceWithContextSchema,
   type Absence,
+  type AbsenceListItem,
   type AbsenceWithContext,
 } from "../domain/absence";
 import {
@@ -52,11 +54,11 @@ export async function getAbsenceById(id: unknown): Promise<Absence> {
 export async function listAbsences(
   operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
   options: { withoutCoverage?: boolean; limit?: number } = {},
-): Promise<AbsenceWithContext[]> {
+): Promise<AbsenceListItem[]> {
   const { organizationId } = await requirePermission("absence:read");
   const { data, error } = await findAbsences(organizationId, operationalContext, options);
   if (error) throwAbsenceRepositoryError(error, "list_absences");
-  return (data ?? []).map((row) => absenceWithContextSchema.parse(row));
+  return (data ?? []).map((row) => absenceListItemSchema.parse(row));
 }
 
 export async function getAbsenceDetailsById(

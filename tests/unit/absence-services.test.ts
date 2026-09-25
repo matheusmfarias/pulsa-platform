@@ -36,46 +36,24 @@ const absence = {
   reported_by: userId,
   created_at: "2026-09-04T12:00:00Z",
 };
-const absenceWithContext = {
-  ...absence,
-  reporter: { id: userId, display_name: "Diretora" },
+const absenceListItem = {
+  id: absence.id,
+  reason: absence.reason,
+  status: absence.status,
+  replacements: [],
   schedule_entry: {
-    id: absence.schedule_entry_id,
-    schedule_revision_id: "00000000-0000-4000-8000-000000000401",
-    assignment_id: "00000000-0000-4000-8000-000000000301",
     starts_at: "2026-09-10T11:00:00Z",
     ends_at: "2026-09-10T19:00:00Z",
-    break_starts_at: null,
-    break_ends_at: null,
-    created_at: "2026-09-01T12:00:00Z",
-    created_by: userId,
     assignment: {
-      id: "00000000-0000-4000-8000-000000000301",
-      worker: {
-        id: "00000000-0000-4000-8000-000000000201",
-        full_name: "Ana Souza",
-      },
+      worker: { full_name: "Ana Souza" },
       position: {
-        id: "00000000-0000-4000-8000-000000000101",
-        job_role: {
-          id: "00000000-0000-4000-8000-000000000102",
-          name: "Porteira",
-        },
+        job_role: { name: "Porteira" },
         unit: {
-          id: "00000000-0000-4000-8000-000000000103",
           name: "Unidade Centro",
           timezone: "America/Sao_Paulo",
-          operation: {
-            id: "00000000-0000-4000-8000-000000000104",
-            name: "Operação Centro",
-            contract_id: "00000000-0000-4000-8000-000000000105",
-          },
+          operation: { name: "Operação Centro" },
         },
       },
-    },
-    schedule_revision: {
-      id: "00000000-0000-4000-8000-000000000401",
-      schedule: { id: "00000000-0000-4000-8000-000000000402" },
     },
   },
 };
@@ -138,10 +116,10 @@ describe("Absence services", () => {
 
   it("uses absence:read and the active Organization for both reads", async () => {
     vi.mocked(findAbsenceById).mockResolvedValue({ data: absence, error: null } as never);
-    vi.mocked(findAbsences).mockResolvedValue({ data: [absenceWithContext], error: null } as never);
+    vi.mocked(findAbsences).mockResolvedValue({ data: [absenceListItem], error: null } as never);
 
     await expect(getAbsenceById(absence.id)).resolves.toEqual(absence);
-    await expect(listAbsences()).resolves.toEqual([absenceWithContext]);
+    await expect(listAbsences()).resolves.toEqual([absenceListItem]);
     expect(requirePermission).toHaveBeenNthCalledWith(1, "absence:read");
     expect(requirePermission).toHaveBeenNthCalledWith(2, "absence:read");
     expect(findAbsenceById).toHaveBeenCalledWith(organizationId, absence.id);
@@ -155,13 +133,13 @@ describe("Absence services", () => {
       contractId: "00000000-0000-4000-8000-000000000106",
     };
     vi.mocked(findAbsences).mockResolvedValue({
-      data: [absenceWithContext],
+      data: [absenceListItem],
       error: null,
     } as never);
 
     await expect(
       listAbsences(context, { withoutCoverage: true, limit: 3 }),
-    ).resolves.toEqual([absenceWithContext]);
+    ).resolves.toEqual([absenceListItem]);
     expect(findAbsences).toHaveBeenCalledWith(organizationId, context, {
       withoutCoverage: true,
       limit: 3,

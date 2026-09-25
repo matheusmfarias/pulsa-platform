@@ -16,18 +16,18 @@ import {
 import {
   ABSENCE_REASON_LABELS,
   isAbsenceWithoutCoverage,
-  type AbsenceWithContext,
+  type AbsenceListItem,
 } from "../domain/absence";
 import { formatAbsenceJourney } from "./absence-date-format";
 import { AbsenceStatusBadge } from "./absence-status-badge";
 
-function formatEntryDateTime(absence: AbsenceWithContext) {
+function formatEntryDateTime(absence: AbsenceListItem) {
   const entry = absence.schedule_entry;
   const timeZone = entry.assignment.position.unit.timezone;
   return formatAbsenceJourney(entry.starts_at, entry.ends_at, timeZone);
 }
 
-export function AbsenceTable({ absences }: { absences: AbsenceWithContext[] }) {
+export function AbsenceTable({ absences }: { absences: AbsenceListItem[] }) {
   return (
     <TableFrame className="mt-4">
       <TableScrollArea label="Tabela de ausências">
