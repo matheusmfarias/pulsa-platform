@@ -1,0 +1,23 @@
+[[redirects]]
+  from = "http://apulsa.com.br/*"
+  to = "https://apulsa.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://apulsa.com.br/*"
+  to = "https://apulsa.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.apulsa.com.br/*"
+  to = "https://apulsa.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.apulsa.com.br/*"
+  to = "https://apulsa.com/:splat"
+  status = 301
+  force = true
