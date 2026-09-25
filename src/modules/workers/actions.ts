@@ -14,6 +14,7 @@ import { createWorker } from "./services/create-worker";
 import { updateWorker } from "./services/update-worker";
 import {
   parseWorkerListSearchParams,
+  parseWorkerListPage,
   WORKER_CREATED_FEEDBACK,
   workerListHref,
 } from "./components/worker-list-filters";
@@ -93,8 +94,12 @@ function safeWorkerListReturnHref(returnHref: string): string {
     const filters = parseWorkerListSearchParams({
       q: destination.searchParams.get("q") ?? undefined,
       status: destination.searchParams.get("status") ?? undefined,
+      page: destination.searchParams.get("page") ?? undefined,
     });
-    return workerListHref("/app/workers", filters);
+    const page = parseWorkerListPage({
+      page: destination.searchParams.get("page") ?? undefined,
+    });
+    return workerListHref("/app/workers", filters, page);
   } catch {
     return "/app/workers";
   }

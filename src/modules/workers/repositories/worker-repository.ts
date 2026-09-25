@@ -7,6 +7,7 @@ import {
 
 import type { WorkerStatus } from "../domain/worker";
 import type { WorkerInput, WorkerListFilters } from "../schemas/worker-schemas";
+import { measureServerStage } from "@/shared/logging";
 
 function sanitizeSearchTerm(value: string): string {
   return value.replace(/[%_*,().-]/g, " ").replace(/\s+/g, " ").trim();
@@ -16,6 +17,7 @@ export async function findWorkers(
   organizationId: string,
   filters: WorkerListFilters,
   operationalContext: OperationalContext,
+  pagination?: { from: number; to: number },
 ) {
   const supabase = await createServerSupabaseClient();
   const workers = supabase.from("workers");
@@ -26,7 +28,8 @@ export async function findWorkers(
       );
   query = query
     .eq("organization_id", organizationId)
-    .order("full_name", { ascending: true });
+    .order("full_name", { ascending: true })
+    .order("id", { ascending: true });
 
   if (filters.status !== "all") query = query.eq("status", filters.status);
   const term = sanitizeSearchTerm(filters.query);
@@ -36,10 +39,16 @@ export async function findWorkers(
     if (digits) clauses.push(`document_number.ilike.%${digits}%`);
     query = query.or(clauses.join(","));
   }
-  return applyOperationalContextFilter(
+  query = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.workers,
+  );
+  if (pagination) query = query.range(pagination.from, pagination.to);
+
+  return measureServerStage(
+    pagination ? "workers.list_page" : "workers.list",
+    () => query,
   );
 }
 

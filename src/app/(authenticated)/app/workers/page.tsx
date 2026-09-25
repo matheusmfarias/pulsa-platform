@@ -1,5 +1,6 @@
 import {
   parseWorkerListSearchParams,
+  parseWorkerListPage,
   WorkersWorkspace,
   type WorkerListSearchParams,
 } from "@/modules/workers";
@@ -9,6 +10,8 @@ export default async function WorkersPage({
 }: {
   searchParams: Promise<WorkerListSearchParams>;
 }) {
-  const filters = parseWorkerListSearchParams(await searchParams);
-  return <WorkersWorkspace filters={filters} />;
+  const params = await searchParams;
+  const filters = parseWorkerListSearchParams(params);
+  const page = parseWorkerListPage(params);
+  return <WorkersWorkspace filters={filters} page={page} />;
 }

@@ -6,6 +6,7 @@ import {
 } from "@/modules/operational-context";
 
 import type { CreateScheduleInput, ScheduleEntryInput, UpdateScheduleEntryInput } from "../schemas/scheduling-schemas";
+import { measureServerStage } from "@/shared/logging";
 
 const SCHEDULE_SELECT = "*, operation:operations!inner(id, name)";
 const REVISION_SELECT = "*, schedule:schedules!inner(*)";
@@ -59,11 +60,12 @@ export async function findScheduleOverviews(operationalContext: OperationalConte
     .select(SCHEDULE_OVERVIEW_SELECT)
     .order("period_start", { ascending: false })
     .order("version", { ascending: false, referencedTable: "revisions" });
-  return applyOperationalContextFilter(
+  const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.schedules,
   );
+  return measureServerStage("schedules.list_overviews", () => filteredQuery);
 }
 
 export async function findPublishedScheduleCopySources(operationalContext: OperationalContext) {
@@ -73,11 +75,12 @@ export async function findPublishedScheduleCopySources(operationalContext: Opera
     .select(SCHEDULE_COPY_SOURCE_SELECT)
     .eq("revisions.status", "published")
     .order("period_start", { ascending: false });
-  return applyOperationalContextFilter(
+  const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.schedules,
   );
+  return measureServerStage("schedules.copy_sources", () => filteredQuery);
 }
 
 export async function findScheduleById(scheduleId: string) {

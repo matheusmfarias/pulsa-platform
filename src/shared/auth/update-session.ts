@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import type { Database } from "@/shared/db/database.types";
+import { measureServerStage } from "@/shared/logging";
 import { getPublicEnvironment } from "@/shared/validation";
 
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
@@ -27,7 +28,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     },
   );
 
-  await supabase.auth.getUser();
+  await measureServerStage("auth.proxy.get_user", () => supabase.auth.getUser());
 
   return response;
 }

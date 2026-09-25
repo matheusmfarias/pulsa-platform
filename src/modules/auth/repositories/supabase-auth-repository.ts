@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import { measureServerStage } from "@/shared/logging";
 
 import type { LoginInput } from "../schemas/login-schema";
 import type { AuthenticatedUser } from "../types/authenticated-user";
@@ -18,7 +19,10 @@ export async function findAuthenticatedUser(): Promise<{
   errorCode?: string;
 }> {
   const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase.auth.getUser();
+  const { data, error } = await measureServerStage(
+    "auth.server.get_user",
+    () => supabase.auth.getUser(),
+  );
 
   if (error || !data.user) {
     return { user: null, errorCode: error?.code };

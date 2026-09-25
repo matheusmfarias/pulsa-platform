@@ -6,6 +6,7 @@ import {
 } from "@/modules/operational-context";
 
 import type { CreateAbsenceInput } from "../schemas/absence-schemas";
+import { measureServerStage } from "@/shared/logging";
 
 const ABSENCE_WITH_CONTEXT_SELECT =
   "*, reporter:profiles!absences_reported_by_fkey(id, display_name), replacements(id, status, replacement_assignment_id, replacement_assignment:assignments!replacements_replacement_assignment_id_fkey(worker:workers!inner(id, full_name), position:positions!inner(job_role:job_roles!inner(id, name), unit:units!inner(id, name)))), schedule_entry:schedule_entries!absences_schedule_entry_id_fkey!inner(*, assignment:assignments!inner(id, worker:workers!inner(id, full_name), position:positions!inner(id, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name, contract_id)))), schedule_revision:schedule_revisions!inner(id, schedule:schedules!inner(id, operation:operations!inner(id, contract_id, contract:contracts!inner(id, client_id)))))";
@@ -106,7 +107,8 @@ export async function findAbsences(
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.absences,
   );
-  return options.limit ? filteredQuery.limit(options.limit) : filteredQuery;
+  const limitedQuery = options.limit ? filteredQuery.limit(options.limit) : filteredQuery;
+  return measureServerStage("absences.list", () => limitedQuery);
 }
 
 export async function findAbsenceDetailsById(

@@ -13,12 +13,15 @@ import { throwAssignmentRepositoryError } from "./repository-errors";
 
 export async function listActiveAssignmentsWithContext(
   operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
+  workerIds?: string[],
 ): Promise<
   AssignmentWithContext[]
 > {
   await requirePermission("assignment:read");
+  if (workerIds?.length === 0) return [];
   const { data, error } = await findActiveAssignmentsWithContext(
     operationalContext,
+    workerIds,
   );
   if (error) throwAssignmentRepositoryError(error, "list_active_with_context");
   return (data ?? []).map(parseAssignmentWithContext);

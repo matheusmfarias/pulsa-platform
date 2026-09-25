@@ -1,6 +1,7 @@
 import {
   NewWorkerDrawer,
   parseWorkerListSearchParams,
+  parseWorkerListPage,
   workerListHref,
   WorkersWorkspace,
   type WorkerListSearchParams,
@@ -11,12 +12,14 @@ export default async function NewWorkerPage({
 }: {
   searchParams: Promise<WorkerListSearchParams>;
 }) {
-  const filters = parseWorkerListSearchParams(await searchParams);
-  const returnHref = workerListHref("/app/workers", filters);
+  const params = await searchParams;
+  const filters = parseWorkerListSearchParams(params);
+  const page = parseWorkerListPage(params);
+  const returnHref = workerListHref("/app/workers", filters, page);
 
   return (
     <>
-      <WorkersWorkspace filters={filters} />
+      <WorkersWorkspace filters={filters} page={page} />
       <NewWorkerDrawer returnHref={returnHref} />
     </>
   );

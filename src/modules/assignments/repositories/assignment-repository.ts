@@ -6,6 +6,7 @@ import {
 } from "@/modules/operational-context";
 
 import type { AssignmentInput, AssignmentListFilters } from "../schemas/assignment-schemas";
+import { measureServerStage } from "@/shared/logging";
 
 const ASSIGNMENT_WITH_CONTEXT_SELECT =
   "*, worker:workers!inner(id, full_name, status, organization_id), position:positions!inner(id, status, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name, contract:contracts!inner(id, name, client:clients!inner(id, trade_name, organization_id)))))";
@@ -52,18 +53,24 @@ export async function findAssignmentsForUnit(unitId: string) {
 
 export async function findActiveAssignmentsWithContext(
   operationalContext: OperationalContext,
+  workerIds?: string[],
 ) {
   const supabase = await createServerSupabaseClient();
-  const query = supabase
+  let query = supabase
     .from("assignments")
     .select(ASSIGNMENT_WITH_CONTEXT_SELECT)
     .eq("status", "active")
     .order("start_date", { ascending: false })
     .order("created_at", { ascending: false });
-  return applyOperationalContextFilter(
+  if (workerIds) query = query.in("worker_id", workerIds);
+  const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
+  );
+  return measureServerStage(
+    workerIds ? "assignments.active_for_workers" : "assignments.active_with_context",
+    () => filteredQuery,
   );
 }
 
