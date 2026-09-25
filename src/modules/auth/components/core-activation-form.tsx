@@ -33,8 +33,13 @@ export function CoreActivationForm() {
       <Field id="activation-email" label="E-mail do convite" required>
         <Input autoComplete="email" name="email" type="email" />
       </Field>
-      <Field id="activation-code" label="Código recebido por e-mail" required>
-        <Input autoComplete="one-time-code" inputMode="numeric" maxLength={8} name="token" pattern="[0-9]{8}" />
+      <Field
+        id="activation-code"
+        label="Código recebido por e-mail"
+        optional
+        description="Para reenviar o código, basta informar o e-mail acima."
+      >
+        <Input autoComplete="one-time-code" inputMode="numeric" maxLength={8} name="token" />
       </Field>
       {state.error ? <FeedbackMessage variant="danger">{state.error}</FeedbackMessage> : null}
       {resendState.error ? <FeedbackMessage variant="danger">{resendState.error}</FeedbackMessage> : null}
