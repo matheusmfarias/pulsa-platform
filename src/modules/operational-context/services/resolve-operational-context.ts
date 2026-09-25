@@ -14,6 +14,15 @@ import { findOperationalContextOptions } from "../repositories/operational-conte
 
 export const OPERATIONAL_CONTEXT_COOKIE = "pulsa-operational-context";
 
+export async function getOperationalContextSelection(): Promise<
+  OperationalContextState["context"]
+> {
+  const cookieStore = await cookies();
+  return parseOperationalContextCookie(
+    cookieStore.get(OPERATIONAL_CONTEXT_COOKIE)?.value,
+  );
+}
+
 export async function listOperationalContextOptions(): Promise<
   OperationalContextOption[]
 > {

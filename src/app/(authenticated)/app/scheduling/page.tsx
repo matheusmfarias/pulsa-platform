@@ -6,14 +6,14 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { listScheduleOverviews, ScheduleTable } from "@/modules/scheduling";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 export default async function SchedulingPage() {
   let schedules;
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
     schedules = await listScheduleOverviews(context);
   } catch (error) {
     return <PageShell><ContentContainer size="list"><PageHeader breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Escalas" }]} />} description="Planejamentos de escala por operação e período civil." title="Escalas" /><FeedbackMessage className="mt-6" variant="danger">{toPublicErrorMessage(error)}</FeedbackMessage></ContentContainer></PageShell>;

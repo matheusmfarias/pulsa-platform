@@ -6,7 +6,7 @@ import { ContentContainer, PageHeader, PageShell } from "@/components/layout/pag
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { can, getAuthorizationContext } from "@/modules/authorization";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import {
   listPresenceOperationalDay,
   presenceOperationalDateSchema,
@@ -44,8 +44,8 @@ export default async function PresencesPage({
   let rows;
   let authorization;
   try {
-    const [{ context }, resolvedAuthorization] = await Promise.all([
-      resolveOperationalContext(),
+    const [context, resolvedAuthorization] = await Promise.all([
+      getOperationalContextSelection(),
       getAuthorizationContext(),
     ]);
     rows = await listPresenceOperationalDay(parsedDate.data, context);

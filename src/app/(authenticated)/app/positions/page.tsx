@@ -16,7 +16,7 @@ import {
   positionGlobalListFiltersSchema,
   PositionTable,
 } from "@/modules/positions";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
@@ -33,7 +33,7 @@ export default async function PositionsPage({
   let positions;
 
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
 
     positions = await listPositionsForGlobalView(filters, context);
   } catch (error) {

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
 import { ContractTable, listContracts } from "@/modules/contracts";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
@@ -18,7 +18,7 @@ export default async function ContractsPage() {
   let contracts;
 
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
     contracts = await listContracts({}, context);
   } catch (error) {
     return (

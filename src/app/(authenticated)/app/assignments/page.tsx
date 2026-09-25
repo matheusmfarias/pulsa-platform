@@ -16,7 +16,7 @@ import {
   listAssignments,
 } from "@/modules/assignments";
 import { PermissionGate } from "@/modules/authorization";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
@@ -32,7 +32,7 @@ export default async function AssignmentsPage({
   let assignments;
 
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
     assignments = await listAssignments(filters, context);
   } catch (error) {
     return (

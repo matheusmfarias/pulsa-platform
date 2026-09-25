@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import {
   listUnitOperationalSummaries,
   UnitTable,
@@ -21,7 +21,7 @@ export default async function UnitsPage() {
   let units;
 
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
     units = await listUnitOperationalSummaries(context);
   } catch (error) {
     return (

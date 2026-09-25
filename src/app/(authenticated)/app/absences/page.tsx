@@ -4,14 +4,14 @@ import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { AbsenceTable, listAbsences } from "@/modules/absences";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 export default async function AbsencesPage({ searchParams }: PageProps<"/app/absences">) {
   let absences;
   let withoutCoverage = false;
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
     withoutCoverage = (await searchParams).coverage === "uncovered";
     absences = await listAbsences(context, { withoutCoverage });
   } catch (error) {

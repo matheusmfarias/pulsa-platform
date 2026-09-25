@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { getAuthorizationContext } from "@/modules/authorization";
 import { listOperations } from "@/modules/operations";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { listPublishedScheduleCopySources, listScheduleOverviews, ScheduleForm } from "@/modules/scheduling";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 export default async function NewSchedulePage() {
   let operations; let organizationId; let copySources; let schedulePeriods;
   try {
-    const [{ context }, authorization] = await Promise.all([resolveOperationalContext(), getAuthorizationContext()]);
+    const [context, authorization] = await Promise.all([getOperationalContextSelection(), getAuthorizationContext()]);
     [operations, copySources, schedulePeriods] = await Promise.all([listOperations({ status: "active" }, context), listPublishedScheduleCopySources(context), listScheduleOverviews(context)]);
     organizationId = authorization.organizationId;
   } catch (error) {
