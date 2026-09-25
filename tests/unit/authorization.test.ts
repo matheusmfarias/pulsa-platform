@@ -6,11 +6,11 @@ import {
   ROLE_PERMISSIONS,
 } from "@/modules/authorization/domain/permissions";
 import { requirePermission } from "@/modules/authorization/services/require-permission";
-import { requireActiveOrganization } from "@/modules/organizations";
+import { getAuthorizationContext } from "@/modules/authorization/services/get-authorization-context";
 import { AppError } from "@/shared/errors";
 
-vi.mock("@/modules/organizations", () => ({
-  requireActiveOrganization: vi.fn(),
+vi.mock("@/modules/authorization/services/get-authorization-context", () => ({
+  getAuthorizationContext: vi.fn(),
 }));
 
 const context = {
@@ -100,12 +100,12 @@ describe("authorization", () => {
   });
 
   it("requirePermission allows a permitted active membership", async () => {
-    vi.mocked(requireActiveOrganization).mockResolvedValue(context);
+    vi.mocked(getAuthorizationContext).mockResolvedValue(context);
     await expect(requirePermission("worker:update")).resolves.toBe(context);
   });
 
   it("keeps an inactive membership denied before checking its role", async () => {
-    vi.mocked(requireActiveOrganization).mockRejectedValue(
+    vi.mocked(getAuthorizationContext).mockRejectedValue(
       new AppError(
         "AUTHORIZATION",
         "Seu usuário não possui uma organização ativa.",
