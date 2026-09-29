@@ -37,14 +37,17 @@ export function CoreActivationForm() {
         id="activation-code"
         label="Código recebido por e-mail"
         optional
-        description="Para reenviar o código, basta informar o e-mail acima."
+        description="Preencha o código ou cole o link do convite abaixo."
       >
         <Input autoComplete="one-time-code" inputMode="numeric" maxLength={8} name="token" />
+      </Field>
+      <Field id="activation-link" label="Link do convite" optional description="Se o e-mail contém um link em vez de código, cole o endereço completo aqui.">
+        <Input autoComplete="off" name="invitationLink" type="url" />
       </Field>
       {state.error ? <FeedbackMessage variant="danger">{state.error}</FeedbackMessage> : null}
       {resendState.error ? <FeedbackMessage variant="danger">{resendState.error}</FeedbackMessage> : null}
       {resendState.success ? <FeedbackMessage variant="success">{resendState.success}</FeedbackMessage> : null}
-      <Button className="w-full" disabled={pending || resending} type="submit">{pending ? "Confirmando…" : "Confirmar código"}</Button>
+      <Button className="w-full" disabled={pending || resending} type="submit">{pending ? "Confirmando…" : "Confirmar convite"}</Button>
       <Button className="w-full" disabled={pending || resending} formAction={resendAction} type="submit" variant="outline">
         {resending ? "Enviando…" : "Enviar novo código"}
       </Button>
