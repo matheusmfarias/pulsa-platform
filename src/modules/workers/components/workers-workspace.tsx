@@ -124,6 +124,23 @@ function WorkersResultsLoading() {
   );
 }
 
+function WorkersWorkspaceLoading() {
+  return (
+    <section
+      aria-label="Carregando lista de colaboradores"
+      className="mt-6 overflow-hidden rounded-card bg-surface shadow-card"
+    >
+      <div className="flex flex-col gap-2.5 p-3 sm:flex-row sm:p-4">
+        <Skeleton className="h-10 min-w-0 flex-1" />
+        <Skeleton className="h-10 w-28" />
+      </div>
+      <div className="border-t border-border-default">
+        <WorkersResultsLoading />
+      </div>
+    </section>
+  );
+}
+
 async function WorkersResults({
   createHref,
   filters,
@@ -222,11 +239,13 @@ export function WorkersWorkspace({ filters, page = 1, pageSize }: { filters: Wor
           title="Colaboradores"
         />
 
-        <WorkerFilterBar pageSize={pageSize}>
-          <Suspense fallback={<WorkersResultsLoading />}>
-            <WorkersResults createHref={createHref} filters={filters} page={page} pageSize={pageSize} />
-          </Suspense>
-        </WorkerFilterBar>
+        <Suspense fallback={<WorkersWorkspaceLoading />}>
+          <WorkerFilterBar pageSize={pageSize}>
+            <Suspense fallback={<WorkersResultsLoading />}>
+              <WorkersResults createHref={createHref} filters={filters} page={page} pageSize={pageSize} />
+            </Suspense>
+          </WorkerFilterBar>
+        </Suspense>
       </ContentContainer>
       <Suspense fallback={null}>
         <WorkerCreateSuccessToast />
