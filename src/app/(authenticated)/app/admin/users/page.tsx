@@ -8,6 +8,7 @@ import {
 } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   Table,
@@ -69,10 +70,12 @@ export default async function AdministrationUsersPage() {
           title="Usuários"
           actions={<InviteOrganizationUser />}
         />
-        <details className="mt-4 text-sm text-muted-foreground">
-          <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Sobre os dados desta lista</summary>
-          <p className="mt-2">Esta lista reúne usuários internos. Colaboradores operacionais são gerenciados na área Colaboradores.</p>
-        </details>
+        <Disclosure className="mt-4 text-sm text-muted-foreground">
+          <DisclosureTrigger className="w-fit">Sobre os dados desta lista</DisclosureTrigger>
+          <DisclosureContent>
+            <p className="mt-2">Esta lista reúne usuários internos. Colaboradores operacionais são gerenciados na área Colaboradores.</p>
+          </DisclosureContent>
+        </Disclosure>
         {members.length === 0 ? (
           <section className="mt-6 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
             <h2 className="font-medium">Nenhum usuário encontrado</h2>

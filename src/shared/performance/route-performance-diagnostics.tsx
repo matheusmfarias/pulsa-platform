@@ -3,6 +3,8 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
+
 import { useLayoutPerformanceStages, type RouteServerStage } from "./layout-performance-stages";
 
 type Props = {
@@ -124,11 +126,11 @@ export function RoutePerformanceDiagnostics({
   const browserStages = transition?.browserStages ?? navigationMetrics();
 
   return (
-    <details className="mt-6 rounded-surface border border-border-default bg-surface px-4 py-3 text-sm">
-      <summary className="cursor-pointer font-medium text-foreground">
+    <Disclosure className="mt-6 rounded-surface border border-border-default bg-surface px-4 py-3 text-sm">
+      <DisclosureTrigger>
         Diagnóstico de desempenho · {resultCount} {resultCount === 1 ? "registro" : "registros"}
-      </summary>
-      <div className="mt-3 grid gap-4 md:grid-cols-2">
+      </DisclosureTrigger>
+      <DisclosureContent className="mt-3 grid gap-4 md:grid-cols-2">
         <section aria-label="Etapas no servidor">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Servidor</h3>
           <dl className="mt-2 space-y-2">
@@ -151,10 +153,10 @@ export function RoutePerformanceDiagnostics({
             )) : <p className="text-muted-foreground">Aguardando a próxima navegação entre telas.</p>}
           </dl>
         </section>
-      </div>
+      </DisclosureContent>
       <p className="mt-3 text-xs leading-5 text-muted-foreground">
         Medições locais desta sessão. A navegação inclui o carregamento dos dados e a renderização da tela.
       </p>
-    </details>
+    </Disclosure>
   );
 }

@@ -32,6 +32,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { BrandMark } from "@/components/shared/brand-mark";
 import { OperationalContextSwitcher } from "@/components/shared/operational-context-switcher";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { logoutAction } from "@/modules/auth/actions";
 import type { OperationalContextState } from "@/modules/operational-context/domain/operational-context";
 import { cn } from "@/shared/utils";
@@ -257,13 +258,13 @@ function NavigationSearch({ collapsed = false, shortcut = false, showAdministrat
         <h2 className="text-sm font-semibold" id={titleId}>Ir para uma página</h2>
         <div className="mt-3 flex items-center gap-2">
           <Search aria-hidden="true" className="size-4 text-muted-foreground" />
-          <input
+          <Input
             aria-activedescendant={results.length ? `${titleId}-result-${currentIndex}` : undefined}
             aria-controls={`${titleId}-results`}
             aria-expanded="true"
             aria-label="Buscar página ou tarefa"
             aria-autocomplete="list"
-            className="h-9 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="h-9 min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
             onChange={(event) => { setQuery(event.target.value); setActiveIndex(0); }}
             onKeyDown={(event) => {
               if (event.key === "ArrowDown") { event.preventDefault(); setActiveIndex((current) => Math.min(current + 1, results.length - 1)); }

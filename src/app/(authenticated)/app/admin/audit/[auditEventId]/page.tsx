@@ -6,6 +6,7 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   Table,
@@ -193,14 +194,16 @@ export default async function AuditEventDetailPage({
             )}
           </section>
           <section className="py-6">
-            <details className="rounded-card bg-surface shadow-card">
-              <summary className="cursor-pointer px-6 py-4 font-medium">
+            <Disclosure className="overflow-hidden rounded-card bg-surface shadow-card">
+              <DisclosureTrigger className="rounded-none px-6 py-4 text-base">
                 Metadata técnica
-              </summary>
-              <pre className="overflow-x-auto border-t border-border-default bg-subtle/35 p-6 text-xs leading-6">
-                {JSON.stringify(event.metadata, null, 2)}
-              </pre>
-            </details>
+              </DisclosureTrigger>
+              <DisclosureContent>
+                <pre className="overflow-x-auto border-t border-border-default bg-subtle/35 p-6 text-xs leading-6">
+                  {JSON.stringify(event.metadata, null, 2)}
+                </pre>
+              </DisclosureContent>
+            </Disclosure>
           </section>
         </div>
       </ContentContainer>

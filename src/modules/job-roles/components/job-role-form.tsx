@@ -5,6 +5,7 @@ import { usePreservedActionState } from "@/shared/forms/use-preserved-action-sta
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import {
   createJobRoleAction,
@@ -39,13 +40,12 @@ export function JobRoleForm({ jobRole }: { jobRole?: JobRole }) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Descrição</Label>
-        <textarea
+        <Textarea
           id="description"
           name="description"
           defaultValue={jobRole?.description ?? ""}
           maxLength={2000}
           rows={5}
-          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
         <ErrorText errors={state.fieldErrors?.description} />
       </div>

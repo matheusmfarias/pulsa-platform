@@ -5,7 +5,6 @@ import {
   Building2,
   CalendarDays,
   CalendarX2,
-  ChevronDown,
   CheckCircle2,
   ClipboardCheck,
   Gauge,
@@ -23,6 +22,7 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { DataRouteSkeleton } from "@/components/ui/data-route-skeleton";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Card, interactiveCardClassName } from "@/components/ui/card";
 import {
@@ -277,9 +277,9 @@ async function InternalHomeContent() {
           </div>
         </section>
 
-        <details open className="group mt-8 overflow-hidden rounded-card bg-surface shadow-card">
-          <summary className="flex cursor-pointer list-none flex-col items-start justify-between gap-3 rounded-card px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:flex-row sm:items-center sm:gap-4 sm:px-6 [&::-webkit-details-marker]:hidden">
-            <span className="min-w-0">
+        <Disclosure open className="mt-8 overflow-hidden rounded-card bg-surface shadow-card">
+          <DisclosureTrigger className="items-start rounded-card px-5 py-4 sm:items-center sm:px-6">
+            <span className="min-w-0 flex-1">
             <h2
               className="font-semibold"
               id="indicators-heading"
@@ -291,14 +291,13 @@ async function InternalHomeContent() {
               Estrutura e alocação no contexto operacional selecionado.
             </p>
             </span>
-            <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-primary sm:self-center">
+            <span className="hidden shrink-0 text-sm font-medium text-primary sm:block">
               <span className="group-open:hidden">Ver indicadores</span>
               <span className="hidden group-open:inline">Ocultar indicadores</span>
-              <ChevronDown aria-hidden="true" className="size-4 transition-transform group-open:rotate-180" />
             </span>
-          </summary>
+          </DisclosureTrigger>
 
-          <div className="grid gap-3 bg-canvas/65 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
+          <DisclosureContent className="grid gap-3 bg-canvas/65 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
             {kpis.map(({ label, value, icon: Icon }) => {
               const featured = label === "Colaboradores ativos";
 
@@ -363,8 +362,8 @@ async function InternalHomeContent() {
                 />
               </div>
             </article>
-          </div>
-        </details>
+          </DisclosureContent>
+        </Disclosure>
 
         <section
           aria-labelledby="operations-heading"

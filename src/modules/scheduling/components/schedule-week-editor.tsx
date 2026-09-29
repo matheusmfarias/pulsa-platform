@@ -6,6 +6,7 @@ import { useActionState, useCallback, useEffect, useRef, useState, useTransition
 
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog } from "@/components/ui/dialog";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Field } from "@/components/ui/field";
@@ -176,7 +177,7 @@ function EntryItem({ scheduleId, revisionId, entry, editable, canCreateAbsence, 
 
   return (
     <div className={`min-w-0 border-b border-border-default py-2 last:border-0 ${activeAbsence ? "rounded-control bg-status-warning-background/20 px-2" : ""}`}>
-      {editable ? <label className="float-right"><input aria-label={`Selecionar ${workerName}`} checked={selected} onChange={(event) => onSelect(entry.id, event.target.checked)} type="checkbox" /></label> : null}
+      {editable ? <label className="float-right"><Checkbox aria-label={`Selecionar ${workerName}`} checked={selected} onChange={(event) => onSelect(entry.id, event.target.checked)} /></label> : null}
       <p className="truncate font-medium" title={workerName}>{workerName}</p>
       <p className="text-xs tabular-nums text-muted-foreground">{start}–{end}</p>
       {pause ? <p className="text-xs tabular-nums text-muted-foreground">Intervalo {pause}</p> : null}
@@ -192,7 +193,7 @@ function EntryItem({ scheduleId, revisionId, entry, editable, canCreateAbsence, 
           </div>
           {mode === "edit" ? <EntryForm assignments={[]} date={entryDay} entry={entry} revisionId={revisionId} scheduleId={scheduleId} timeZone={timeZone} /> : <form action={copyAction} className="space-y-4 text-sm" onReset={copyPreservationReset} onSubmit={(event) => { copyPreservationSubmit(event); setCopyAttempted(true); }} ref={copyPreservationRef}>
             <p className="text-muted-foreground">Escolha os dias desta semana que receberão a mesma jornada.</p>
-            <div className="grid gap-2 sm:grid-cols-2">{targetDays.map((day) => <label className="flex min-h-11 items-center gap-3 rounded-control border border-border-default px-3 py-2 capitalize hover:bg-hover" key={day.key}><input checked={copyTargets.includes(day.key)} className="size-4 accent-primary" name="target_dates" onChange={(event) => setCopyTargets((current) => event.target.checked ? [...current, day.key] : current.filter((key) => key !== day.key))} type="checkbox" value={day.key} />{day.label}</label>)}</div>
+            <div className="grid gap-2 sm:grid-cols-2">{targetDays.map((day) => <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-control border border-border-default px-3 py-2 capitalize transition-colors hover:bg-hover" key={day.key}><Checkbox checked={copyTargets.includes(day.key)} name="target_dates" onChange={(event) => setCopyTargets((current) => event.target.checked ? [...current, day.key] : current.filter((key) => key !== day.key))} value={day.key} />{day.label}</label>)}</div>
             <Button disabled={copying || !copyTargets.length} type="submit">{copying ? "Copiando…" : "Copiar jornada"}</Button>
             {copyAttempted && !copying && copyResult ? <FeedbackMessage variant={copyResultVariant}>{copyResult}</FeedbackMessage> : null}
           </form>}

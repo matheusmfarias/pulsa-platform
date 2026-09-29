@@ -6,6 +6,7 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   ResendOrganizationInvitation,
@@ -105,10 +106,12 @@ export default async function AdministrationUserDetailPage({
                 </dd>
               </div>
             </dl>
-            <details className="mt-5 text-sm text-muted-foreground">
-              <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Identificador para suporte</summary>
-              <p className="mt-2 break-all font-mono">{member.profile_id}</p>
-            </details>
+            <Disclosure className="mt-5 text-sm text-muted-foreground">
+              <DisclosureTrigger className="w-fit">Identificador para suporte</DisclosureTrigger>
+              <DisclosureContent>
+                <p className="mt-2 break-all font-mono">{member.profile_id}</p>
+              </DisclosureContent>
+            </Disclosure>
           </section>
           {member.invitationPending ? (
             <section className="py-6">

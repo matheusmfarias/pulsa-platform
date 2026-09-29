@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -142,8 +143,9 @@ function PresenceDetails({
               <div><dt className="text-muted-foreground">Posto</dt><dd className="mt-1">{row.job_role_name}</dd></div>
             </dl>
             {canCorrect ? (
-              <details className="mt-5 border-t border-border-default pt-4">
-                <summary className="cursor-pointer text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Corrigir horários</summary>
+              <Disclosure className="mt-5 border-t border-border-default pt-4">
+                <DisclosureTrigger className="font-semibold">Corrigir horários</DisclosureTrigger>
+                <DisclosureContent>
                 <form action={correctionAction} className="mt-4 space-y-3" onReset={correctionPreservationReset} onSubmit={correctionPreservationSubmit} ref={correctionPreservationRef}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="grid gap-1.5 text-sm">Chegada<Input defaultValue={dateTimeLocalValue(row.arrived_at, row.unit_timezone)} name="arrived_at" required type="datetime-local" /></label>
@@ -153,17 +155,20 @@ function PresenceDetails({
                 {correctionState.error ? <FeedbackMessage variant="danger">{correctionState.error}</FeedbackMessage> : null}
                 <Button disabled={correctionPending} size="sm" type="submit">{correctionPending ? "Salvando…" : "Salvar correção"}</Button>
                 </form>
-              </details>
+                </DisclosureContent>
+              </Disclosure>
             ) : null}
             {canCancel ? (
-              <details className="mt-5 border-t border-border-default pt-4">
-                <summary className="cursor-pointer text-sm font-semibold text-status-danger-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">Cancelar presença</summary>
+              <Disclosure className="mt-5 border-t border-border-default pt-4">
+                <DisclosureTrigger className="font-semibold text-status-danger-foreground hover:text-status-danger-foreground">Cancelar presença</DisclosureTrigger>
+                <DisclosureContent>
                 <form action={cancellationAction} className="mt-4 space-y-3" onReset={cancellationPreservationReset} onSubmit={cancellationPreservationSubmit} ref={cancellationPreservationRef}>
                 <label className="grid gap-1.5 text-sm">Justificativa<Textarea maxLength={1000} name="reason" required /></label>
                 {cancellationState.error ? <FeedbackMessage variant="danger">{cancellationState.error}</FeedbackMessage> : null}
                 <Button disabled={cancellationPending} size="sm" type="submit" variant="destructive">{cancellationPending ? "Cancelando…" : "Cancelar presença"}</Button>
                 </form>
-              </details>
+                </DisclosureContent>
+              </Disclosure>
             ) : null}
         </Dialog>
       ) : null}
