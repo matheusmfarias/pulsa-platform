@@ -297,35 +297,37 @@ export default async function InternalHomePage() {
           </summary>
 
           <div className="grid gap-3 bg-canvas/65 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
-            {kpis.map(({ label, value, icon: Icon }) => (
-              <article
-                className="flex min-h-28 flex-col justify-between rounded-card bg-surface px-5 py-4 shadow-card"
+            {kpis.map(({ label, value, icon: Icon }) => {
+              const featured = label === "Colaboradores ativos";
+
+              return <article
+                className={`flex min-h-28 flex-col justify-between rounded-card px-5 py-4 shadow-card ${featured ? "bg-action-primary text-primary-foreground" : "bg-surface"}`}
                 key={label}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className={`text-xs font-medium ${featured ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                     {label}
                   </p>
 
                   <Icon
                     aria-hidden="true"
-                    className="size-4.5 text-primary"
+                    className={`size-4.5 ${featured ? "text-primary-foreground/80" : "text-primary"}`}
                   />
                 </div>
 
                 <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
                   {value}
                 </p>
-              </article>
-            ))}
+              </article>;
+            })}
 
-            <article className="flex min-h-28 flex-col justify-between rounded-card bg-action-primary px-5 py-4 text-primary-foreground shadow-card sm:col-span-2 lg:col-span-2">
+            <article className="flex min-h-28 flex-col justify-between rounded-card bg-surface px-5 py-4 shadow-card sm:col-span-2 lg:col-span-2">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="flex items-center gap-2 text-xs font-medium text-primary-foreground/80">
                     <Gauge
                       aria-hidden="true"
-                      className="size-4 text-primary-foreground/80"
+                      className="size-4 text-primary"
                     />
 
                     Alocação sobre efetivo base
@@ -337,7 +339,7 @@ export default async function InternalHomePage() {
                   </p>
                 </div>
 
-                <span className="text-sm font-medium tabular-nums text-primary-foreground">
+                <span className="text-sm font-medium tabular-nums text-primary">
                   {rawOccupancyPercent}%
                 </span>
               </div>
@@ -348,11 +350,11 @@ export default async function InternalHomePage() {
                 aria-valuemin={0}
                 aria-valuenow={progressValue}
                 aria-valuetext={`${activeAssignments} de ${totalRequiredHeadcount}, ${rawOccupancyPercent}%`}
-                className="mt-4 h-2 overflow-hidden rounded-full bg-primary-foreground/20"
+                className="mt-4 h-2 overflow-hidden rounded-full bg-muted"
                 role="progressbar"
               >
                 <div
-                  className="h-full rounded-full bg-primary-foreground"
+                  className="h-full rounded-full bg-primary"
                   style={{
                     width: `${progressValue}%`,
                   }}

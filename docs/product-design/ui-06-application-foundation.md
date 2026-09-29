@@ -99,8 +99,9 @@ Requer atenção
 → Resumo das operações
 
 O bloco de indicadores aparece expandido inicialmente após os atalhos e pode
-ser recolhido pelo usuário. A ocupação sobre efetivo base recebe maior peso
-visual e mantém esse rótulo explícito; não representa cobertura de Scheduling.
+ser recolhido pelo usuário. Colaboradores ativos pode receber maior peso
+visual; a ocupação sobre efetivo base mantém escala e rótulo explícitos e não
+representa cobertura de Scheduling.
 
 Indicadores derivados devem explicar exatamente o dado que representam.
 Alocações sobre efetivo base não devem ser apresentadas como cobertura de
