@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import {
   ContentContainer,
@@ -11,6 +12,7 @@ import { ListPagination } from "@/components/layout/list-pagination";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   assignmentListFiltersSchema,
+  AssignmentTableSkeleton,
   AssignmentFilterBar,
   AssignmentTable,
   hasActiveAssignmentFilters,
@@ -43,36 +45,7 @@ export default async function AssignmentsPage({
   const rawPage = Array.isArray(query.page) ? query.page[0] : query.page;
   const parsedPage = Number.parseInt(rawPage ?? "1", 10);
   const page = Number.isFinite(parsedPage) ? Math.max(1, Math.min(10_000, parsedPage)) : 1;
-
-  let result;
-
-  try {
-    const context = await getOperationalContextSelection();
-    result = await listAssignmentsPage(filters, context, page);
-  } catch (error) {
-    return (
-      <PageShell>
-        <ContentContainer size="list">
-          <PageHeader
-            breadcrumb={
-              <Breadcrumb
-                items={[{ label: "Operação" }, { label: "Alocações" }]}
-              />
-            }
-            description="Relações temporais entre colaboradores e postos."
-            title="Alocações"
-          />
-
-          <FeedbackMessage className="mt-6" variant="danger">
-            {toPublicErrorMessage(error)}
-          </FeedbackMessage>
-        </ContentContainer>
-      </PageShell>
-    );
-  }
-
   const hasActiveFilters = hasActiveAssignmentFilters(filters);
-  const assignments = result.items;
 
   return (
     <PageShell>
@@ -99,55 +72,86 @@ export default async function AssignmentsPage({
 
         <AssignmentFilterBar filters={filters} />
 
-        <div className="mt-5 sm:mt-6">
-          {result.total > 0 ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-              <p>
-                <span className="font-medium tabular-nums text-foreground">
-                  {result.total}
-                </span>{" "}
-                {result.total === 1 ? "alocação encontrada" : "alocações encontradas"}
-                {hasActiveFilters ? " com os filtros atuais" : ""}
-              </p>
-            </div>
-          ) : hasActiveFilters ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhuma alocação encontrada com os filtros atuais
-            </p>
-          ) : null}
-
-          {assignments.length === 0 ? (
-            <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
-              <h2 className="font-medium">
-                {hasActiveFilters
-                  ? "Nenhuma alocação corresponde ao filtro"
-                  : "Nenhuma alocação cadastrada"}
-              </h2>
-
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                {hasActiveFilters
-                  ? "Altere ou limpe o filtro para visualizar outras alocações."
-                  : "As alocações representam o vínculo temporal entre um colaborador e um posto."}
-              </p>
-            </section>
-          ) : (
-            <AssignmentTable
-              assignments={assignments}
-              footer={
-                <ListPagination
-                  currentPage={result.page}
-                  getHref={(targetPage) => assignmentsPageHref(filters, targetPage)}
-                  getPageSizeHref={(targetSize) => assignmentsPageHref(filters, 1, targetSize)}
-                  label="alocações"
-                  pageCount={result.pageCount}
-                  pageSize={result.pageSize}
-                  total={result.total}
-                />
-              }
-            />
-          )}
-        </div>
+        <Suspense fallback={<AssignmentTableSkeleton />}>
+          <AssignmentResults filters={filters} hasActiveFilters={hasActiveFilters} page={page} />
+        </Suspense>
       </ContentContainer>
     </PageShell>
+  );
+}
+
+async function AssignmentResults({
+  filters,
+  hasActiveFilters,
+  page,
+}: {
+  filters: ReturnType<typeof assignmentListFiltersSchema.parse>;
+  hasActiveFilters: boolean;
+  page: number;
+}) {
+  let result;
+
+  try {
+    const context = await getOperationalContextSelection();
+    result = await listAssignmentsPage(filters, context, page);
+  } catch (error) {
+    return (
+      <FeedbackMessage className="mt-6" variant="danger">
+        {toPublicErrorMessage(error)}
+      </FeedbackMessage>
+    );
+  }
+
+  const assignments = result.items;
+
+  return (
+    <div className="mt-5 sm:mt-6">
+      {result.total > 0 ? (
+        <div aria-live="polite" className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+          <p>
+            <span className="font-medium tabular-nums text-foreground">
+              {result.total}
+            </span>{" "}
+            {result.total === 1 ? "alocação encontrada" : "alocações encontradas"}
+            {hasActiveFilters ? " com os filtros atuais" : ""}
+          </p>
+        </div>
+      ) : hasActiveFilters ? (
+        <p aria-live="polite" className="text-sm text-muted-foreground">
+          Nenhuma alocação encontrada com os filtros atuais
+        </p>
+      ) : null}
+
+      {assignments.length === 0 ? (
+        <section className="mt-4 rounded-card bg-surface px-6 py-8 text-center shadow-card sm:py-10">
+          <h2 className="font-medium">
+            {hasActiveFilters
+              ? "Nenhuma alocação corresponde ao filtro"
+              : "Nenhuma alocação cadastrada"}
+          </h2>
+
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+            {hasActiveFilters
+              ? "Altere ou limpe o filtro para visualizar outras alocações."
+              : "As alocações representam o vínculo temporal entre um colaborador e um posto."}
+          </p>
+        </section>
+      ) : (
+        <AssignmentTable
+          assignments={assignments}
+          footer={
+            <ListPagination
+              currentPage={result.page}
+              getHref={(targetPage) => assignmentsPageHref(filters, targetPage)}
+              getPageSizeHref={(targetSize) => assignmentsPageHref(filters, 1, targetSize)}
+              label="alocações"
+              pageCount={result.pageCount}
+              pageSize={result.pageSize}
+              total={result.total}
+            />
+          }
+        />
+      )}
+    </div>
   );
 }

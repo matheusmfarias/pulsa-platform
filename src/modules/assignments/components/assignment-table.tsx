@@ -151,3 +151,61 @@ export function AssignmentTable({
     </TableFrame>
   );
 }
+
+function SkeletonBone({ className = "" }: { className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`block animate-pulse rounded-control bg-subtle motion-reduce:animate-none ${className}`}
+    />
+  );
+}
+
+export function AssignmentTableSkeleton() {
+  return (
+    <TableFrame
+      aria-busy="true"
+      aria-label="Carregando resultados de alocações"
+      className="mt-4 overflow-hidden rounded-card bg-surface shadow-card"
+      role="status"
+    >
+      <TableScrollArea bounded label="Resultados de alocações">
+        <Table className="min-w-full table-fixed xl:min-w-[920px] xl:table-auto">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="px-3 xl:px-4">Alocação</TableHead>
+              <TableHead className="hidden xl:table-cell">Posto</TableHead>
+              <TableHead className="hidden xl:table-cell">Unidade</TableHead>
+              <TableHead className="hidden xl:table-cell">Período</TableHead>
+              <TableHead className="w-28 px-2 xl:w-32 xl:px-4">Status</TableHead>
+              <TableHead className="w-12 px-1 xl:w-14 xl:px-4"><span className="sr-only">Ações</span></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 8 }, (_, index) => (
+              <TableRow key={index}>
+                <TableCell className="px-3 xl:px-4">
+                  <SkeletonBone className="h-4 w-3/4" />
+                  <div className="mt-2 space-y-1.5 xl:hidden">
+                    <SkeletonBone className="h-3 w-2/3" />
+                    <SkeletonBone className="h-3 w-1/2" />
+                    <SkeletonBone className="h-3 w-2/5" />
+                  </div>
+                </TableCell>
+                <TableCell className="hidden xl:table-cell"><SkeletonBone className="h-4 w-3/4" /></TableCell>
+                <TableCell className="hidden xl:table-cell"><SkeletonBone className="h-4 w-4/5" /></TableCell>
+                <TableCell className="hidden xl:table-cell"><SkeletonBone className="h-4 w-2/3" /></TableCell>
+                <TableCell className="px-2"><SkeletonBone className="h-6 w-16 rounded-full" /></TableCell>
+                <TableCell className="px-1"><SkeletonBone className="ml-auto size-8 rounded-full" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableScrollArea>
+      <div aria-hidden="true" className="flex items-center justify-between border-t border-border-default/80 px-4 py-3">
+        <SkeletonBone className="h-4 w-24" />
+        <div className="flex gap-2"><SkeletonBone className="h-9 w-20" /><SkeletonBone className="h-9 w-20" /></div>
+      </div>
+    </TableFrame>
+  );
+}
