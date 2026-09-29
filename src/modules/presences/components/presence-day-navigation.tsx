@@ -177,7 +177,7 @@ export function PresenceDayNavigation({
                 <Select
                   aria-label="Mês"
                   className="min-w-0 px-2 capitalize"
-                  onChange={(event) => setVisibleMonth((value) => new Date(Date.UTC(value.getUTCFullYear(), Number(event.target.value), 1, 12)))}
+                  onValueChange={(nextValue) => setVisibleMonth((value) => new Date(Date.UTC(value.getUTCFullYear(), Number(nextValue), 1, 12)))}
                   value={String(visibleMonth.getUTCMonth())}
                 >
                   {MONTHS.map((month, index) => <option key={month} value={index}>{month}</option>)}
@@ -185,7 +185,7 @@ export function PresenceDayNavigation({
                 <Select
                   aria-label="Ano"
                   className="min-w-0 px-2"
-                  onChange={(event) => setVisibleMonth((value) => new Date(Date.UTC(Number(event.target.value), value.getUTCMonth(), 1, 12)))}
+                  onValueChange={(nextValue) => setVisibleMonth((value) => new Date(Date.UTC(Number(nextValue), value.getUTCMonth(), 1, 12)))}
                   value={String(visibleMonth.getUTCFullYear())}
                 >
                   {years.map((year) => <option key={year} value={year}>{year}</option>)}

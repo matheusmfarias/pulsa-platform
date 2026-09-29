@@ -56,7 +56,7 @@ export function ScheduleForm({ organizationId, operations, copySources, schedule
           <p className="mt-1 text-sm leading-6 text-muted-foreground">Escolha os dias que esta escala vai organizar. O período não pode se sobrepor a outra escala da mesma operação.</p>
         </div>
         <Field error={fieldError("operation_id")} id="operation_id" label="Operação" required>
-          <Select defaultValue="" name="operation_id" onChange={(event) => { setOperationId(event.target.value); setSourceScheduleId(""); markEdited("operation_id"); markEdited("source_schedule_id"); }}>
+          <Select defaultValue="" name="operation_id" onValueChange={(nextValue) => { setOperationId(nextValue); setSourceScheduleId(""); markEdited("operation_id"); markEdited("source_schedule_id"); }}>
             <option disabled value="">Selecione uma operação</option>
             {operations.map((operation) => <option key={operation.id} value={operation.id}>{operation.contract.client.trade_name} — {operation.name}</option>)}
           </Select>
@@ -80,7 +80,7 @@ export function ScheduleForm({ organizationId, operations, copySources, schedule
           </div>
           {noCopySource ? <FeedbackMessage>Nenhuma escala publicada anterior está disponível para esta operação e este início de período. Escolha outro período ou comece sem jornadas.</FeedbackMessage> : (
             <Field error={fieldError("source_schedule_id")} id="source_schedule_id" label="Escala publicada anterior" required>
-              <Select disabled={!operationId || !periodStart} name="source_schedule_id" onChange={(event) => { setSourceScheduleId(event.target.value); markEdited("source_schedule_id"); }} value={sourceScheduleId}>
+              <Select disabled={!operationId || !periodStart} name="source_schedule_id" onValueChange={(nextValue) => { setSourceScheduleId(nextValue); markEdited("source_schedule_id"); }} value={sourceScheduleId}>
                 <option value="">{operationId && periodStart ? "Selecione uma escala publicada" : "Selecione a operação e o novo período"}</option>
                 {sources.map((source) => <option key={source.id} value={source.id}>{formatCivilDate(source.period_start)} — {formatCivilDate(source.period_end)} · v{source.publishedVersion}</option>)}
               </Select>

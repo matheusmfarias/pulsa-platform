@@ -76,7 +76,7 @@ export function AssignmentForm({
                 assignment?.worker_id ?? defaultWorkerId ?? ""
               }
               name="worker_id"
-              onChange={() => markEdited("worker_id")}
+              onValueChange={() => markEdited("worker_id")}
             >
               <option disabled value="">
                 Selecione um colaborador
@@ -111,7 +111,7 @@ export function AssignmentForm({
                 assignment?.position_id ?? defaultPositionId ?? ""
               }
               name="position_id"
-              onChange={() => markEdited("position_id")}
+              onValueChange={() => markEdited("position_id")}
             >
               <option disabled value="">
                 Selecione um posto
