@@ -43,7 +43,7 @@ export function TableScrollArea({
         aria-label={label}
         orientation={bounded ? "both" : "horizontal"}
         role="region"
-        scrollAreaClassName={cn(scrollAreaClassName, bounded ? "lg:max-h-[calc(100dvh-24rem)]" : undefined)}
+        scrollAreaClassName={cn(scrollAreaClassName, bounded ? "lg:max-h-[calc(100dvh-25rem)]" : undefined)}
         tabIndex={0}
         {...props}
       >
@@ -57,7 +57,7 @@ export function TableScrollArea({
       aria-label={label}
       className={cn(
         bounded
-          ? "overflow-x-auto lg:max-h-[calc(100dvh-24rem)] lg:overflow-y-auto"
+          ? "overflow-x-auto lg:max-h-[calc(100dvh-25rem)] lg:overflow-y-auto"
           : "overflow-x-auto",
         scrollAreaClassName,
       )}
