@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -13,12 +13,19 @@ import {
   AssignmentFilterBar,
   AssignmentTable,
   hasActiveAssignmentFilters,
-  listAssignments,
+  listAssignmentsPage,
 } from "@/modules/assignments";
 import { PermissionGate } from "@/modules/authorization";
 import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+
+function assignmentsPageHref(status: string | undefined, page: number): string {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  params.set("page", String(page));
+  return `/app/assignments?${params.toString()}`;
+}
 
 export default async function AssignmentsPage({
   searchParams,
@@ -28,12 +35,15 @@ export default async function AssignmentsPage({
   const filters = assignmentListFiltersSchema.parse({
     status: query.status,
   });
+  const rawPage = Array.isArray(query.page) ? query.page[0] : query.page;
+  const parsedPage = Number.parseInt(rawPage ?? "1", 10);
+  const page = Number.isFinite(parsedPage) ? Math.max(1, Math.min(10_000, parsedPage)) : 1;
 
-  let assignments;
+  let result;
 
   try {
     const context = await getOperationalContextSelection();
-    assignments = await listAssignments(filters, context);
+    result = await listAssignmentsPage(filters, context, page);
   } catch (error) {
     return (
       <PageShell>
@@ -57,6 +67,7 @@ export default async function AssignmentsPage({
   }
 
   const hasActiveFilters = hasActiveAssignmentFilters(filters);
+  const assignments = result.items;
 
   return (
     <PageShell>
@@ -84,16 +95,19 @@ export default async function AssignmentsPage({
         <AssignmentFilterBar filters={filters} />
 
         <div className="mt-5 sm:mt-6">
-          {assignments.length > 0 ? (
-            <p className="text-sm text-muted-foreground">
+          {result.total > 0 ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+              <p>
               <span className="font-medium tabular-nums text-foreground">
-                {assignments.length}
+                {result.total}
               </span>{" "}
-              {assignments.length === 1
+              {result.total === 1
                 ? "alocação encontrada"
                 : "alocações encontradas"}
               {hasActiveFilters ? " com os filtros atuais" : ""}
-            </p>
+              </p>
+              <p>Página {result.page} de {result.pageCount}</p>
+            </div>
           ) : hasActiveFilters ? (
             <p className="text-sm text-muted-foreground">
               Nenhuma alocação encontrada com os filtros atuais
@@ -117,6 +131,26 @@ export default async function AssignmentsPage({
           ) : (
             <AssignmentTable assignments={assignments} />
           )}
+          {result.total > 0 ? (
+            <nav aria-label="Paginação das alocações" className="mt-5 flex items-center justify-between gap-3">
+              {result.page > 1 ? (
+                <Button asChild variant="outline">
+                  <Link href={assignmentsPageHref(filters.status, result.page - 1)} scroll={false}>
+                    <ArrowLeft aria-hidden="true" className="size-4" />
+                    Anterior
+                  </Link>
+                </Button>
+              ) : <Button disabled variant="outline"><ArrowLeft aria-hidden="true" className="size-4" />Anterior</Button>}
+              {result.page < result.pageCount ? (
+                <Button asChild variant="outline">
+                  <Link href={assignmentsPageHref(filters.status, result.page + 1)} scroll={false}>
+                    Próxima
+                    <ArrowRight aria-hidden="true" className="size-4" />
+                  </Link>
+                </Button>
+              ) : <Button disabled variant="outline">Próxima<ArrowRight aria-hidden="true" className="size-4" /></Button>}
+            </nav>
+          ) : null}
         </div>
       </ContentContainer>
     </PageShell>

@@ -5,9 +5,48 @@ import {
 } from "@/modules/operational-context";
 
 import { parseAssignmentWithContext, type AssignmentWithContext } from "../domain/assignment";
-import { findAssignments } from "../repositories/assignment-repository";
+import { findAssignments, findAssignmentsPage } from "../repositories/assignment-repository";
 import { assignmentListFiltersSchema } from "../schemas/assignment-schemas";
 import { throwAssignmentRepositoryError } from "./repository-errors";
+
+export const ASSIGNMENT_LIST_PAGE_SIZE = 50;
+
+export async function listAssignmentsPage(
+  filters: unknown = {},
+  operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
+  page = 1,
+) {
+  await requirePermission("assignment:read");
+  const validFilters = assignmentListFiltersSchema.parse(filters);
+  const { data, error, count } = await findAssignmentsPage(
+    validFilters,
+    operationalContext,
+    page,
+    ASSIGNMENT_LIST_PAGE_SIZE,
+  );
+  if (error) throwAssignmentRepositoryError(error, "list");
+  const total = count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / ASSIGNMENT_LIST_PAGE_SIZE));
+  const effectivePage = Math.min(page, pageCount);
+  let pageData = data ?? [];
+  if (effectivePage !== page) {
+    const corrected = await findAssignmentsPage(
+      validFilters,
+      operationalContext,
+      effectivePage,
+      ASSIGNMENT_LIST_PAGE_SIZE,
+    );
+    if (corrected.error) throwAssignmentRepositoryError(corrected.error, "list");
+    pageData = corrected.data ?? [];
+  }
+  return {
+    items: pageData.map(parseAssignmentWithContext),
+    page: effectivePage,
+    pageSize: ASSIGNMENT_LIST_PAGE_SIZE,
+    total,
+    pageCount,
+  };
+}
 
 export async function listAssignments(
   filters: unknown = {},

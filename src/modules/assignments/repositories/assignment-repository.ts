@@ -31,6 +31,30 @@ export async function findAssignments(
   );
 }
 
+export async function findAssignmentsPage(
+  filters: AssignmentListFilters,
+  operationalContext: OperationalContext,
+  page: number,
+  pageSize: number,
+) {
+  const supabase = await createServerSupabaseClient();
+  let query = supabase
+    .from("assignments")
+    .select(ASSIGNMENT_WITH_CONTEXT_SELECT, { count: "exact" })
+    .order("start_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range((page - 1) * pageSize, page * pageSize - 1);
+  if (filters.workerId) query = query.eq("worker_id", filters.workerId);
+  if (filters.positionId) query = query.eq("position_id", filters.positionId);
+  if (filters.status) query = query.eq("status", filters.status);
+  return applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
+  );
+}
+
 export async function findAssignmentsForOperation(operationId: string) {
   const supabase = await createServerSupabaseClient();
   return supabase

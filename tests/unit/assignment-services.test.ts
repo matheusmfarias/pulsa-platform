@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requirePermission } from "@/modules/authorization";
-import { insertAssignment } from "@/modules/assignments/repositories/assignment-repository";
+import { findAssignmentsPage, insertAssignment } from "@/modules/assignments/repositories/assignment-repository";
 import { createAssignment } from "@/modules/assignments/services/create-assignment";
+import { listAssignmentsPage } from "@/modules/assignments/services/list-assignments";
 import { validateAssignmentParents } from "@/modules/assignments/services/validate-assignment-parents";
 
 vi.mock("@/modules/authorization", () => ({ requirePermission: vi.fn() }));
 vi.mock("@/modules/assignments/repositories/assignment-repository", () => ({
   insertAssignment: vi.fn(),
+  findAssignmentsPage: vi.fn(),
 }));
 vi.mock("@/modules/assignments/services/validate-assignment-parents", () => ({
   validateAssignmentParents: vi.fn(),
@@ -76,5 +78,35 @@ describe("createAssignment", () => {
     });
     await expect(createAssignment(input)).rejects.toMatchObject({ code: "VALIDATION" });
     expect(insertAssignment).not.toHaveBeenCalled();
+  });
+});
+
+describe("listAssignmentsPage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requirePermission).mockResolvedValue({
+      organizationId: "00000000-0000-4000-8000-000000000001",
+      userId: "00000000-0000-4000-8000-000000000701",
+      role: "DIRECTOR",
+    });
+  });
+
+  it("returns an exact total while fetching only one 50-row page", async () => {
+    vi.mocked(findAssignmentsPage).mockResolvedValue({ data: [], error: null, count: 125, status: 200, statusText: "OK", success: true });
+
+    await expect(listAssignmentsPage({ status: "active" }, undefined, 2)).resolves.toMatchObject({
+      items: [], page: 2, pageSize: 50, total: 125, pageCount: 3,
+    });
+    expect(requirePermission).toHaveBeenCalledWith("assignment:read");
+    expect(findAssignmentsPage).toHaveBeenCalledWith({ status: "active" }, expect.anything(), 2, 50);
+  });
+
+  it("moves a stale page request back to the last page", async () => {
+    vi.mocked(findAssignmentsPage)
+      .mockResolvedValueOnce({ data: [], error: null, count: 75, status: 200, statusText: "OK", success: true })
+      .mockResolvedValueOnce({ data: [], error: null, count: 75, status: 200, statusText: "OK", success: true });
+
+    await expect(listAssignmentsPage({}, undefined, 9)).resolves.toMatchObject({ page: 2, total: 75, pageCount: 2 });
+    expect(findAssignmentsPage).toHaveBeenNthCalledWith(2, {}, expect.anything(), 2, 50);
   });
 });
