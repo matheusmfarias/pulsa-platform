@@ -28,7 +28,12 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     },
   );
 
+  const authStartedAt = performance.now();
   await measureServerStage("auth.proxy.get_user", () => supabase.auth.getUser());
+  response.headers.set(
+    "Server-Timing",
+    `auth;dur=${(performance.now() - authStartedAt).toFixed(1)};desc="Sessão"`,
+  );
 
   return response;
 }

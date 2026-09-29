@@ -12,7 +12,8 @@ type Props = {
   serverStages: RouteServerStage[];
 };
 
-type TransitionMeasurement = { durationMs: number; route: string } | null;
+type BrowserStage = { durationMs: number; label: string };
+type TransitionMeasurement = { browserStages: BrowserStage[]; route: string } | null;
 
 declare global {
   interface Window {
@@ -54,10 +55,31 @@ function navigationMetrics() {
     | undefined;
   if (!navigation) return [];
 
-  return [
+  const stages: BrowserStage[] = [
     { label: "Resposta inicial (TTFB)", durationMs: Math.round(navigation.responseStart) },
     { label: "Documento carregado", durationMs: Math.round(navigation.loadEventEnd) },
   ].filter((stage) => stage.durationMs > 0);
+  stages.push(...navigation.serverTiming.map((stage) => ({
+    label: stage.name === "auth" ? "Autenticação no middleware" : `Servidor · ${stage.name}`,
+    durationMs: Math.round(stage.duration),
+  })));
+  return stages;
+}
+
+function routeServerTimingStages(startedAt: number): BrowserStage[] {
+  const resources = performance
+    .getEntriesByType("resource")
+    .filter((entry): entry is PerformanceResourceTiming =>
+      entry instanceof PerformanceResourceTiming &&
+      entry.startTime >= startedAt &&
+      new URL(entry.name).origin === window.location.origin &&
+      entry.serverTiming.length > 0,
+    );
+  const serverTiming = resources.flatMap((entry) => entry.serverTiming);
+  const authTiming = serverTiming.find((stage) => stage.name === "auth");
+  return authTiming
+    ? [{ label: "Autenticação no middleware", durationMs: Math.round(authTiming.duration) }]
+    : [];
 }
 
 export function RoutePerformanceDiagnostics({
@@ -86,7 +108,10 @@ export function RoutePerformanceDiagnostics({
     if (targetPath !== pathname) return;
 
     window.__pulsaLatestRouteMeasurement = {
-      durationMs: Math.round(performance.now() - pending.startedAt),
+      browserStages: [
+        { label: `Navegação + dados + render (${route})`, durationMs: Math.round(performance.now() - pending.startedAt) },
+        ...routeServerTimingStages(pending.startedAt),
+      ],
       route,
     };
     window.__pulsaRouteTransition = undefined;
@@ -95,9 +120,7 @@ export function RoutePerformanceDiagnostics({
 
   if (!enabledByQuery && !enabledInSession) return null;
 
-  const browserStages = transition
-    ? [{ label: `Navegação + dados + render (${transition.route})`, durationMs: transition.durationMs }]
-    : navigationMetrics();
+  const browserStages = transition?.browserStages ?? navigationMetrics();
 
   return (
     <details className="mt-6 rounded-surface border border-border-default bg-surface px-4 py-3 text-sm">
