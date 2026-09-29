@@ -11,10 +11,7 @@ import {
   findAuditEventById,
   findAuditEvents,
 } from "../repositories/administration-repository";
-import {
-  AUDIT_PAGE_SIZE,
-  type AuditListFilters,
-} from "../schemas/administration-schemas";
+import type { AuditListFilters } from "../schemas/administration-schemas";
 import { throwAdministrationRepositoryError } from "./repository-errors";
 
 export type PaginatedAuditEvents = {
@@ -32,7 +29,7 @@ export async function listAuditEvents(
   let result = await findAuditEvents(organizationId, filters);
   if (result.error) throwAdministrationRepositoryError(result.error, "list_audit_events");
   const total = result.count ?? 0;
-  const pageCount = Math.max(1, Math.ceil(total / AUDIT_PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(total / filters.pageSize));
   const page = Math.min(filters.page, pageCount);
   if (page !== filters.page) {
     result = await findAuditEvents(organizationId, { ...filters, page });
@@ -41,7 +38,7 @@ export async function listAuditEvents(
   return {
     items: (result.data ?? []).map(parseAuditEvent),
     page,
-    pageSize: AUDIT_PAGE_SIZE,
+    pageSize: filters.pageSize,
     total,
     pageCount,
   };

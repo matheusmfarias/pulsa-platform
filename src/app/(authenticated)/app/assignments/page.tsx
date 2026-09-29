@@ -21,11 +21,12 @@ import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
-function assignmentsPageHref(filters: { query: string; status?: string }, page: number): string {
+function assignmentsPageHref(filters: { query: string; status?: string; pageSize: number }, page: number, pageSize = filters.pageSize): string {
   const params = new URLSearchParams();
   if (filters.query) params.set("q", filters.query);
   if (filters.status) params.set("status", filters.status);
-  params.set("page", String(page));
+  if (page > 1) params.set("page", String(page));
+  if (pageSize !== 10) params.set("size", String(pageSize));
   return `/app/assignments?${params.toString()}`;
 }
 
@@ -37,6 +38,7 @@ export default async function AssignmentsPage({
   const filters = assignmentListFiltersSchema.parse({
     query: query.q,
     status: query.status,
+    pageSize: query.size,
   });
   const rawPage = Array.isArray(query.page) ? query.page[0] : query.page;
   const parsedPage = Number.parseInt(rawPage ?? "1", 10);
@@ -135,6 +137,7 @@ export default async function AssignmentsPage({
                 <ListPagination
                   currentPage={result.page}
                   getHref={(targetPage) => assignmentsPageHref(filters, targetPage)}
+                  getPageSizeHref={(targetSize) => assignmentsPageHref(filters, 1, targetSize)}
                   label="alocações"
                   pageCount={result.pageCount}
                   pageSize={result.pageSize}

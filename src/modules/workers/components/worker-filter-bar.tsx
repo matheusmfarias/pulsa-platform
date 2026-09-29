@@ -18,6 +18,7 @@ import {
   WORKER_STATUS_LABELS,
   type WorkerStatus,
 } from "../domain/worker";
+import type { WorkerListPageSize } from "../services/list-workers-with-current-assignment";
 import { parseWorkerListSearchParams, workerListHref } from "./worker-list-filters";
 
 type WorkerStatusFilter = WorkerStatus | "all";
@@ -41,7 +42,7 @@ function readStatusFilter(value: string | null): WorkerStatusFilter {
     : "all";
 }
 
-export function WorkerFilterBar({ children }: { children: React.ReactNode }) {
+export function WorkerFilterBar({ children, pageSize }: { children: React.ReactNode; pageSize: WorkerListPageSize }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = React.useTransition();
@@ -68,10 +69,10 @@ export function WorkerFilterBar({ children }: { children: React.ReactNode }) {
         status: updates.status ?? requestedStatusRef.current,
       });
       startTransition(() => {
-        router.replace(workerListHref("/app/workers", filters), { scroll: false });
+        router.replace(workerListHref("/app/workers", filters, 1, pageSize), { scroll: false });
       });
     },
-    [query, router],
+    [pageSize, query, router],
   );
 
   function cancelPendingSearch() {

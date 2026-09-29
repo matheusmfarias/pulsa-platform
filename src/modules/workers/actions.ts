@@ -15,6 +15,7 @@ import { updateWorker } from "./services/update-worker";
 import {
   parseWorkerListSearchParams,
   parseWorkerListPage,
+  parseWorkerListPageSize,
   WORKER_CREATED_FEEDBACK,
   workerListHref,
 } from "./components/worker-list-filters";
@@ -95,11 +96,15 @@ function safeWorkerListReturnHref(returnHref: string): string {
       q: destination.searchParams.get("q") ?? undefined,
       status: destination.searchParams.get("status") ?? undefined,
       page: destination.searchParams.get("page") ?? undefined,
+      size: destination.searchParams.get("size") ?? undefined,
     });
     const page = parseWorkerListPage({
       page: destination.searchParams.get("page") ?? undefined,
     });
-    return workerListHref("/app/workers", filters, page);
+    const pageSize = parseWorkerListPageSize({
+      size: destination.searchParams.get("size") ?? undefined,
+    });
+    return workerListHref("/app/workers", filters, page, pageSize);
   } catch {
     return "/app/workers";
   }

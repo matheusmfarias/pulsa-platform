@@ -43,6 +43,18 @@ function ResultSummary() {
   return <div className="flex min-h-12 items-center px-5 py-2.5"><div><Bone className="h-4 w-36" /><Bone className="mt-1.5 h-3 w-24" /></div></div>;
 }
 
+function PaginationFooter() {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-3 border-t border-border-default/80 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+      <div className="flex items-center justify-between gap-4 sm:justify-start">
+        <Bone className="h-4 w-20" />
+        <div className="flex items-center gap-1.5"><Bone className="h-3 w-16" />{[0, 1, 2].map((item) => <Bone className="size-8" key={item} />)}</div>
+      </div>
+      <div className="flex justify-between gap-2 sm:justify-end"><Bone className="h-9 w-24" /><Bone className="h-9 w-24" /></div>
+    </div>
+  );
+}
+
 function FilterBar({ type = "search" }: { type?: "search" | "chips" | "audit" }) {
   if (type === "chips") {
     return (
@@ -123,7 +135,7 @@ function CollectionData({ label }: { label: string }) {
   }
 
   if (normalized.includes("auditoria")) {
-    return <><FilterBar type="audit" /><div className="mt-5"><Bone className="mb-3 h-4 w-40" /><TableRows columns={6} /></div></>;
+    return <><FilterBar type="audit" /><div className="mt-5"><Bone className="mb-3 h-4 w-40" /><TableRows columns={6} /><PaginationFooter /></div></>;
   }
 
   if (normalized.includes("colaborador")) {
@@ -132,7 +144,7 @@ function CollectionData({ label }: { label: string }) {
         <div className="grid gap-3 p-3 sm:grid-cols-[minmax(0,1fr)_12rem] sm:p-4"><Bone className="h-10 w-full" /><Bone className="h-10 w-full" /></div>
         <ResultSummary />
         <div className="border-t border-border-default/80"><TableRows columns={6} /></div>
-        <div className="flex items-center justify-between border-t border-border-default px-4 py-3"><Bone className="h-4 w-20" /><div className="flex gap-2"><Bone className="h-8 w-20" /><Bone className="h-8 w-20" /></div></div>
+        <PaginationFooter />
       </section>
     );
   }
@@ -151,7 +163,7 @@ function CollectionData({ label }: { label: string }) {
 
   if (["cliente", "cargo", "posto", "aloc"].some((term) => normalized.includes(term))) {
     const columns = normalized.includes("aloc") ? 6 : normalized.includes("posto") ? 7 : 5;
-    return <><FilterBar /><CollectionHeader label={label} /><TableRows columns={columns} /></>;
+    return <><FilterBar /><CollectionHeader label={label} /><TableRows columns={columns} /><PaginationFooter /></>;
   }
 
   const columns = normalized.includes("unidade") ? 8 : normalized.includes("opera") ? 6 : normalized.includes("contrato") ? 5 : 5;

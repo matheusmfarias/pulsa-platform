@@ -37,6 +37,7 @@ import { toPublicErrorMessage } from "@/shared/errors";
 
 type SearchParams = Promise<{
   page?: string | string[];
+  size?: string | string[];
   from?: string | string[];
   to?: string | string[];
   entityType?: string | string[];
@@ -51,14 +52,15 @@ function formatDateTime(value: string): string {
     timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
-function paginationHref(filters: AuditListFilters, page: number): string {
+function paginationHref(filters: AuditListFilters, page: number, pageSize = filters.pageSize): string {
   const params = new URLSearchParams();
   if (filters.from) params.set("from", filters.from);
   if (filters.to) params.set("to", filters.to);
   if (filters.entityType) params.set("entityType", filters.entityType);
   if (filters.action) params.set("action", filters.action);
   if (filters.actorId) params.set("actorId", filters.actorId);
-  params.set("page", String(page));
+  if (page > 1) params.set("page", String(page));
+  if (pageSize !== 10) params.set("size", String(pageSize));
   return `/app/admin/audit?${params.toString()}`;
 }
 
@@ -123,6 +125,7 @@ export default async function AdministrationAuditPage({
           className="mt-6 grid gap-3 rounded-card bg-surface shadow-card p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.2fr_1.2fr_1.4fr_auto]"
           method="get"
         >
+          {filters.pageSize !== 10 ? <input name="size" type="hidden" value={filters.pageSize} /> : null}
           <Field id="audit-from" label="De">
             <Input defaultValue={filters.from} name="from" type="date" />
           </Field>
@@ -257,6 +260,7 @@ export default async function AdministrationAuditPage({
             <ListPagination
               currentPage={result.page}
               getHref={(targetPage) => paginationHref(filters, targetPage)}
+              getPageSizeHref={(targetSize) => paginationHref(filters, 1, targetSize)}
               label="auditoria"
               pageCount={result.pageCount}
               pageSize={result.pageSize}

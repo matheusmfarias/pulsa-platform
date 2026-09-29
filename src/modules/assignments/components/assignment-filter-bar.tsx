@@ -54,6 +54,7 @@ export function AssignmentFilterBar({
           <option value="cancelled">Canceladas</option>
         </Select>
       </div>
+      {filters.pageSize !== 10 ? <input name="size" type="hidden" value={filters.pageSize} /> : null}
 
       <ListFilterActions>
         <Button className="flex-1 sm:flex-none" type="submit" variant="outline">

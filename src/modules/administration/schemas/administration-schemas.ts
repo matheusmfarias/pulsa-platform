@@ -43,6 +43,10 @@ export const auditListFiltersSchema = z
       firstString,
       z.coerce.number().int().min(1).max(10_000).default(1),
     ),
+    pageSize: z.preprocess(
+      firstString,
+      z.union([z.literal("10"), z.literal("25"), z.literal("50")]).transform(Number).catch(10).default(10),
+    ),
     from: z.preprocess(firstString, dateSchema),
     to: z.preprocess(firstString, dateSchema),
     entityType: z.preprocess(
@@ -71,4 +75,4 @@ export const auditListFiltersSchema = z
 
 export type AuditListFilters = z.infer<typeof auditListFiltersSchema>;
 
-export const AUDIT_PAGE_SIZE = 50;
+export const AUDIT_PAGE_SIZE = 10;

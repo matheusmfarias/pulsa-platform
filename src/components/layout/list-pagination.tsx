@@ -10,6 +10,7 @@ type ListPaginationProps = {
   total: number;
   label: string;
   getHref: (page: number) => string;
+  getPageSizeHref: (pageSize: number) => string;
 };
 
 function visiblePages(currentPage: number, pageCount: number) {
@@ -25,6 +26,7 @@ export function ListPagination({
   total,
   label,
   getHref,
+  getPageSizeHref,
 }: ListPaginationProps) {
   if (total === 0) return null;
 
@@ -39,9 +41,27 @@ export function ListPagination({
       aria-label={`Paginação: ${label}`}
       className="flex flex-col gap-3 border-t border-border-default/80 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
     >
-      <p aria-live="polite" className="text-xs tabular-nums text-muted-foreground">
-        <span className="font-medium text-foreground">{firstItem}–{lastItem}</span> de {total}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-start">
+        <p aria-live="polite" className="text-xs tabular-nums text-muted-foreground">
+          <span className="font-medium text-foreground">{firstItem}–{lastItem}</span> de {total}
+        </p>
+        <div aria-label="Itens por página" className="flex items-center gap-1.5" role="group">
+          <span className="text-xs text-muted-foreground">Por página</span>
+          {[10, 25, 50].map((size) => (
+            <Button
+              asChild
+              aria-current={pageSize === size ? "true" : undefined}
+              aria-label={`${size} itens por página`}
+              className="h-8 min-w-8 px-2 text-xs tabular-nums"
+              key={size}
+              size="sm"
+              variant={pageSize === size ? "default" : "ghost"}
+            >
+              <Link href={getPageSizeHref(size)} scroll={false}>{size}</Link>
+            </Button>
+          ))}
+        </div>
+      </div>
 
       <div className="flex items-center justify-between gap-1 sm:justify-end">
         {previous ? (

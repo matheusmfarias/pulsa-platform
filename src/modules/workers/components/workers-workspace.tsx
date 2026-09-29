@@ -13,7 +13,7 @@ import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 import type { WorkerListFilters } from "../schemas/worker-schemas";
-import { listWorkersPageWithCurrentAssignment } from "../services/list-workers-with-current-assignment";
+import { listWorkersPageWithCurrentAssignment, type WorkerListPageSize } from "../services/list-workers-with-current-assignment";
 import { WorkerFilterBar } from "./worker-filter-bar";
 import { WorkerCreateSuccessToast } from "./worker-create-success-toast";
 import { hasActiveWorkerFilters, workerListHref } from "./worker-list-filters";
@@ -127,16 +127,18 @@ async function WorkersResults({
   createHref,
   filters,
   page,
+  pageSize,
 }: {
   createHref: string;
   filters: WorkerListFilters;
   page: number;
+  pageSize: WorkerListPageSize;
 }) {
   let result;
 
   try {
     const context = await getOperationalContextSelection();
-    result = await listWorkersPageWithCurrentAssignment(filters, context, page);
+    result = await listWorkersPageWithCurrentAssignment(filters, context, page, pageSize);
   } catch (error) {
     return (
       <div className="px-4 py-6">
@@ -179,7 +181,7 @@ async function WorkersResults({
                 Esta página não tem colaboradores. A lista pode ter mudado desde a última visita.
               </p>
               <Button asChild className="mt-4" size="sm" variant="outline">
-                  <Link href={workerListHref("/app/workers", filters)} scroll={false}>
+                  <Link href={workerListHref("/app/workers", filters, 1, pageSize)} scroll={false}>
                   Ir para a primeira página
                 </Link>
               </Button>
@@ -187,7 +189,8 @@ async function WorkersResults({
           ) : <WorkerTable workers={workers} />}
           <ListPagination
             currentPage={result.page}
-            getHref={(targetPage) => workerListHref("/app/workers", filters, targetPage)}
+            getHref={(targetPage) => workerListHref("/app/workers", filters, targetPage, pageSize)}
+            getPageSizeHref={(targetSize) => workerListHref("/app/workers", filters, 1, targetSize as WorkerListPageSize)}
             label="colaboradores"
             pageCount={result.pageCount}
             pageSize={result.pageSize}
@@ -199,9 +202,9 @@ async function WorkersResults({
   );
 }
 
-export function WorkersWorkspace({ filters, page = 1 }: { filters: WorkerListFilters; page?: number }) {
-  const createHref = workerListHref("/app/workers/new", filters, page);
-  const filtersKey = `${filters.query}:${filters.status}:${page}`;
+export function WorkersWorkspace({ filters, page = 1, pageSize }: { filters: WorkerListFilters; page?: number; pageSize: WorkerListPageSize }) {
+  const createHref = workerListHref("/app/workers/new", filters, page, pageSize);
+  const filtersKey = `${filters.query}:${filters.status}:${page}:${pageSize}`;
 
   return (
     <PageShell className="py-7 sm:py-8">
@@ -215,9 +218,9 @@ export function WorkersWorkspace({ filters, page = 1 }: { filters: WorkerListFil
         />
 
         <Suspense fallback={<WorkersWorkspaceLoading />}>
-          <WorkerFilterBar>
+          <WorkerFilterBar pageSize={pageSize}>
             <Suspense fallback={<WorkersResultsLoading />} key={filtersKey}>
-              <WorkersResults createHref={createHref} filters={filters} page={page} />
+              <WorkersResults createHref={createHref} filters={filters} page={page} pageSize={pageSize} />
             </Suspense>
           </WorkerFilterBar>
         </Suspense>
