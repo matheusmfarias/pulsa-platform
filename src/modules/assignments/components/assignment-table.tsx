@@ -13,7 +13,7 @@ import {
   TableScrollArea,
 } from "@/components/ui/table";
 
-import type { AssignmentWithContext } from "../domain/assignment";
+import type { AssignmentListItem } from "../domain/assignment";
 import { AssignmentStatusBadge } from "./assignment-status-badge";
 
 const relationLinkClass =
@@ -30,7 +30,7 @@ function formatDate(value: string | null): string {
 export function AssignmentTable({
   assignments,
 }: {
-  assignments: AssignmentWithContext[];
+  assignments: AssignmentListItem[];
 }) {
   return (
     <TableFrame className="mt-4">

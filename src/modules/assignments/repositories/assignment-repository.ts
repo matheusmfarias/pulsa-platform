@@ -11,6 +11,9 @@ import { measureServerStage } from "@/shared/logging";
 const ASSIGNMENT_WITH_CONTEXT_SELECT =
   "*, worker:workers!inner(id, full_name, status, organization_id), position:positions!inner(id, status, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name, contract:contracts!inner(id, name, client:clients!inner(id, trade_name, organization_id)))))";
 
+const ASSIGNMENT_LIST_PAGE_SELECT =
+  "id, start_date, end_date, status, worker:workers!inner(id, full_name), position:positions!inner(id, job_role:job_roles!inner(name), unit:units!inner(id, name, operation:operations!inner(id, contract:contracts!inner(id, client_id, client:clients!inner(id)))))";
+
 export async function findAssignments(
   filters: AssignmentListFilters,
   operationalContext: OperationalContext,
@@ -40,7 +43,7 @@ export async function findAssignmentsPage(
   const supabase = await createServerSupabaseClient();
   let query = supabase
     .from("assignments")
-    .select(ASSIGNMENT_WITH_CONTEXT_SELECT, { count: "exact" })
+    .select(ASSIGNMENT_LIST_PAGE_SELECT, { count: "exact" })
     .order("start_date", { ascending: false })
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })

@@ -4,7 +4,11 @@ import {
   type OperationalContext,
 } from "@/modules/operational-context";
 
-import { parseAssignmentWithContext, type AssignmentWithContext } from "../domain/assignment";
+import {
+  parseAssignmentListItem,
+  parseAssignmentWithContext,
+  type AssignmentWithContext,
+} from "../domain/assignment";
 import { findAssignments, findAssignmentsPage } from "../repositories/assignment-repository";
 import { assignmentListFiltersSchema } from "../schemas/assignment-schemas";
 import { throwAssignmentRepositoryError } from "./repository-errors";
@@ -40,7 +44,7 @@ export async function listAssignmentsPage(
     pageData = corrected.data ?? [];
   }
   return {
-    items: pageData.map(parseAssignmentWithContext),
+    items: pageData.map(parseAssignmentListItem),
     page: effectivePage,
     pageSize: ASSIGNMENT_LIST_PAGE_SIZE,
     total,
