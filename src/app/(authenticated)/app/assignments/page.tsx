@@ -19,7 +19,6 @@ import {
 } from "@/modules/assignments";
 import {
   AssignmentListNavigationProvider,
-  AssignmentPaginationNavigation,
   AssignmentTablePendingSurface,
 } from "@/modules/assignments/components/assignment-list-navigation";
 import { hasActiveAssignmentFilters } from "@/modules/assignments/domain/assignment-list-filters";
@@ -148,17 +147,15 @@ async function AssignmentResults({
           <AssignmentTable
             assignments={assignments}
             footer={
-              <AssignmentPaginationNavigation>
-                <ListPagination
-                  currentPage={result.page}
-                  getHref={(targetPage) => assignmentsPageHref(filters, targetPage)}
-                  getPageSizeHref={(targetSize) => assignmentsPageHref(filters, 1, targetSize)}
-                  label="alocações"
-                  pageCount={result.pageCount}
-                  pageSize={result.pageSize}
-                  total={result.total}
-                />
-              </AssignmentPaginationNavigation>
+              <ListPagination
+                currentPage={result.page}
+                getHref={(targetPage) => assignmentsPageHref(filters, targetPage)}
+                getPageSizeHref={(targetSize) => assignmentsPageHref(filters, 1, targetSize)}
+                label="alocações"
+                pageCount={result.pageCount}
+                pageSize={result.pageSize}
+                total={result.total}
+              />
             }
           />
         </AssignmentTablePendingSurface>

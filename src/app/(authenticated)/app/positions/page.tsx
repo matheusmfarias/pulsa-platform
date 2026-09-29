@@ -6,6 +6,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { ListNavigationProvider } from "@/components/layout/list-navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Button } from "@/components/ui/button";
 import { PermissionGate } from "@/modules/authorization";
@@ -61,6 +62,7 @@ export default async function PositionsPage({
   const hasActiveFilters = hasActivePositionFilters(filters);
 
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -81,9 +83,8 @@ export default async function PositionsPage({
           title="Postos"
         />
 
-        <PositionFilterBar filters={filters} />
-
-        <div className="mt-6">
+        <PositionFilterBar filters={filters}>
+        <div>
           {positions.length > 0 ? (
             <p className="text-sm text-muted-foreground">
               <span className="font-medium tabular-nums text-foreground">
@@ -118,7 +119,9 @@ export default async function PositionsPage({
             <PositionTable positions={positions} />
           )}
         </div>
+        </PositionFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

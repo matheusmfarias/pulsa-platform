@@ -9,6 +9,7 @@ import {
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ListNavigationProvider } from "@/components/layout/list-navigation";
 import { PermissionGate } from "@/modules/authorization";
 import {
   JobRoleFilterBar,
@@ -59,6 +60,7 @@ export default async function JobRolesPage({
   const hasActiveFilters = hasActiveJobRoleFilters(filters);
 
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -78,8 +80,8 @@ export default async function JobRolesPage({
           description="Catálogo organizacional reutilizável de cargos e funções."
           title="Cargos"
         />
-        <JobRoleFilterBar filters={filters} />
-        <div className="mt-5 sm:mt-6">
+        <JobRoleFilterBar filters={filters}>
+        <div>
           {jobRoles.length > 0 ? (
             <p className="text-sm text-muted-foreground">
               <span className="font-medium tabular-nums text-foreground">
@@ -114,7 +116,9 @@ export default async function JobRolesPage({
             <JobRoleTable jobRoles={jobRoles} />
           )}
         </div>
+        </JobRoleFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

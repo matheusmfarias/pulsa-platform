@@ -1,10 +1,11 @@
 "use client";
 
-import { LoaderCircle, Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { ActiveFilters } from "@/components/layout/list";
+import { ListPendingSurface, useListNavigation } from "@/components/layout/list-navigation";
 import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/filter-chip";
 import {
@@ -12,8 +13,6 @@ import {
   type FilterSelectOption,
 } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/shared/utils";
-
 import {
   WORKER_STATUS_LABELS,
   type WorkerStatus,
@@ -43,9 +42,8 @@ function readStatusFilter(value: string | null): WorkerStatusFilter {
 }
 
 export function WorkerFilterBar({ children, pageSize }: { children: React.ReactNode; pageSize: WorkerListPageSize }) {
-  const router = useRouter();
+  const { navigate } = useListNavigation();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = React.useTransition();
   const suppressDebounceRef = React.useRef(false);
   const debounceTimerRef = React.useRef<number | null>(null);
   const appliedQuery = searchParams.get("q") ?? "";
@@ -68,11 +66,9 @@ export function WorkerFilterBar({ children, pageSize }: { children: React.ReactN
         q: updates.query ?? query,
         status: updates.status ?? requestedStatusRef.current,
       });
-      startTransition(() => {
-        router.replace(workerListHref("/app/workers", filters, 1, pageSize), { scroll: false });
-      });
+      navigate(workerListHref("/app/workers", filters, 1, pageSize), "replace");
     },
-    [pageSize, query, router],
+    [navigate, pageSize, query],
   );
 
   function cancelPendingSearch() {
@@ -113,7 +109,7 @@ export function WorkerFilterBar({ children, pageSize }: { children: React.ReactN
     cancelPendingSearch();
     suppressDebounceRef.current = true;
     setQueryDraft({ source: appliedQuery, value: "" });
-    startTransition(() => router.replace("/app/workers", { scroll: false }));
+    navigate("/app/workers", "replace");
   }
 
   return (
@@ -160,16 +156,6 @@ export function WorkerFilterBar({ children, pageSize }: { children: React.ReactN
               options={STATUS_OPTIONS}
               value={status}
             />
-            <span
-              aria-live="polite"
-              className="inline-flex min-w-4 items-center gap-1.5 text-xs text-muted-foreground"
-            >
-              {isPending ? (
-                <>
-                  <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin" />
-                </>
-              ) : null}
-            </span>
           </div>
         </div>
 
@@ -203,19 +189,9 @@ export function WorkerFilterBar({ children, pageSize }: { children: React.ReactN
         ) : null}
       </div>
 
-      <div
-        aria-busy={isPending}
-        className="border-t border-border-default/80"
-      >
-        <div
-          className={cn(
-            "transition-opacity duration-150",
-            isPending && "opacity-70",
-          )}
-        >
-          {children}
-        </div>
-      </div>
+      <ListPendingSurface className="border-t border-border-default/80">
+        {children}
+      </ListPendingSurface>
     </section>
   );
 }

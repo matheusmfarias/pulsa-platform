@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { ListEmptyState, ListResultSummary } from "@/components/layout/list";
 import { ListPagination } from "@/components/layout/list-pagination";
+import { ListNavigationProvider } from "@/components/layout/list-navigation";
 import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -205,9 +206,9 @@ async function WorkersResults({
 
 export function WorkersWorkspace({ filters, page = 1, pageSize }: { filters: WorkerListFilters; page?: number; pageSize: WorkerListPageSize }) {
   const createHref = workerListHref("/app/workers/new", filters, page, pageSize);
-  const filtersKey = `${filters.query}:${filters.status}:${page}:${pageSize}`;
 
   return (
+    <ListNavigationProvider>
     <PageShell className="py-7 sm:py-8">
       <ContentContainer size="list">
         <PageHeader
@@ -220,7 +221,7 @@ export function WorkersWorkspace({ filters, page = 1, pageSize }: { filters: Wor
 
         <Suspense fallback={<WorkersWorkspaceLoading />}>
           <WorkerFilterBar pageSize={pageSize}>
-            <Suspense fallback={<WorkersResultsLoading />} key={filtersKey}>
+            <Suspense fallback={<WorkersResultsLoading />}>
               <WorkersResults createHref={createHref} filters={filters} page={page} pageSize={pageSize} />
             </Suspense>
           </WorkerFilterBar>
@@ -230,5 +231,6 @@ export function WorkersWorkspace({ filters, page = 1, pageSize }: { filters: Wor
         <WorkerCreateSuccessToast />
       </Suspense>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

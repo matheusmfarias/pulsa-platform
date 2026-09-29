@@ -6,6 +6,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { ListNavigationProvider } from "@/components/layout/list-navigation";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
@@ -72,6 +73,7 @@ export default async function ClientsPage({
   const hasActiveFilters = hasActiveClientFilters(filters);
 
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -101,9 +103,8 @@ export default async function ClientsPage({
           title="Clientes"
         />
 
-        <ClientFilterBar filters={filters} />
-
-        <div className="mt-5 sm:mt-6">
+        <ClientFilterBar filters={filters}>
+        <div>
           {clients.length > 0 ? (
             <p className="text-sm text-muted-foreground">
               <span className="font-medium tabular-nums text-foreground">
@@ -138,7 +139,9 @@ export default async function ClientsPage({
             <ClientTable clients={clients} />
           )}
         </div>
+        </ClientFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

@@ -1,4 +1,3 @@
-import { Search } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -7,12 +6,11 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { ListPagination } from "@/components/layout/list-pagination";
+import { ListNavigationProvider } from "@/components/layout/list-navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { AuditListFilterBar } from "./audit-list-filter-bar";
 import {
   Table,
   TableBody,
@@ -24,9 +22,7 @@ import {
 } from "@/components/ui/table";
 import {
   AUDIT_ACTION_LABELS,
-  AUDIT_ACTIONS,
   AUDIT_ENTITY_LABELS,
-  AUDIT_ENTITY_TYPES,
   auditListFiltersSchema,
   listAuditEvents,
   listOrganizationMembers,
@@ -110,6 +106,7 @@ export default async function AdministrationAuditPage({
     return { event, summary };
   });
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -121,58 +118,14 @@ export default async function AdministrationAuditPage({
           description="Registro operacional de mudanças da organização, do evento mais recente ao mais antigo."
           title="Auditoria"
         />
-        <form
-          className="mt-6 grid gap-3 rounded-card bg-surface shadow-card p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.2fr_1.2fr_1.4fr_auto]"
-          method="get"
+        <AuditListFilterBar
+          actorOptions={members.map((member) => ({
+            label: member.profile?.display_name ?? member.profile_id,
+            value: member.profile_id,
+          }))}
+          filters={filters}
         >
-          {filters.pageSize !== 10 ? <input name="size" type="hidden" value={filters.pageSize} /> : null}
-          <Field id="audit-from" label="De">
-            <Input defaultValue={filters.from} name="from" type="date" />
-          </Field>
-          <Field id="audit-to" label="Até">
-            <Input defaultValue={filters.to} name="to" type="date" />
-          </Field>
-          <Field id="audit-entity" label="Entidade">
-            <Select defaultValue={filters.entityType ?? ""} name="entityType">
-              <option value="">Todas</option>
-              {AUDIT_ENTITY_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {AUDIT_ENTITY_LABELS[type]}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field id="audit-action" label="Ação">
-            <Select defaultValue={filters.action ?? ""} name="action">
-              <option value="">Todas</option>
-              {AUDIT_ACTIONS.map((action) => (
-                <option key={action} value={action}>
-                  {AUDIT_ACTION_LABELS[action]}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field id="audit-actor" label="Ator">
-            <Select defaultValue={filters.actorId ?? ""} name="actorId">
-              <option value="">Todos</option>
-              {members.map((member) => (
-                <option key={member.profile_id} value={member.profile_id}>
-                  {member.profile?.display_name ?? member.profile_id}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <div className="flex items-center gap-2 self-end">
-            <Button type="submit" variant="outline">
-              <Search aria-hidden="true" className="size-4" />
-              Filtrar
-            </Button>
-            {[filters.from, filters.to, filters.entityType, filters.action, filters.actorId].some(Boolean) ? (
-              <Button asChild size="sm" variant="ghost"><Link href="/app/admin/audit">Limpar</Link></Button>
-            ) : null}
-          </div>
-        </form>
-        <div className="mt-5 flex items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="mt-0 flex items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>
             {result.total} {result.total === 1 ? "evento" : "eventos"}
           </p>
@@ -268,7 +221,9 @@ export default async function AdministrationAuditPage({
             />
           </section>
         )}
+        </AuditListFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }
