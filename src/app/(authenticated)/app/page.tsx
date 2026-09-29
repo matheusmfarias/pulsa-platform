@@ -15,12 +15,14 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import {
   ContentContainer,
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { DataRouteSkeleton } from "@/components/ui/data-route-skeleton";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Card, interactiveCardClassName } from "@/components/ui/card";
 import {
@@ -38,7 +40,7 @@ import { listAbsences } from "@/modules/absences";
 import { getOperationalOverview } from "@/modules/overview/operational-overview";
 import { toPublicErrorMessage } from "@/shared/errors";
 
-export default async function InternalHomePage() {
+async function InternalHomeContent() {
   let overview;
   let uncoveredAbsences;
 
@@ -459,5 +461,21 @@ export default async function InternalHomePage() {
         </section>
       </ContentContainer>
     </PageShell>
+  );
+}
+
+export default function InternalHomePage() {
+  return (
+    <Suspense
+      fallback={
+        <DataRouteSkeleton
+          kind="dashboard"
+          label="Carregando visão geral"
+          scope="core"
+        />
+      }
+    >
+      <InternalHomeContent />
+    </Suspense>
   );
 }
