@@ -1200,6 +1200,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_operational_overview: {
+        Args: {
+          target_client_id?: string | null
+          target_context_type: string
+          target_contract_id?: string | null
+          target_organization_id: string
+        }
+        Returns: Json
+      }
       approve_schedule_revision: {
         Args: { schedule_revision_id: string }
         Returns: {

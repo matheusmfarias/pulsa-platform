@@ -8,7 +8,7 @@ const migration = readFileSync(
     import.meta.url,
   ),
   "utf8",
-);
+).replace(/\r\n/g, "\n");
 
 function publicFunction(name: string) {
   const match = migration.match(
