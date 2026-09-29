@@ -1,3 +1,3 @@
-export default function StaticClientFormLoading() {
-  return null;
-}
+import { createDataRouteLoading } from "@/components/ui/data-route-skeleton";
+
+export default createDataRouteLoading("form", "Carregando dados para o cliente", "core");
