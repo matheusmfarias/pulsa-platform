@@ -20,18 +20,19 @@ export async function findAuthenticatedUser(): Promise<{
 }> {
   const supabase = await createServerSupabaseClient();
   const { data, error } = await measureServerStage(
-    "auth.server.get_user",
-    () => supabase.auth.getUser(),
+    "auth.server.get_claims",
+    () => supabase.auth.getClaims(),
   );
 
-  if (error || !data.user) {
+  const userId = data?.claims?.sub;
+  if (error || typeof userId !== "string" || !userId) {
     return { user: null, errorCode: error?.code };
   }
 
   return {
     user: {
-      id: data.user.id,
-      email: data.user.email ?? null,
+      id: userId,
+      email: typeof data.claims.email === "string" ? data.claims.email : null,
     },
   };
 }
