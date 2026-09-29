@@ -143,8 +143,7 @@ function CollectionData({ label }: { label: string }) {
       <section className="mt-6 overflow-hidden rounded-card bg-surface shadow-card">
         <div className="grid gap-3 p-3 sm:grid-cols-[minmax(0,1fr)_12rem] sm:p-4"><Bone className="h-10 w-full" /><Bone className="h-10 w-full" /></div>
         <ResultSummary />
-        <div className="border-t border-border-default/80"><TableRows columns={6} /></div>
-        <PaginationFooter />
+        <div className="border-t border-border-default/80"><TableRows columns={6} rows={4} /></div>
       </section>
     );
   }
