@@ -37,7 +37,7 @@ export default async function PresencesPage({
   // eslint-disable-next-line react-hooks/purity
   const preparationStartedAt = performance.now();
   const today = currentDate();
-  const requestedDate = (await searchParams).date;
+  const requestedDate = params.date;
   const parsedDate = presenceOperationalDateSchema.safeParse(
     typeof requestedDate === "string" ? requestedDate : today,
   );
@@ -87,7 +87,7 @@ export default async function PresencesPage({
     <PageShell>
       <ContentContainer size="list">
         <PageHeader breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Presença" }]} />} description="Acompanhe quem era esperado, quem compareceu e o que exige ação no dia." title="Presença" />
-        <section className="mt-6" aria-label="Navegação por dia"><PresenceDayNavigation date={parsedDate.data} today={today} /></section>
+        <section className="mt-6" aria-label="Navegação por dia"><PresenceDayNavigation date={parsedDate.data} key={parsedDate.data} preserveDiagnostics={params.perf === "1"} today={today} /></section>
         <section aria-label="Resumo do dia" className="mt-5">
           <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-surface border border-border-default bg-border-default md:grid-cols-5">
             {counts.map(([label, value]) => (

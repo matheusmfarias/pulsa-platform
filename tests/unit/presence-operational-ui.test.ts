@@ -16,6 +16,10 @@ const table = readFileSync(
   resolve("src/modules/presences/components/presence-operational-table.tsx"),
   "utf8",
 );
+const dayNavigation = readFileSync(
+  resolve("src/modules/presences/components/presence-day-navigation.tsx"),
+  "utf8",
+);
 
 describe("Supervisor operational Presence UI", () => {
   it("adds Presença to operational navigation and keeps context navigation safe", () => {
@@ -30,10 +34,21 @@ describe("Supervisor operational Presence UI", () => {
   });
 
   it("requests the selected date and supports previous, today and next navigation", () => {
-    expect(page).toContain("(await searchParams).date");
+    expect(page).toContain("const requestedDate = params.date");
     expect(page).toContain("listPresenceOperationalDay(parsedDate.data, context)");
     expect(shiftPresenceDate("2026-09-08", -1)).toBe("2026-09-07");
     expect(shiftPresenceDate("2026-09-08", 1)).toBe("2026-09-09");
+    expect(shiftPresenceDate("2024-03-01", -1)).toBe("2024-02-29");
+    expect(shiftPresenceDate("2026-12-31", 1)).toBe("2027-01-01");
+  });
+
+  it("offers a calendar grid with direct month and year selection", () => {
+    expect(dayNavigation).toContain('aria-label="Escolher data da presença"');
+    expect(dayNavigation).toContain('aria-label="Mês"');
+    expect(dayNavigation).toContain('aria-label="Ano"');
+    expect(dayNavigation).toContain('role="grid"');
+    expect(dayNavigation).toContain('aria-current={isToday ? "date" : undefined}');
+    expect(dayNavigation).toContain('event.key === "ArrowDown"');
   });
 
   it("does not offer arrival for an uncovered Absence", () => {
