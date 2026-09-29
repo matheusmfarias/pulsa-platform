@@ -72,7 +72,7 @@ export default async function AdministrationUserDetailPage({
           metadata={<MembershipStatusBadge status={member.status} />}
           title={displayName}
         />
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <section className="py-6">
             <h2 className="font-semibold">Dados do usuário</h2>
             <dl className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">

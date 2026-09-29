@@ -101,7 +101,7 @@ export default async function AssignmentsPage({
           ) : null}
 
           {assignments.length === 0 ? (
-            <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+            <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
               <h2 className="font-medium">
                 {hasActiveFilters
                   ? "Nenhuma alocação corresponde ao filtro"

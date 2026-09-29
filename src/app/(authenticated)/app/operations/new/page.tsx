@@ -64,7 +64,7 @@ export default async function NewOperationPage({
         />
 
         {contracts.length === 0 ? (
-          <section className="mt-8 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+          <section className="mt-8 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
             <h2 className="font-medium">
               Nenhum contrato ativo disponível
             </h2>
@@ -80,7 +80,7 @@ export default async function NewOperationPage({
         ) : (
           <section
             aria-label="Formulário de cadastro da operação"
-            className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8"
+            className="mt-8 rounded-card bg-surface shadow-card p-6 sm:p-8"
           >
             <OperationForm
               cancelHref="/app/operations"

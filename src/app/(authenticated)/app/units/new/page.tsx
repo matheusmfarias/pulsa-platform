@@ -48,7 +48,7 @@ export default async function NewUnitPage({
 
         <section
           aria-label="Formulário de cadastro da unidade"
-          className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8"
+          className="mt-8 rounded-card bg-surface shadow-card p-6 sm:p-8"
         >
           <UnitForm
             cancelHref="/app/units"

@@ -128,7 +128,7 @@ export default async function OperationDetailsPage({
           title={operation.name}
         />
 
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <DetailSection
             description="Informações que vinculam esta operação ao cliente e ao contrato de origem."
             id="operation-context"

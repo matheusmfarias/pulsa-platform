@@ -120,7 +120,7 @@ export default async function AdministrationAuditPage({
           title="Auditoria"
         />
         <form
-          className="mt-6 grid gap-3 rounded-surface border border-border-default bg-surface p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.2fr_1.2fr_1.4fr_auto]"
+          className="mt-6 grid gap-3 rounded-card bg-surface shadow-card p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.2fr_1.2fr_1.4fr_auto]"
           method="get"
         >
           <Field id="audit-from" label="De">
@@ -173,7 +173,7 @@ export default async function AdministrationAuditPage({
           </p>
         </div>
         {events.length === 0 ? (
-          <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+          <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
             <h2 className="font-medium">Nenhum evento encontrado</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Ajuste os filtros ou consulte outro período.
@@ -181,7 +181,7 @@ export default async function AdministrationAuditPage({
           </section>
         ) : (
           <>
-            <ul className="mt-4 divide-y divide-border-default overflow-hidden rounded-surface border border-border-default md:hidden">
+            <ul className="mt-4 divide-y divide-border-default overflow-hidden rounded-card bg-surface shadow-card md:hidden">
               {events.map(({ event, summary }) => (
                 <li className="space-y-2 p-4" key={event.id}>
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">

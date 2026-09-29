@@ -14,7 +14,7 @@ function Bone({ className = "" }: { className?: string }) {
 
 function CollectionData() {
   return (
-    <div className="mt-6 overflow-hidden rounded-surface border border-border-default bg-surface">
+    <div className="mt-6 overflow-hidden rounded-card bg-surface shadow-card">
       <div className="flex min-h-12 items-center border-b border-border-default px-4 sm:px-5">
         <Bone className="h-4 w-32" />
       </div>
@@ -40,9 +40,9 @@ function CollectionData() {
 
 function DetailData() {
   return (
-    <div className="mt-6 space-y-5">
+    <div className="mt-6 divide-y divide-border-default overflow-hidden rounded-card bg-surface shadow-card">
       {[0, 1, 2].map((section) => (
-        <section className="rounded-surface border border-border-default bg-surface p-5 sm:p-6" key={section}>
+        <section className="px-5 py-6 first:pt-5 last:pb-6 sm:px-7" key={section}>
           <Bone className="h-4 w-36" />
           <div className="mt-5 grid gap-x-8 gap-y-6 sm:grid-cols-2">
             {[0, 1, 2, 3].map((field) => (
@@ -60,7 +60,7 @@ function DetailData() {
 
 function FormData() {
   return (
-    <section className="mt-6 rounded-surface border border-border-default bg-surface p-5 sm:p-7">
+    <section className="mt-6 rounded-card bg-surface p-5 shadow-card sm:p-7">
       <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2">
         {[0, 1, 2, 3, 4, 5].map((field) => (
           <div className="space-y-2" key={field}>
@@ -80,7 +80,7 @@ function FormData() {
 function DashboardData() {
   return (
     <div className="mt-7 space-y-7">
-      <section className="rounded-surface border border-border-default bg-surface p-5 sm:p-6">
+      <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
         <Bone className="h-5 w-40" />
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <Bone className="h-24 w-full" />
@@ -97,7 +97,7 @@ function DashboardData() {
 
 function ScheduleData() {
   return (
-    <div className="mt-6 overflow-hidden rounded-surface border border-border-default bg-surface">
+    <div className="mt-6 overflow-hidden rounded-card bg-surface shadow-card">
       <div className="flex flex-wrap gap-3 border-b border-border-default p-4">
         <Bone className="h-10 w-36" />
         <Bone className="h-10 w-28" />
@@ -119,7 +119,7 @@ function WorkerData({ kind }: { kind: Exclude<SkeletonKind, "dashboard" | "sched
     return (
       <div className="mt-6 space-y-3">
         {[0, 1, 2, 3, 4].map((item) => (
-          <div className="rounded-surface border border-border-default bg-surface p-4" key={item}>
+          <div className="rounded-card bg-surface p-4 shadow-card" key={item}>
             <Bone className="h-4 w-36" />
             <Bone className="mt-3 h-4 w-2/3" />
             <Bone className="mt-3 h-10 w-full" />
@@ -173,7 +173,7 @@ export function DataRouteSkeleton({
   if (scope === "worker-public") {
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md items-center px-4 py-8 sm:px-6 sm:py-12">
-        <section className="w-full rounded-surface border border-border-default bg-surface p-6 sm:p-8">
+        <section className="w-full rounded-card bg-surface p-6 shadow-card sm:p-8">
           <div aria-busy="true" aria-label={label} role="status">
             <span className="sr-only">{label}…</span>
             {content}

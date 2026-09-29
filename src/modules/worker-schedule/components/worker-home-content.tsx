@@ -44,7 +44,7 @@ export function WorkerHomeContent({
               presenceControl={presenceControl}
             />
           ) : (
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="rounded-card bg-surface p-6 shadow-card">
               <p className="font-medium">Nenhuma jornada programada para hoje.</p>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {next
@@ -62,7 +62,7 @@ export function WorkerHomeContent({
             Outra jornada hoje
           </h2>
           <Link
-            className="group mt-3 flex min-h-24 flex-col gap-2 rounded-surface border border-border-default bg-surface p-4 transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:flex-row sm:items-center sm:justify-between"
+            className="group mt-3 flex min-h-24 flex-col gap-2 rounded-card bg-surface p-4 shadow-card transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:flex-row sm:items-center sm:justify-between"
             href={`/worker/schedule/${otherToday.scheduleEntryId}`}
           >
             <div>
@@ -82,7 +82,7 @@ export function WorkerHomeContent({
       ) : null}
 
       {next ? (
-        <section className="mt-6 rounded-surface border border-border-default bg-surface p-5" aria-labelledby="next-journey">
+        <section className="mt-6 rounded-card bg-surface p-5 shadow-card" aria-labelledby="next-journey">
           <h2 id="next-journey" className="text-sm font-medium text-muted-foreground">Próxima jornada</h2>
           <p className="mt-2 font-semibold capitalize">
             {formatCompactWorkerDate(next.startsAt, next.unitTimezone)} · {formatWorkerTime(next.startsAt, next.unitTimezone)}

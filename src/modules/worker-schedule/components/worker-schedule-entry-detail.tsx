@@ -31,7 +31,7 @@ export function WorkerScheduleEntryDetail({
 }) {
   const location = formatUnitLocation(entry);
   return (
-    <article className="rounded-surface border border-border-default bg-surface p-5 sm:p-8">
+    <article className="rounded-card bg-surface p-5 shadow-card sm:p-8">
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
         <div>
           <p className="capitalize text-muted-foreground">{formatWorkerDate(entry.startsAt, entry.unitTimezone)}</p>

@@ -74,12 +74,12 @@ export default async function AdministrationUsersPage() {
           <p className="mt-2">Esta lista reúne usuários internos. Colaboradores operacionais são gerenciados na área Colaboradores.</p>
         </details>
         {members.length === 0 ? (
-          <section className="mt-6 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+          <section className="mt-6 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
             <h2 className="font-medium">Nenhum usuário encontrado</h2>
           </section>
         ) : (
           <>
-          <ul className="mt-6 divide-y divide-border-default overflow-hidden rounded-surface border border-border-default md:hidden">
+          <ul className="mt-6 divide-y divide-border-default overflow-hidden rounded-card bg-surface shadow-card md:hidden">
             {members.map((member) => (
               <li className="space-y-3 p-4" key={member.profile_id}>
                 <div className="flex items-start justify-between gap-3">

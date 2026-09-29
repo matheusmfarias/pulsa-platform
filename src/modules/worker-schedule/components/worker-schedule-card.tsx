@@ -24,7 +24,7 @@ export function WorkerScheduleCard({
   const location = formatUnitLocation(entry);
 
   return (
-    <article className="overflow-hidden rounded-surface border border-border-default bg-surface">
+    <article className="overflow-hidden rounded-card bg-surface shadow-card">
       <div className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>

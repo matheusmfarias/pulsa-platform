@@ -17,7 +17,7 @@ export default function ClientsError({
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <section className="max-w-xl rounded-lg border bg-card p-6">
+      <section className="max-w-xl rounded-card bg-surface shadow-card p-6">
         <h1 className="text-xl font-semibold">Não foi possível carregar clientes</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Tente novamente. Se o problema persistir, contate o suporte interno.

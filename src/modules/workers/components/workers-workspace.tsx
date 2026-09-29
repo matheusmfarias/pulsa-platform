@@ -109,7 +109,7 @@ function WorkersWorkspaceLoading() {
   return (
     <section
       aria-label="Carregando lista de colaboradores"
-      className="mt-6 overflow-hidden rounded-surface border border-border-default bg-surface"
+      className="mt-6 overflow-hidden rounded-card bg-surface shadow-card"
     >
       <div className="flex flex-col gap-2.5 p-3 sm:flex-row sm:p-4">
         <Skeleton className="h-10 min-w-0 flex-1" />

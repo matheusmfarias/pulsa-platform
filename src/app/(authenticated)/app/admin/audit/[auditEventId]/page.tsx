@@ -100,7 +100,7 @@ export default async function AuditEventDetailPage({
           description={formatDateTime(event.created_at)}
           title={`${AUDIT_ACTION_LABELS[event.action]} · ${AUDIT_ENTITY_LABELS[event.entity_type]}`}
         />
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <section className="py-6">
             <h2 className="font-semibold">Contexto do evento</h2>
             <dl className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
@@ -193,7 +193,7 @@ export default async function AuditEventDetailPage({
             )}
           </section>
           <section className="py-6">
-            <details className="rounded-surface border border-border-default bg-surface">
+            <details className="rounded-card bg-surface shadow-card">
               <summary className="cursor-pointer px-6 py-4 font-medium">
                 Metadata técnica
               </summary>
