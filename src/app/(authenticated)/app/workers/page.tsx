@@ -1,3 +1,7 @@
+import { Suspense } from "react";
+
+import { DataRouteSkeleton } from "@/components/ui/data-route-skeleton";
+
 import {
   parseWorkerListSearchParams,
   parseWorkerListPage,
@@ -6,7 +10,7 @@ import {
   type WorkerListSearchParams,
 } from "@/modules/workers";
 
-export default async function WorkersPage({
+async function WorkersPageContent({
   searchParams,
 }: {
   searchParams: Promise<WorkerListSearchParams>;
@@ -16,4 +20,24 @@ export default async function WorkersPage({
   const page = parseWorkerListPage(params);
   const pageSize = parseWorkerListPageSize(params);
   return <WorkersWorkspace filters={filters} page={page} pageSize={pageSize} />;
+}
+
+export default function WorkersPage({
+  searchParams,
+}: {
+  searchParams: Promise<WorkerListSearchParams>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <DataRouteSkeleton
+          kind="collection"
+          label="Carregando colaboradores"
+          scope="core"
+        />
+      }
+    >
+      <WorkersPageContent searchParams={searchParams} />
+    </Suspense>
+  );
 }
