@@ -22,9 +22,9 @@ const relationLinkClass =
 export function UnitTable({ units }: { units: UnitOperationalSummary[] }) {
   return (
     <TableFrame className="mt-4">
-      <TableScrollArea label="Tabela de unidades">
+      <TableScrollArea bounded label="Tabela de unidades">
         <Table className="min-w-full table-fixed xl:min-w-[980px] xl:table-auto">
-          <TableHeader>
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>
               <TableHead className="px-3 xl:px-4">
                 <span className="xl:hidden">Unidade</span>

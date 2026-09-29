@@ -40,9 +40,9 @@ export function PresenceOperationalTable({
 }) {
   return (
     <TableFrame className="mt-4">
-      <TableScrollArea label="Acompanhamento operacional de presença">
+      <TableScrollArea bounded label="Acompanhamento operacional de presença">
         <Table className="min-w-full table-fixed xl:min-w-[1180px] xl:table-auto">
-          <TableHeader>
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>
               <TableHead className="w-24 px-3 xl:px-4">Horário</TableHead>
               <TableHead className="px-3 xl:px-4">Colaborador esperado</TableHead>

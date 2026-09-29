@@ -21,12 +21,14 @@ export function TableFrame({
 export interface TableScrollAreaProps extends React.ComponentProps<"div"> {
   label: string;
   shadow?: boolean;
+  bounded?: boolean;
 }
 
 export function TableScrollArea({
   className,
   label,
   shadow = false,
+  bounded = false,
   children,
   ...props
 }: TableScrollAreaProps) {
@@ -39,8 +41,9 @@ export function TableScrollArea({
     return (
       <ScrollShadow
         aria-label={label}
+        orientation={bounded ? "both" : "horizontal"}
         role="region"
-        scrollAreaClassName={scrollAreaClassName}
+        scrollAreaClassName={cn(scrollAreaClassName, bounded ? "lg:max-h-[calc(100dvh-24rem)]" : undefined)}
         tabIndex={0}
         {...props}
       >
@@ -53,7 +56,9 @@ export function TableScrollArea({
     <div
       aria-label={label}
       className={cn(
-        "overflow-x-auto",
+        bounded
+          ? "overflow-x-auto lg:max-h-[calc(100dvh-24rem)] lg:overflow-y-auto"
+          : "overflow-x-auto",
         scrollAreaClassName,
       )}
       role="region"

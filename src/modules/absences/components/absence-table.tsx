@@ -30,9 +30,9 @@ function formatEntryDateTime(absence: AbsenceListItem) {
 export function AbsenceTable({ absences }: { absences: AbsenceListItem[] }) {
   return (
     <TableFrame className="mt-4">
-      <TableScrollArea label="Tabela de ausências">
+      <TableScrollArea bounded label="Tabela de ausências">
         <Table className="min-w-full table-fixed xl:min-w-[1120px] xl:table-auto">
-          <TableHeader>
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>
               <TableHead className="px-3 xl:px-4">Colaborador</TableHead>
               <TableHead className="hidden xl:table-cell">Data e horário</TableHead>

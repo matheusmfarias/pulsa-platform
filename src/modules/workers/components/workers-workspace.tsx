@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { ListEmptyState, ListResultSummary } from "@/components/layout/list";
+import { ListPagination } from "@/components/layout/list-pagination";
 import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -158,7 +159,7 @@ async function WorkersResults({
       <ListResultSummary className="mt-0 min-h-12 px-5 py-2.5">
         <p>
           <span className="text-sm font-semibold tabular-nums text-foreground">
-            {workers.length} {workers.length === 1 ? "colaborador nesta página" : "colaboradores nesta página"}
+            {result.total} {result.total === 1 ? "colaborador" : "colaboradores"}
           </span>
           {filtered ? (
             <span className="mt-0.5 block text-xs text-muted-foreground">
@@ -168,7 +169,7 @@ async function WorkersResults({
         </p>
       </ListResultSummary>
 
-      {workers.length === 0 && page === 1 ? (
+      {workers.length === 0 && result.page === 1 ? (
         <WorkersEmptyState createHref={createHref} filtered={filtered} />
       ) : (
         <>
@@ -178,31 +179,20 @@ async function WorkersResults({
                 Esta página não tem colaboradores. A lista pode ter mudado desde a última visita.
               </p>
               <Button asChild className="mt-4" size="sm" variant="outline">
-                <Link href={workerListHref("/app/workers", filters)} scroll={false}>
+                  <Link href={workerListHref("/app/workers", filters)} scroll={false}>
                   Ir para a primeira página
                 </Link>
               </Button>
             </div>
           ) : <WorkerTable workers={workers} />}
-          <div className="flex items-center justify-between gap-3 border-t border-border-default px-4 py-3">
-            <span className="text-xs text-muted-foreground">Página {page}</span>
-            <div className="flex gap-2">
-              {page > 1 ? (
-                <Button asChild size="sm" variant="outline">
-                  <Link href={workerListHref("/app/workers", filters, page - 1)} scroll={false}>
-                    Anterior
-                  </Link>
-                </Button>
-              ) : <Button disabled size="sm" variant="outline">Anterior</Button>}
-              {result.hasNextPage ? (
-                <Button asChild size="sm" variant="outline">
-                  <Link href={workerListHref("/app/workers", filters, page + 1)} scroll={false}>
-                    Próxima
-                  </Link>
-                </Button>
-              ) : <Button disabled size="sm" variant="outline">Próxima</Button>}
-            </div>
-          </div>
+          <ListPagination
+            currentPage={result.page}
+            getHref={(targetPage) => workerListHref("/app/workers", filters, targetPage)}
+            label="colaboradores"
+            pageCount={result.pageCount}
+            pageSize={result.pageSize}
+            total={result.total}
+          />
         </>
       )}
     </>

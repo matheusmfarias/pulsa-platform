@@ -29,15 +29,21 @@ export async function listAuditEvents(
   filters: AuditListFilters,
 ): Promise<PaginatedAuditEvents> {
   const { organizationId } = await requirePermission("audit:read");
-  const { data, error, count } = await findAuditEvents(organizationId, filters);
-  if (error) throwAdministrationRepositoryError(error, "list_audit_events");
-  const total = count ?? 0;
+  let result = await findAuditEvents(organizationId, filters);
+  if (result.error) throwAdministrationRepositoryError(result.error, "list_audit_events");
+  const total = result.count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / AUDIT_PAGE_SIZE));
+  const page = Math.min(filters.page, pageCount);
+  if (page !== filters.page) {
+    result = await findAuditEvents(organizationId, { ...filters, page });
+    if (result.error) throwAdministrationRepositoryError(result.error, "list_audit_events");
+  }
   return {
-    items: data.map(parseAuditEvent),
-    page: filters.page,
+    items: (result.data ?? []).map(parseAuditEvent),
+    page,
     pageSize: AUDIT_PAGE_SIZE,
     total,
-    pageCount: Math.max(1, Math.ceil(total / AUDIT_PAGE_SIZE)),
+    pageCount,
   };
 }
 

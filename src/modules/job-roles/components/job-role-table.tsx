@@ -26,9 +26,9 @@ export function JobRoleTable({
 }) {
   return (
     <TableFrame className="mt-4">
-      <TableScrollArea label="Tabela de cargos">
+      <TableScrollArea bounded label="Tabela de cargos">
         <Table className="min-w-full table-fixed lg:min-w-[720px] lg:table-auto">
-          <TableHeader>
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>
               <TableHead className="px-3 lg:px-4">
                 Cargo

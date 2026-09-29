@@ -51,6 +51,8 @@ export async function findAssignmentsPage(
   if (filters.workerId) query = query.eq("worker_id", filters.workerId);
   if (filters.positionId) query = query.eq("position_id", filters.positionId);
   if (filters.status) query = query.eq("status", filters.status);
+  const searchTerm = filters.query.replace(/[%_*,().]/g, " ").replace(/\s+/g, " ").trim();
+  if (searchTerm) query = query.ilike("worker.full_name", `%${searchTerm}%`);
   const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,

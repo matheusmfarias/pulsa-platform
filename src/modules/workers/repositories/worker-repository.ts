@@ -22,9 +22,10 @@ export async function findWorkers(
   const supabase = await createServerSupabaseClient();
   const workers = supabase.from("workers");
   let query = operationalContext.type === "all"
-    ? workers.select("*")
+    ? workers.select("*", { count: "exact" })
     : workers.select(
         "*, assignments!inner(id, position:positions!inner(unit:units!inner(operation:operations!inner(contract:contracts!inner(id, client_id)))))",
+        { count: "exact" },
       );
   query = query
     .eq("organization_id", organizationId)

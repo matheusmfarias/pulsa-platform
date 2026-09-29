@@ -29,6 +29,10 @@ position_id: z.uuid("Selecione um posto válido."),
   );
 
 export const assignmentListFiltersSchema = z.object({
+  query: z.preprocess(
+    (value) => Array.isArray(value) ? value[0] : value,
+    z.string().trim().max(120).catch("").default(""),
+  ),
   workerId: z.uuid().optional(),
   positionId: z.uuid().optional(),
   status: z.preprocess(

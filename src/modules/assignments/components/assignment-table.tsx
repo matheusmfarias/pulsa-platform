@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -29,14 +30,16 @@ function formatDate(value: string | null): string {
 
 export function AssignmentTable({
   assignments,
+  footer,
 }: {
   assignments: AssignmentListItem[];
+  footer?: ReactNode;
 }) {
   return (
     <TableFrame className="mt-4">
-      <TableScrollArea label="Tabela de alocações">
+      <TableScrollArea bounded label="Tabela de alocações">
         <Table className="min-w-full table-fixed xl:min-w-[920px] xl:table-auto">
-          <TableHeader>
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>
               <TableHead className="px-3 xl:px-4">
                 <span className="xl:hidden">Alocação</span>
@@ -144,6 +147,7 @@ export function AssignmentTable({
           </TableBody>
         </Table>
       </TableScrollArea>
+      {footer}
     </TableFrame>
   );
 }

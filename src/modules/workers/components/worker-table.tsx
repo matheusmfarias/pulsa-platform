@@ -74,9 +74,9 @@ export function WorkerTable({
 }) {
   return (
     <div className="border-t border-border-default/80">
-      <TableScrollArea label="Tabela de colaboradores" shadow>
+      <TableScrollArea bounded label="Tabela de colaboradores" shadow>
         <Table className="min-w-full table-fixed sm:min-w-[960px] sm:table-auto">
-          <TableHeader className="bg-subtle/45 text-xs normal-case tracking-normal text-muted-foreground">
+          <TableHeader className="sticky top-0 z-10 bg-subtle/45 text-xs normal-case tracking-normal text-muted-foreground">
             <TableRow>
               <TableHead className="w-auto px-3 sm:w-[24%] sm:px-5">
                 <span className="sm:hidden">Colaborador</span>

@@ -27,9 +27,9 @@ export function ClientTable({
 }) {
   return (
     <TableFrame className="mt-4">
-      <TableScrollArea label="Tabela de clientes">
+      <TableScrollArea bounded label="Tabela de clientes">
         <Table className="min-w-full table-fixed xl:min-w-[760px] xl:table-auto">
-          <TableHeader>
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>
               <TableHead className="px-3 xl:px-4">
                 <span className="xl:hidden">Cliente</span>

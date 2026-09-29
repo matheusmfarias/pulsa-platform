@@ -5,7 +5,7 @@ import * as React from "react";
 import { cn } from "@/shared/utils";
 
 export interface ScrollShadowProps extends React.ComponentProps<"div"> {
-  orientation?: "horizontal" | "vertical";
+  orientation?: "horizontal" | "vertical" | "both";
   scrollAreaClassName?: string;
 }
 
@@ -18,29 +18,25 @@ export function ScrollShadow({
   ...props
 }: ScrollShadowProps) {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
-  const [edges, setEdges] = React.useState({ start: false, end: false });
+  const [edges, setEdges] = React.useState({ left: false, right: false, top: false, bottom: false });
 
   const updateEdges = React.useCallback(() => {
     const element = scrollAreaRef.current;
 
     if (!element) {
-      setEdges({ start: false, end: false });
+      setEdges({ left: false, right: false, top: false, bottom: false });
       return;
     }
 
-    if (orientation === "horizontal") {
-      const maxScrollLeft = element.scrollWidth - element.clientWidth;
-      setEdges({
-        start: element.scrollLeft > 1,
-        end: maxScrollLeft - element.scrollLeft > 1,
-      });
-      return;
-    }
-
+    const horizontal = orientation !== "vertical";
+    const vertical = orientation !== "horizontal";
     const maxScrollTop = element.scrollHeight - element.clientHeight;
+    const maxScrollLeft = element.scrollWidth - element.clientWidth;
     setEdges({
-      start: element.scrollTop > 1,
-      end: maxScrollTop - element.scrollTop > 1,
+      left: horizontal && element.scrollLeft > 1,
+      right: horizontal && maxScrollLeft - element.scrollLeft > 1,
+      top: vertical && element.scrollTop > 1,
+      bottom: vertical && maxScrollTop - element.scrollTop > 1,
     });
   }, [orientation]);
 
@@ -62,7 +58,7 @@ export function ScrollShadow({
     <div className={cn("relative", className)}>
       <div
         className={cn(
-          orientation === "horizontal" ? "overflow-x-auto" : "overflow-y-auto",
+          orientation === "horizontal" ? "overflow-x-auto" : orientation === "vertical" ? "overflow-y-auto" : "overflow-auto",
           scrollAreaClassName,
         )}
         onScroll={(event) => {
@@ -74,26 +70,14 @@ export function ScrollShadow({
       >
         {children}
       </div>
-      <div
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute z-10 from-surface to-transparent transition-opacity duration-150",
-          orientation === "horizontal"
-            ? "inset-y-0 left-0 w-5 bg-gradient-to-r"
-            : "inset-x-0 top-0 h-5 bg-gradient-to-b",
-          edges.start ? "opacity-100" : "opacity-0",
-        )}
-      />
-      <div
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute z-10 from-surface to-transparent transition-opacity duration-150",
-          orientation === "horizontal"
-            ? "inset-y-0 right-0 w-5 bg-gradient-to-l"
-            : "inset-x-0 bottom-0 h-5 bg-gradient-to-t",
-          edges.end ? "opacity-100" : "opacity-0",
-        )}
-      />
+      {orientation !== "vertical" ? <>
+        <div aria-hidden="true" className={cn("pointer-events-none absolute inset-y-0 left-0 z-10 w-5 bg-gradient-to-r from-surface to-transparent transition-opacity duration-150", edges.left ? "opacity-100" : "opacity-0")} />
+        <div aria-hidden="true" className={cn("pointer-events-none absolute inset-y-0 right-0 z-10 w-5 bg-gradient-to-l from-surface to-transparent transition-opacity duration-150", edges.right ? "opacity-100" : "opacity-0")} />
+      </> : null}
+      {orientation !== "horizontal" ? <>
+        <div aria-hidden="true" className={cn("pointer-events-none absolute inset-x-0 top-0 z-10 h-5 bg-gradient-to-b from-surface to-transparent transition-opacity duration-150", edges.top ? "opacity-100" : "opacity-0")} />
+        <div aria-hidden="true" className={cn("pointer-events-none absolute inset-x-0 bottom-0 z-10 h-5 bg-gradient-to-t from-surface to-transparent transition-opacity duration-150", edges.bottom ? "opacity-100" : "opacity-0")} />
+      </> : null}
     </div>
   );
 }

@@ -23,20 +23,34 @@ export async function listWorkersPageWithCurrentAssignment(
   page: number,
 ): Promise<{
   workers: WorkerWithCurrentAssignment[];
-  hasNextPage: boolean;
+  page: number;
+  pageCount: number;
+  pageSize: number;
+  total: number;
 }> {
   const { organizationId } = await requirePermission("worker:read");
   const from = (page - 1) * WORKER_LIST_PAGE_SIZE;
-  const { data, error } = await findWorkers(
+  let result = await findWorkers(
     organizationId,
     filters,
     operationalContext,
     { from, to: from + WORKER_LIST_PAGE_SIZE },
   );
-  if (error) throwWorkerRepositoryError(error, "list_workers_page");
+  if (result.error) throwWorkerRepositoryError(result.error, "list_workers_page");
 
-  const parsedWorkers = data.map(parseWorker);
-  const hasNextPage = parsedWorkers.length > WORKER_LIST_PAGE_SIZE;
+  const total = result.count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / WORKER_LIST_PAGE_SIZE));
+  const effectivePage = Math.min(page, pageCount);
+  if (effectivePage !== page) {
+    const effectiveFrom = (effectivePage - 1) * WORKER_LIST_PAGE_SIZE;
+    result = await findWorkers(organizationId, filters, operationalContext, {
+      from: effectiveFrom,
+      to: effectiveFrom + WORKER_LIST_PAGE_SIZE,
+    });
+    if (result.error) throwWorkerRepositoryError(result.error, "list_workers_page");
+  }
+
+  const parsedWorkers = (result.data ?? []).map(parseWorker);
   const workersOnPage = parsedWorkers.slice(0, WORKER_LIST_PAGE_SIZE);
   const assignments = await listActiveAssignmentsWithContext(
     operationalContext,
@@ -50,7 +64,10 @@ export async function listWorkersPageWithCurrentAssignment(
   }
 
   return {
-    hasNextPage,
+    page: effectivePage,
+    pageCount,
+    pageSize: WORKER_LIST_PAGE_SIZE,
+    total,
     workers: workersOnPage.map((worker) => ({
       ...worker,
       currentAssignment: assignmentByWorker.get(worker.id) ?? null,

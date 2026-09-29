@@ -1,8 +1,9 @@
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 import {
   ActiveFiltersSummary,
@@ -19,7 +20,7 @@ import type { AssignmentListFilters } from "../schemas/assignment-schemas";
 export function hasActiveAssignmentFilters(
   filters: AssignmentListFilters,
 ): boolean {
-  return Boolean(filters.status);
+  return Boolean(filters.status || filters.query);
 }
 
 export function AssignmentFilterBar({
@@ -33,9 +34,13 @@ export function AssignmentFilterBar({
     <ListFilterBar
       action="/app/assignments"
       aria-label="Filtros de alocações"
-      className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+      className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center"
     >
-      <div className="min-w-0 flex-1 sm:max-w-xs">
+      <div className="relative min-w-0 flex-1">
+        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input aria-label="Buscar alocações por colaborador" className="bg-background pl-9" defaultValue={filters.query} name="q" placeholder="Buscar colaborador" type="search" />
+      </div>
+      <div className="min-w-0 sm:w-56">
         <Select
           aria-label="Filtrar alocações por status"
           defaultValue={filters.status ?? "all"}
@@ -67,10 +72,10 @@ export function AssignmentFilterBar({
         ) : null}
       </ListFilterActions>
 
-      {filters.status ? (
+      {hasActiveFilters ? (
         <ActiveFiltersSummary className="sm:basis-full">
-          <span className="font-medium text-foreground">Filtro ativo:</span>{" "}
-          Status: {ASSIGNMENT_STATUS_LABELS[filters.status as AssignmentStatus]}
+          <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
+          {[filters.query ? `Colaborador: ${filters.query}` : null, filters.status ? `Status: ${ASSIGNMENT_STATUS_LABELS[filters.status as AssignmentStatus]}` : null].filter(Boolean).join(" · ")}
         </ActiveFiltersSummary>
       ) : null}
     </ListFilterBar>

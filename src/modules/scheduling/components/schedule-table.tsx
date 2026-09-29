@@ -12,7 +12,7 @@ function formatDate(value: string) {
 }
 
 export function ScheduleTable({ schedules }: { schedules: ScheduleOverview[] }) {
-  return <TableFrame className="mt-4"><TableScrollArea label="Tabela de escalas"><Table className="min-w-full table-fixed xl:min-w-[880px] xl:table-auto"><TableHeader><TableRow>
+  return <TableFrame className="mt-4"><TableScrollArea bounded label="Tabela de escalas"><Table className="min-w-full table-fixed xl:min-w-[880px] xl:table-auto"><TableHeader className="lg:sticky lg:top-0 lg:z-10"><TableRow>
     <TableHead className="px-3 xl:px-4">Período</TableHead><TableHead className="hidden xl:table-cell">Operação</TableHead><TableHead className="hidden xl:table-cell">Revisão</TableHead><TableHead className="w-40 px-2 xl:px-4">Status</TableHead><TableHead className="w-12 px-1 text-right xl:px-4"><span className="sr-only">Ações</span></TableHead>
   </TableRow></TableHeader><TableBody>{schedules.map((schedule) => <TableRow key={schedule.id}>
     <TableCell className="px-3 font-medium tabular-nums xl:px-4"><Link className="rounded-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring" href={`/app/scheduling/${schedule.id}`}>{formatDate(schedule.period_start)} — {formatDate(schedule.period_end)}</Link><p className="mt-1 text-xs font-normal text-muted-foreground xl:hidden">{schedule.operation.name} · {schedule.latestRevision ? `v${schedule.latestRevision.version}` : "Sem revisão"}</p></TableCell>

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -6,6 +6,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { ListPagination } from "@/components/layout/list-pagination";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -16,7 +17,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
@@ -159,17 +159,19 @@ export default async function AdministrationAuditPage({
               ))}
             </Select>
           </Field>
-          <Button className="self-end" type="submit" variant="outline">
-            <Search aria-hidden="true" className="size-4" />
-            Filtrar
-          </Button>
+          <div className="flex items-center gap-2 self-end">
+            <Button type="submit" variant="outline">
+              <Search aria-hidden="true" className="size-4" />
+              Filtrar
+            </Button>
+            {[filters.from, filters.to, filters.entityType, filters.action, filters.actorId].some(Boolean) ? (
+              <Button asChild size="sm" variant="ghost"><Link href="/app/admin/audit">Limpar</Link></Button>
+            ) : null}
+          </div>
         </form>
         <div className="mt-5 flex items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>
             {result.total} {result.total === 1 ? "evento" : "eventos"}
-          </p>
-          <p>
-            Página {result.page} de {result.pageCount}
           </p>
         </div>
         {events.length === 0 ? (
@@ -180,8 +182,8 @@ export default async function AdministrationAuditPage({
             </p>
           </section>
         ) : (
-          <>
-            <ul className="mt-4 divide-y divide-border-default overflow-hidden rounded-card bg-surface shadow-card md:hidden">
+          <section className="mt-4 overflow-hidden rounded-card bg-surface shadow-card">
+            <ul className="divide-y divide-border-default md:hidden">
               {events.map(({ event, summary }) => (
                 <li className="space-y-2 p-4" key={event.id}>
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -200,10 +202,10 @@ export default async function AdministrationAuditPage({
                 </li>
               ))}
             </ul>
-            <TableFrame className="mt-4 hidden md:block">
-            <TableScrollArea label="Tabela de auditoria">
+            <div className="hidden md:block">
+            <TableScrollArea bounded label="Tabela de auditoria">
               <Table className="min-w-full table-fixed xl:min-w-[1050px] xl:table-auto">
-                <TableHeader>
+                <TableHeader className="lg:sticky lg:top-0 lg:z-10">
                   <TableRow>
                     <TableHead>Data/hora</TableHead>
                     <TableHead>Ator</TableHead>
@@ -251,32 +253,17 @@ export default async function AdministrationAuditPage({
                 </TableBody>
               </Table>
             </TableScrollArea>
-            </TableFrame>
-          </>
+            </div>
+            <ListPagination
+              currentPage={result.page}
+              getHref={(targetPage) => paginationHref(filters, targetPage)}
+              label="auditoria"
+              pageCount={result.pageCount}
+              pageSize={result.pageSize}
+              total={result.total}
+            />
+          </section>
         )}
-        <nav
-          aria-label="Paginação da auditoria"
-          className="mt-6 flex items-center justify-between"
-        >
-          {result.page > 1 ? (
-            <Button asChild variant="outline">
-              <Link href={paginationHref(filters, result.page - 1)}>
-                <ArrowLeft aria-hidden="true" className="size-4" />
-                Anterior
-              </Link>
-            </Button>
-          ) : (
-            <span />
-          )}
-          {result.page < result.pageCount ? (
-            <Button asChild variant="outline">
-              <Link href={paginationHref(filters, result.page + 1)}>
-                Próxima
-                <ArrowRight aria-hidden="true" className="size-4" />
-              </Link>
-            </Button>
-          ) : null}
-        </nav>
       </ContentContainer>
     </PageShell>
   );
