@@ -111,3 +111,20 @@ export function AssignmentPaginationNavigation({
     </div>
   );
 }
+
+export function AssignmentTablePendingSurface({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { isPending } = useAssignmentListNavigation();
+
+  return (
+    <div
+      aria-busy={isPending}
+      className={`transition-opacity duration-200 ${isPending ? "opacity-55" : "opacity-100"}`}
+    >
+      {children}
+    </div>
+  );
+}

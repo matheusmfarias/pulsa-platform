@@ -1,6 +1,6 @@
 "use client";
 
-import { LoaderCircle, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
 
@@ -43,7 +43,7 @@ export function AssignmentFilterBar({
   filters: AssignmentListFilters;
 }) {
   const searchParams = useSearchParams();
-  const { isPending, navigate } = useAssignmentListNavigation();
+  const { navigate } = useAssignmentListNavigation();
   const appliedQuery = searchParams.get("q") ?? filters.query;
   const appliedStatus = readStatus(searchParams.get("status") ?? filters.status ?? null);
   const [queryDraft, setQueryDraft] = React.useState(appliedQuery);
@@ -118,26 +118,16 @@ export function AssignmentFilterBar({
         />
       </div>
 
-      <div className="flex items-center justify-between gap-2 sm:justify-start">
-        <FilterSelect
-          ariaLabel="Filtrar alocações por status"
-          label="Status"
-          onValueChange={(nextStatus) => {
-            setStatus(nextStatus);
-            navigateWithFilters(queryDraft, nextStatus);
-          }}
-          options={STATUS_OPTIONS}
-          value={status}
-        />
-        <span
-          aria-label={isPending ? "Atualizando alocações" : undefined}
-          aria-live="polite"
-          className="inline-flex size-5 items-center justify-center text-muted-foreground"
-          role={isPending ? "status" : undefined}
-        >
-          {isPending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
-        </span>
-      </div>
+      <FilterSelect
+        ariaLabel="Filtrar alocações por status"
+        label="Status"
+        onValueChange={(nextStatus) => {
+          setStatus(nextStatus);
+          navigateWithFilters(queryDraft, nextStatus);
+        }}
+        options={STATUS_OPTIONS}
+        value={status}
+      />
 
       {hasActiveFilters ? (
         <>

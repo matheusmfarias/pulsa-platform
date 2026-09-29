@@ -1,4 +1,4 @@
-import { LoaderCircle, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -12,6 +12,7 @@ import { ListPagination } from "@/components/layout/list-pagination";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   assignmentListFiltersSchema,
+  AssignmentTableSkeleton,
   AssignmentFilterBar,
   AssignmentTable,
   listAssignmentsPage,
@@ -19,6 +20,7 @@ import {
 import {
   AssignmentListNavigationProvider,
   AssignmentPaginationNavigation,
+  AssignmentTablePendingSurface,
 } from "@/modules/assignments/components/assignment-list-navigation";
 import { hasActiveAssignmentFilters } from "@/modules/assignments/domain/assignment-list-filters";
 import { PermissionGate } from "@/modules/authorization";
@@ -76,26 +78,12 @@ export default async function AssignmentsPage({
 
           <AssignmentFilterBar filters={filters} />
 
-          <Suspense fallback={<AssignmentResultsFallback />}>
+          <Suspense fallback={<AssignmentTableSkeleton />}>
             <AssignmentResults filters={filters} hasActiveFilters={hasActiveFilters} page={page} />
           </Suspense>
         </ContentContainer>
       </PageShell>
     </AssignmentListNavigationProvider>
-  );
-}
-
-function AssignmentResultsFallback() {
-  return (
-    <div
-      aria-busy="true"
-      aria-live="polite"
-      className="mt-5 flex min-h-12 items-center gap-2 text-sm text-muted-foreground sm:mt-6"
-      role="status"
-    >
-      <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-      Atualizando alocações…
-    </div>
   );
 }
 
@@ -156,22 +144,24 @@ async function AssignmentResults({
           </p>
         </section>
       ) : (
-        <AssignmentTable
-          assignments={assignments}
-          footer={
-            <AssignmentPaginationNavigation>
-              <ListPagination
-                currentPage={result.page}
-                getHref={(targetPage) => assignmentsPageHref(filters, targetPage)}
-                getPageSizeHref={(targetSize) => assignmentsPageHref(filters, 1, targetSize)}
-                label="alocações"
-                pageCount={result.pageCount}
-                pageSize={result.pageSize}
-                total={result.total}
-              />
-            </AssignmentPaginationNavigation>
-          }
-        />
+        <AssignmentTablePendingSurface>
+          <AssignmentTable
+            assignments={assignments}
+            footer={
+              <AssignmentPaginationNavigation>
+                <ListPagination
+                  currentPage={result.page}
+                  getHref={(targetPage) => assignmentsPageHref(filters, targetPage)}
+                  getPageSizeHref={(targetSize) => assignmentsPageHref(filters, 1, targetSize)}
+                  label="alocações"
+                  pageCount={result.pageCount}
+                  pageSize={result.pageSize}
+                  total={result.total}
+                />
+              </AssignmentPaginationNavigation>
+            }
+          />
+        </AssignmentTablePendingSurface>
       )}
     </div>
   );
