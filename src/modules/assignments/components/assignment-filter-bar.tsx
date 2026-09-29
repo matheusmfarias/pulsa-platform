@@ -36,12 +36,6 @@ function readStatus(value: string | null): AssignmentStatusFilter {
     : "all";
 }
 
-export function hasActiveAssignmentFilters(
-  filters: AssignmentListFilters,
-): boolean {
-  return Boolean(filters.status || filters.query);
-}
-
 export function AssignmentFilterBar({
   filters,
 }: {

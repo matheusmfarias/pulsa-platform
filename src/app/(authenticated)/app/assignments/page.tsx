@@ -15,9 +15,9 @@ import {
   AssignmentTableSkeleton,
   AssignmentFilterBar,
   AssignmentTable,
-  hasActiveAssignmentFilters,
   listAssignmentsPage,
 } from "@/modules/assignments";
+import { hasActiveAssignmentFilters } from "@/modules/assignments/domain/assignment-list-filters";
 import { PermissionGate } from "@/modules/authorization";
 import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
