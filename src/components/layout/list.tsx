@@ -10,7 +10,7 @@ export function ListFilterBar({
   return (
     <form
       className={cn(
-        "mt-6 rounded-surface border border-border-default bg-surface p-3 sm:p-4",
+        "mt-6 rounded-card bg-surface p-3 shadow-card sm:p-4",
         className,
       )}
       method={method}
@@ -94,7 +94,7 @@ export function ListEmptyState({
   return (
     <section
       className={cn(
-        "mt-3 border-y border-dashed border-border-strong px-4 py-10 text-center sm:py-12",
+        "mt-4 rounded-card bg-surface px-4 py-10 text-center shadow-card sm:py-12",
         className,
       )}
       {...props}

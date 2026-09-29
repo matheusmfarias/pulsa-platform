@@ -74,7 +74,7 @@ export default async function JobRoleDetailsPage({
           metadata={<JobRoleStatusBadge status={jobRole.status} />}
           title={jobRole.name}
         />
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <section className="py-6">
             <h2 className="font-semibold">Dados do cargo</h2>
             <dl className="mt-5">

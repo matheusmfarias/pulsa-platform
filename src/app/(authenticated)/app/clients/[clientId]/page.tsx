@@ -133,7 +133,7 @@ export default async function ClientDetailsPage({
           title={client.trade_name}
         />
 
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <DetailSection
             description="Informações jurídicas e comerciais usadas para identificar este cliente."
             id="client-data"

@@ -122,7 +122,7 @@ export default async function AbsenceDetailsPage({
             Esta ausência foi cancelada. O registro permanece no histórico.
           </FeedbackMessage>
         )}
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <DetailSection id="absence-schedule-entry" title="Entrada de escala">
             <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
               <DetailItem label="Colaborador" value={entry.assignment.worker.full_name} />

@@ -394,7 +394,7 @@ export default async function InternalHomePage() {
           </header>
 
           {overview.operations.length === 0 ? (
-            <section className="mt-4 border-y border-dashed border-border-strong px-4 py-8 text-center">
+            <section className="mt-4 rounded-card bg-surface px-4 py-8 text-center shadow-card">
               <h3 className="font-medium">
                 Nenhuma operação ativa
               </h3>

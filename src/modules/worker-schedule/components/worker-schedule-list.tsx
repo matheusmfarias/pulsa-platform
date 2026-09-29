@@ -4,7 +4,7 @@ import { WorkerScheduleCard } from "./worker-schedule-card";
 export function WorkerScheduleList({ entries }: { entries: WorkerScheduleEntry[] }) {
   if (entries.length === 0) {
     return (
-      <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+      <div className="rounded-card bg-surface p-6 text-sm text-muted-foreground shadow-card">
         Nenhuma jornada nesta semana.
       </div>
     );

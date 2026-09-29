@@ -95,9 +95,9 @@ export default async function PresencesPage({
           <section className="mt-6" aria-label="Navegação por dia"><PresenceDayNavigation date={parsedDate.data} key={parsedDate.data} today={today} /></section>
           <PresenceDayLoadingRegion>
             <section aria-label="Resumo do dia">
-              <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-surface border border-border-default bg-border-default md:grid-cols-5">
+              <dl className="grid grid-cols-2 gap-3 md:grid-cols-5">
                 {counts.map(([label, value]) => (
-                  <div className="bg-surface px-4 py-3 last:col-span-2 md:last:col-span-1" key={label}>
+                  <div className="rounded-card bg-surface px-4 py-3 shadow-card last:col-span-2 md:last:col-span-1" key={label}>
                     <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
                     <dd className="mt-1 text-xl font-semibold tabular-nums">{value}</dd>
                   </div>
@@ -115,7 +115,7 @@ export default async function PresencesPage({
             ) : null}
             <section className="mt-6" aria-labelledby="presence-list-title">
               <div><h2 className="font-semibold" id="presence-list-title">Acompanhamento do dia</h2><p className="mt-1 text-sm text-muted-foreground">Confira quem é esperado em cada jornada e acompanhe chegada e saída.</p></div>
-              {rows.length ? <PresenceOperationalTable capabilities={capabilities} rows={rows} /> : <div className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-10 text-center"><h3 className="font-medium">Nenhuma entrada programada</h3><p className="mt-2 text-sm text-muted-foreground">Não há trabalho planejado para esta data e contexto operacional.</p></div>}
+              {rows.length ? <PresenceOperationalTable capabilities={capabilities} rows={rows} /> : <div className="mt-4 rounded-card bg-surface px-6 py-10 text-center shadow-card"><h3 className="font-medium">Nenhuma entrada programada</h3><p className="mt-2 text-sm text-muted-foreground">Não há trabalho planejado para esta data e contexto operacional.</p></div>}
             </section>
             <RoutePerformanceDiagnostics enabledByQuery={params.perf === "1"} resultCount={rows.length} route="Presença" serverStages={serverStages} />
           </PresenceDayLoadingRegion>

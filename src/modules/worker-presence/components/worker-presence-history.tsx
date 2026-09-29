@@ -30,7 +30,7 @@ export function WorkerPresenceHistory({
 }) {
   if (page.entries.length === 0) {
     return (
-      <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+      <div className="rounded-card bg-surface p-6 text-sm text-muted-foreground shadow-card">
         Você ainda não possui jornadas realizadas.
       </div>
     );
@@ -40,7 +40,7 @@ export function WorkerPresenceHistory({
     <div className="space-y-4">
       {page.entries.map((entry) => (
         <article
-          className="rounded-xl border bg-card p-5 shadow-sm"
+          className="rounded-card bg-surface p-5 shadow-card"
           key={`${entry.scheduleEntryId}-${entry.arrivedAt}`}
         >
           <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
