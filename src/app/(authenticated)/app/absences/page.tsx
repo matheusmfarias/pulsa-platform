@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
-import { RoutePerformanceDiagnostics, type RouteServerStage } from "@/shared/performance/route-performance-diagnostics";
+import { RoutePerformanceDiagnostics } from "@/shared/performance/route-performance-diagnostics";
+import type { RouteServerStage } from "@/shared/performance/layout-performance-stages";
 
 export default async function AbsencesPage({ searchParams }: PageProps<"/app/absences">) {
   const params = await searchParams;

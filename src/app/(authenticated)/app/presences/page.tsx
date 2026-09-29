@@ -15,7 +15,8 @@ import {
 import { PresenceDayNavigation } from "@/modules/presences/components/presence-day-navigation";
 import { PresenceOperationalTable } from "@/modules/presences/components/presence-operational-table";
 import { toPublicErrorMessage } from "@/shared/errors";
-import { RoutePerformanceDiagnostics, type RouteServerStage } from "@/shared/performance/route-performance-diagnostics";
+import { RoutePerformanceDiagnostics } from "@/shared/performance/route-performance-diagnostics";
+import type { RouteServerStage } from "@/shared/performance/layout-performance-stages";
 
 function currentDate() {
   return new Intl.DateTimeFormat("en-CA", {

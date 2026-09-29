@@ -3,7 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 
-export type RouteServerStage = { label: string; durationMs: number };
+import { useLayoutPerformanceStages, type RouteServerStage } from "./layout-performance-stages";
 
 type Props = {
   enabledByQuery: boolean;
@@ -89,6 +89,7 @@ export function RoutePerformanceDiagnostics({
   serverStages,
 }: Props) {
   const pathname = usePathname();
+  const layoutStages = useLayoutPerformanceStages();
   const enabledInSession = useSyncExternalStore(subscribeToDiagnostics, diagnosticsSnapshot, serverSnapshot);
   const transition = useSyncExternalStore(subscribeToTransition, transitionSnapshot, () => null);
 
@@ -131,7 +132,7 @@ export function RoutePerformanceDiagnostics({
         <section aria-label="Etapas no servidor">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Servidor</h3>
           <dl className="mt-2 space-y-2">
-            {serverStages.map((stage) => (
+            {[...layoutStages, ...serverStages].map((stage) => (
               <div className="flex items-center justify-between gap-4" key={stage.label}>
                 <dt>{stage.label}</dt>
                 <dd className="font-mono tabular-nums">{stage.durationMs} ms</dd>
