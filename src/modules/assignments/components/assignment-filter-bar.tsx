@@ -1,7 +1,7 @@
 "use client";
 
 import { LoaderCircle, Search, X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { ActiveFiltersSummary, ListFilterBar } from "@/components/layout/list";
@@ -14,6 +14,7 @@ import {
   type AssignmentStatus,
 } from "../domain/assignment";
 import type { AssignmentListFilters } from "../schemas/assignment-schemas";
+import { useAssignmentListNavigation } from "./assignment-list-navigation";
 
 type AssignmentStatusFilter = AssignmentStatus | "all";
 
@@ -41,9 +42,8 @@ export function AssignmentFilterBar({
 }: {
   filters: AssignmentListFilters;
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = React.useTransition();
+  const { isPending, navigate } = useAssignmentListNavigation();
   const appliedQuery = searchParams.get("q") ?? filters.query;
   const appliedStatus = readStatus(searchParams.get("status") ?? filters.status ?? null);
   const [queryDraft, setQueryDraft] = React.useState(appliedQuery);
@@ -72,13 +72,9 @@ export function AssignmentFilterBar({
       if (nextSearch === searchParams.toString()) return;
 
       expectedSearchRef.current = nextSearch;
-      startTransition(() => {
-        router.replace(nextSearch ? `/app/assignments?${nextSearch}` : "/app/assignments", {
-          scroll: false,
-        });
-      });
+      navigate(nextSearch ? `/app/assignments?${nextSearch}` : "/app/assignments", "replace");
     },
-    [router, searchParams],
+    [navigate, searchParams],
   );
 
   React.useEffect(() => {
