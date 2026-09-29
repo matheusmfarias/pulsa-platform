@@ -19,19 +19,19 @@ export async function findAuthenticatedUser(): Promise<{
   errorCode?: string;
 }> {
   const supabase = await createServerSupabaseClient();
-  const { data, error } = await measureServerStage(
-    "auth.server.get_user",
-    () => supabase.auth.getUser(),
+  const { data, error } = await measureServerStage("auth.server.get_claims", () =>
+    supabase.auth.getClaims(),
   );
 
-  if (error || !data.user) {
+  const claims = data?.claims;
+  if (error || !claims?.sub) {
     return { user: null, errorCode: error?.code };
   }
 
   return {
     user: {
-      id: data.user.id,
-      email: data.user.email ?? null,
+      id: claims.sub,
+      email: claims.email ?? null,
     },
   };
 }
