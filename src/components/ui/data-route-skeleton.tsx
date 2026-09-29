@@ -13,12 +13,15 @@ function Bone({ className = "" }: { className?: string }) {
   );
 }
 
-function PageHeading({ dashboard = false }: { dashboard?: boolean }) {
+function PageHeading({ dashboard = false, action = false }: { dashboard?: boolean; action?: boolean }) {
   return (
-    <header className={dashboard ? "rounded-card bg-surface px-5 py-5 shadow-card sm:px-7 sm:py-6" : ""}>
-      <Bone className="h-3 w-28" />
-      <Bone className="mt-3 h-7 w-52 max-w-full" />
-      <Bone className="mt-2 h-4 w-72 max-w-full" />
+    <header className={`flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${dashboard ? "rounded-card bg-surface px-5 py-5 shadow-card sm:px-7 sm:py-6" : ""}`}>
+      <div>
+        <Bone className="h-3 w-28" />
+        <Bone className="mt-3 h-7 w-52 max-w-full" />
+        <Bone className="mt-2 h-4 w-72 max-w-full" />
+      </div>
+      {action ? <Bone className="h-10 w-36" /> : null}
     </header>
   );
 }
@@ -146,12 +149,12 @@ function CollectionData({ label }: { label: string }) {
     return <div className="mt-6"><CollectionHeader label={label} /><TableRows columns={5} /></div>;
   }
 
-  if (["cliente", "cargo", "posto", "alocação"].some((term) => normalized.includes(term))) {
-    const columns = normalized.includes("alocação") ? 6 : normalized.includes("posto") ? 7 : 5;
+  if (["cliente", "cargo", "posto", "aloc"].some((term) => normalized.includes(term))) {
+    const columns = normalized.includes("aloc") ? 6 : normalized.includes("posto") ? 7 : 5;
     return <><FilterBar /><CollectionHeader label={label} /><TableRows columns={columns} /></>;
   }
 
-  const columns = normalized.includes("unidade") ? 8 : normalized.includes("operação") ? 6 : normalized.includes("contrato") ? 5 : 5;
+  const columns = normalized.includes("unidade") ? 8 : normalized.includes("opera") ? 6 : normalized.includes("contrato") ? 5 : 5;
   return <div className="mt-6"><CollectionHeader label={label} /><TableRows columns={columns} /></div>;
 }
 
@@ -300,7 +303,9 @@ export function DataRouteSkeleton({ kind, label, scope = "core" }: { kind: Skele
     return <div className="fixed inset-0 z-50 flex justify-end bg-foreground/30"><section aria-busy="true" aria-label={label} className="h-full w-full max-w-2xl overflow-y-auto bg-canvas p-5 shadow-card sm:p-8" role="status"><span className="sr-only">{label}…</span><div className="mb-6 flex items-center justify-between"><Bone className="h-4 w-32" /><Bone className="size-9 rounded-full" /></div><FormData label={label} /></section></div>;
   }
 
-  return <PageShell className="py-7 sm:py-8"><ContentContainer size={kind === "detail" || kind === "schedule" ? "detail-wide" : kind === "form" ? "form" : "list"}><div aria-busy="true" aria-label={label} role="status"><span className="sr-only">{label}…</span>{kind === "dashboard" ? <><PageHeading dashboard />{content}</> : <><PageHeading />{content}</>}</div></ContentContainer></PageShell>;
+  const normalizedLabel = label.toLocaleLowerCase("pt-BR");
+  const hasHeaderAction = kind === "detail" || kind === "schedule" || (kind === "collection" && !["presença", "ausência", "auditoria"].some((term) => normalizedLabel.includes(term)));
+  return <PageShell className="py-7 sm:py-8"><ContentContainer size={kind === "detail" || kind === "schedule" ? "detail-wide" : kind === "form" ? "form" : "list"}><div aria-busy="true" aria-label={label} role="status"><span className="sr-only">{label}…</span>{kind === "dashboard" ? <><PageHeading dashboard />{content}</> : <><PageHeading action={hasHeaderAction} />{content}</>}</div></ContentContainer></PageShell>;
 }
 
 export function createDataRouteLoading(kind: SkeletonKind, label: string, scope: SkeletonScope = "core") {
