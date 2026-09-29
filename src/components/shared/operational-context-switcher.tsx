@@ -5,7 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { Input } from "@/components/ui/input";
-import { setOperationalContextAction } from "@/modules/operational-context/actions";
+import {
+  loadOperationalContextOptionsAction,
+  setOperationalContextAction,
+} from "@/modules/operational-context/actions";
 import {
   safePathAfterOperationalContextChange,
   type OperationalContext,
@@ -98,6 +101,8 @@ export function OperationalContextSwitcher({
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [options, setOptions] = useState(state.options);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
   const [isPending, startTransition] = useTransition();
 
@@ -107,7 +112,7 @@ export function OperationalContextSwitcher({
     state.context.type === "all" ? null : state.context.clientId;
 
   const selectedClient = selectedClientId
-    ? (state.options.find((client) => client.id === selectedClientId) ?? null)
+    ? (options.find((client) => client.id === selectedClientId) ?? null)
     : null;
 
   const title = selectedClient?.name ?? "Todos os clientes";
@@ -120,12 +125,12 @@ export function OperationalContextSwitcher({
   const visibleOptions = useMemo(() => {
     const term = normalizeSearch(query.trim());
 
-    if (!term) return state.options;
+    if (!term) return options;
 
-    return state.options.filter((client) =>
+    return options.filter((client) =>
       normalizeSearch(client.name).includes(term),
     );
-  }, [query, state.options]);
+  }, [query, options]);
 
   function closeSwitcher({
     restoreFocus = false,
@@ -171,20 +176,25 @@ export function OperationalContextSwitcher({
 
   function toggleSwitcher() {
     setMessage(null);
+    const next = !isOpen;
+    setIsOpen(next);
 
-    setIsOpen((open) => {
-      const next = !open;
-
-      if (next) {
-        requestAnimationFrame(() => {
-          searchInputRef.current?.focus();
-        });
-      } else {
-        setQuery("");
+    if (next) {
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
+      if (!isLoadingOptions) {
+        setIsLoadingOptions(true);
+        void loadOperationalContextOptionsAction()
+          .then(setOptions)
+          .catch(() => {
+            setMessage("Não foi possível carregar os clientes. Tente novamente.");
+          })
+          .finally(() => setIsLoadingOptions(false));
       }
-
-      return next;
-    });
+    } else {
+      setQuery("");
+    }
   }
 
   function selectContext(context: OperationalContext) {
@@ -322,6 +332,12 @@ export function OperationalContextSwitcher({
               <div className="my-2 h-px bg-border" />
             ) : null}
 
+            {isLoadingOptions ? (
+              <p className="px-3 py-4 text-center text-sm text-muted-foreground" role="status">
+                Carregando clientes…
+              </p>
+            ) : null}
+
             {visibleOptions.map((client) => (
               <ContextOption
                 key={client.id}
@@ -337,9 +353,14 @@ export function OperationalContextSwitcher({
               />
             ))}
 
-            {visibleOptions.length === 0 && query ? (
+            {!isLoadingOptions && visibleOptions.length === 0 && query ? (
               <p className="px-3 py-8 text-center text-sm leading-6 text-muted-foreground">
                 Nenhum cliente encontrado.
+              </p>
+            ) : null}
+            {!isLoadingOptions && visibleOptions.length === 0 && !query ? (
+              <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+                Nenhum cliente cadastrado.
               </p>
             ) : null}
           </div>

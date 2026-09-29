@@ -16,6 +16,10 @@ export type SetOperationalContextResult =
   | { ok: true }
   | { ok: false; message: string };
 
+export async function loadOperationalContextOptionsAction() {
+  return listOperationalContextOptions();
+}
+
 export async function setOperationalContextAction(
   input: unknown,
 ): Promise<SetOperationalContextResult> {

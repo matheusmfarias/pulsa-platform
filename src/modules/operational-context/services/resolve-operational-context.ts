@@ -53,13 +53,13 @@ export async function listOperationalContextOptions(): Promise<
 }
 
 async function resolveOperationalContextUncached(): Promise<OperationalContextState> {
-  const [cookieStore, options] = await Promise.all([
-    cookies(),
-    listOperationalContextOptions(),
-  ]);
+  const cookieStore = await cookies();
   const requested = parseOperationalContextCookie(
     cookieStore.get(OPERATIONAL_CONTEXT_COOKIE)?.value,
   );
+  const options =
+    requested.type === "all" ? [] : await listOperationalContextOptions();
+
   return {
     context: resolveOperationalContextSelection(requested, options),
     options,

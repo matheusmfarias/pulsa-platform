@@ -6,6 +6,7 @@ import { findOperationalContextOptions } from "@/modules/operational-context/rep
 import {
   getOperationalContextSelection,
   listOperationalContextOptions,
+  resolveOperationalContext,
 } from "@/modules/operational-context/services/resolve-operational-context";
 
 vi.mock("next/headers", () => ({ cookies: vi.fn() }));
@@ -68,5 +69,47 @@ describe("getOperationalContextSelection", () => {
 
     await expect(getOperationalContextSelection()).resolves.toEqual({ type: "all" });
     expect(findOperationalContextOptions).not.toHaveBeenCalled();
+  });
+});
+
+describe("resolveOperationalContext", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: "all" }),
+    } as never);
+  });
+
+  it("does not fetch client and contract options for the default all-clients context", async () => {
+    await expect(resolveOperationalContext()).resolves.toEqual({
+      context: { type: "all" },
+      options: [],
+    });
+    expect(findOperationalContextOptions).not.toHaveBeenCalled();
+  });
+
+  it("continues validating a selected client against its organization options", async () => {
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({
+        value: "client:00000000-0000-4000-8000-000000000101",
+      }),
+    } as never);
+    vi.mocked(findOperationalContextOptions).mockResolvedValue({
+      data: [{
+        id: "00000000-0000-4000-8000-000000000101",
+        trade_name: "Cliente de teste",
+        status: "active",
+        contracts: [],
+      }],
+      error: null,
+    } as never);
+
+    await expect(resolveOperationalContext()).resolves.toMatchObject({
+      context: {
+        type: "client",
+        clientId: "00000000-0000-4000-8000-000000000101",
+      },
+    });
+    expect(findOperationalContextOptions).toHaveBeenCalledOnce();
   });
 });
