@@ -15,6 +15,7 @@ import {
 import { PresenceDayNavigation } from "@/modules/presences/components/presence-day-navigation";
 import { PresenceOperationalTable } from "@/modules/presences/components/presence-operational-table";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { RoutePerformanceDiagnostics, type RouteServerStage } from "@/shared/performance/route-performance-diagnostics";
 
 function currentDate() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -29,6 +30,11 @@ export default async function PresencesPage({
   searchParams,
 }: PageProps<"/app/presences">) {
   await connection();
+  const params = await searchParams;
+  const serverStages: RouteServerStage[] = [];
+  // Server Components use request-local elapsed time to expose data-stage timings.
+  // eslint-disable-next-line react-hooks/purity
+  const preparationStartedAt = performance.now();
   const today = currentDate();
   const requestedDate = (await searchParams).date;
   const parsedDate = presenceOperationalDateSchema.safeParse(
@@ -48,7 +54,13 @@ export default async function PresencesPage({
       getOperationalContextSelection(),
       getAuthorizationContext(),
     ]);
+    // eslint-disable-next-line react-hooks/purity
+    serverStages.push({ label: "Contexto e permissões", durationMs: Math.round(performance.now() - preparationStartedAt) });
+    // eslint-disable-next-line react-hooks/purity
+    const queryStartedAt = performance.now();
     rows = await listPresenceOperationalDay(parsedDate.data, context);
+    // eslint-disable-next-line react-hooks/purity
+    serverStages.push({ label: "Consulta de jornadas e presenças", durationMs: Math.round(performance.now() - queryStartedAt) });
     authorization = resolvedAuthorization;
   } catch (error) {
     return (
@@ -98,6 +110,7 @@ export default async function PresencesPage({
           <div><h2 className="font-semibold" id="presence-list-title">Acompanhamento do dia</h2><p className="mt-1 text-sm text-muted-foreground">Confira quem é esperado em cada jornada e acompanhe chegada e saída.</p></div>
           {rows.length ? <PresenceOperationalTable capabilities={capabilities} rows={rows} /> : <div className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-10 text-center"><h3 className="font-medium">Nenhuma entrada programada</h3><p className="mt-2 text-sm text-muted-foreground">Não há trabalho planejado para esta data e contexto operacional.</p></div>}
         </section>
+        <RoutePerformanceDiagnostics enabledByQuery={params.perf === "1"} resultCount={rows.length} route="Presença" serverStages={serverStages} />
       </ContentContainer>
     </PageShell>
   );

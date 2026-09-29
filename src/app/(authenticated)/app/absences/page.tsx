@@ -6,14 +6,26 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { RoutePerformanceDiagnostics, type RouteServerStage } from "@/shared/performance/route-performance-diagnostics";
 
 export default async function AbsencesPage({ searchParams }: PageProps<"/app/absences">) {
+  const params = await searchParams;
+  const serverStages: RouteServerStage[] = [];
+  // Server Components use request-local elapsed time to expose data-stage timings.
+  // eslint-disable-next-line react-hooks/purity
+  const preparationStartedAt = performance.now();
   let absences;
   let withoutCoverage = false;
   try {
     const context = await getOperationalContextSelection();
-    withoutCoverage = (await searchParams).coverage === "uncovered";
+    // eslint-disable-next-line react-hooks/purity
+    serverStages.push({ label: "Contexto operacional", durationMs: Math.round(performance.now() - preparationStartedAt) });
+    withoutCoverage = params.coverage === "uncovered";
+    // eslint-disable-next-line react-hooks/purity
+    const queryStartedAt = performance.now();
     absences = await listAbsences(context, { withoutCoverage });
+    // eslint-disable-next-line react-hooks/purity
+    serverStages.push({ label: "Consulta de ausências", durationMs: Math.round(performance.now() - queryStartedAt) });
   } catch (error) {
     return (
       <PageShell>
@@ -68,6 +80,7 @@ export default async function AbsencesPage({ searchParams }: PageProps<"/app/abs
             </section>
           )}
         </div>
+        <RoutePerformanceDiagnostics enabledByQuery={params.perf === "1"} resultCount={absences.length} route="Ausências" serverStages={serverStages} />
       </ContentContainer>
     </PageShell>
   );
