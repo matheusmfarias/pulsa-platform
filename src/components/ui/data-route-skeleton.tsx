@@ -87,8 +87,9 @@ function FilterBar({ type = "search" }: { type?: "search" | "chips" | "audit" })
   );
 }
 
-function TableRows({ columns, rows = 6, compact = false }: { columns: number; rows?: number; compact?: boolean }) {
+function TableRows({ columns, rows = 6, compact = false, mobileRows, mobileDetails = compact ? 1 : 2 }: { columns: number; rows?: number; compact?: boolean; mobileRows?: number; mobileDetails?: number }) {
   const columnStyle = { "--skeleton-columns": `repeat(${columns}, minmax(0, 1fr))` } as CSSProperties;
+  const mobileDetailWidths = ["w-3/4", "w-1/2", "w-2/3"];
   return (
     <div className="overflow-hidden rounded-card bg-surface shadow-card">
       <div aria-hidden="true" className={`hidden min-h-10 items-center gap-5 bg-subtle/45 px-4 sm:grid sm:px-5`} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
@@ -96,13 +97,10 @@ function TableRows({ columns, rows = 6, compact = false }: { columns: number; ro
       </div>
       <div className="divide-y divide-border-default/70">
         {Array.from({ length: rows }, (_, row) => (
-          <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 sm:grid-cols-[var(--skeleton-columns)] sm:gap-5 sm:px-5" key={row} style={columnStyle}>
+          <div className={`grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 sm:grid-cols-[var(--skeleton-columns)] sm:gap-5 sm:px-5 ${mobileRows !== undefined && row >= mobileRows ? "hidden sm:grid" : ""}`} key={row} style={columnStyle}>
             <div className="min-w-0">
               <Bone className={`h-4 ${row % 2 ? "w-2/3" : "w-4/5"}`} />
-              <div className="mt-2 space-y-1.5 sm:hidden">
-                <Bone className="h-3 w-3/4" />
-                {!compact && <Bone className="h-3 w-1/2" />}
-              </div>
+              <div className="mt-2 space-y-1.5 sm:hidden">{mobileDetailWidths.slice(0, mobileDetails).map((width, index) => <Bone className={`h-3 ${width}`} key={index} />)}</div>
             </div>
             <Bone className="h-5 w-16" />
             <div className="hidden min-w-0 sm:contents">
@@ -143,8 +141,7 @@ function CollectionData({ label }: { label: string }) {
       <section className="mt-6 overflow-hidden rounded-card bg-surface shadow-card">
         <div className="grid gap-3 p-3 sm:grid-cols-[minmax(0,1fr)_12rem] sm:p-4"><Bone className="h-10 w-full" /><Bone className="h-10 w-full" /></div>
         <ResultSummary />
-        <div className="border-t border-border-default/80"><TableRows columns={6} /></div>
-        <PaginationFooter />
+        <div className="border-t border-border-default/80"><TableRows columns={6} rows={4} mobileRows={3} mobileDetails={3} /></div>
       </section>
     );
   }
