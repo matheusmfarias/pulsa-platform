@@ -10,7 +10,7 @@ export function TableFrame({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-surface border border-border-default bg-surface",
+        "overflow-hidden rounded-card border border-border-default/80 bg-surface shadow-card",
         className,
       )}
       {...props}
