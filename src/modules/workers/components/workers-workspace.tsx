@@ -88,34 +88,18 @@ function WorkersResultsLoading() {
         </div>
       </div>
       <div className="border-t border-border-default">
-        <div aria-hidden="true" className="grid min-h-10 grid-cols-[minmax(0,1fr)_5rem_2rem] items-center gap-3 bg-subtle/45 px-3 sm:grid-cols-[2fr_1fr_1.5fr_1.5fr_1fr_auto] sm:gap-6 sm:px-5">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="h-3 w-12 sm:hidden" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-5 justify-self-end sm:block" />
-        </div>
+        <Skeleton className="h-10 w-full rounded-none" />
         <div className="divide-y divide-border-default/80">
-          {Array.from({ length: 4 }).map((_, index) => (
+          {Array.from({ length: 6 }).map((_, index) => (
             <div
-              className={`grid min-h-14 grid-cols-[minmax(0,1fr)_5rem_2rem] items-center gap-3 px-3 py-2.5 sm:grid-cols-[2fr_1fr_1.5fr_1.5fr_1fr_auto] sm:gap-6 sm:px-5 ${index === 3 ? "hidden sm:grid" : ""}`}
+              className="grid min-h-14 grid-cols-[2fr_1fr_1.5fr_1.5fr_1fr] items-center gap-6 px-4 py-3"
               key={index}
             >
-              <div className="min-w-0">
-                <Skeleton className="h-4 w-4/5" />
-                <div className="mt-1.5 space-y-1 sm:hidden">
-                  <Skeleton className="h-3 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                  <Skeleton className="h-3 w-2/3" />
-                </div>
-              </div>
               <Skeleton className="h-4 w-full" />
-              <Skeleton className="hidden h-4 w-full sm:block" />
-              <Skeleton className="hidden h-4 w-full sm:block" />
-              <Skeleton className="hidden h-5 w-16 sm:block" />
-              <Skeleton className="h-5 w-5 justify-self-end" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-5 w-16" />
             </div>
           ))}
         </div>
