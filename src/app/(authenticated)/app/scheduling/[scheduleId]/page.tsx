@@ -12,6 +12,7 @@ import { listAssignmentsForOperation, type AssignmentWithContext } from "@/modul
 import { getOperationById } from "@/modules/operations";
 import { canRegisterAbsenceOnRevision, getSchedule, getScheduleRevisionWithEntries, listScheduleRevisions, resolveScheduleWeekStart, scheduleIdSchema, ScheduleRevisionActions, ScheduleStatusBadge, ScheduleWeekEditor, ScheduleWorkerView, selectOfficialPublishedRevision, selectScheduleRevision, scheduleWeekDays } from "@/modules/scheduling";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
+import { logger } from "@/shared/logging";
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -49,11 +50,16 @@ export default async function ScheduleDetailsPage({ params, searchParams }: Page
   const permissions = new Set(ROLE_PERMISSIONS[authorization.role]);
   const actorNames = new Map<string, string>();
   if (authorization.role === "DIRECTOR") {
-    const members = await listOrganizationMembers();
-    for (const member of members) {
-      if (member.profile?.display_name) {
-        actorNames.set(member.profile_id, member.profile.display_name);
+    try {
+      const members = await listOrganizationMembers();
+      for (const member of members) {
+        if (member.profile?.display_name) {
+          actorNames.set(member.profile_id, member.profile.display_name);
+        }
       }
+    } catch {
+      // Actor names are supplemental audit context; they must not block schedule operations.
+      logger.error({ event: "scheduling.actor_names_failed" });
     }
   }
   const actorLabel = (userId: string | null) => {
