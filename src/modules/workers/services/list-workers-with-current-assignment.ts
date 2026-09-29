@@ -6,6 +6,7 @@ import type { OperationalContext } from "@/modules/operational-context";
 
 import type { WorkerListFilters } from "../schemas/worker-schemas";
 import type { Worker } from "../domain/worker";
+import { WORKER_LIST_PAGE_SIZE, type WorkerListPageSize } from "../domain/worker-list-pagination";
 import { requirePermission } from "@/modules/authorization";
 import { parseWorker } from "../domain/worker";
 import { findWorkers } from "../repositories/worker-repository";
@@ -14,10 +15,6 @@ import { throwWorkerRepositoryError } from "./repository-errors";
 export type WorkerWithCurrentAssignment = Worker & {
   currentAssignment: AssignmentWithContext | null;
 };
-
-export const WORKER_LIST_PAGE_SIZES = [10, 25, 50] as const;
-export type WorkerListPageSize = (typeof WORKER_LIST_PAGE_SIZES)[number];
-export const WORKER_LIST_PAGE_SIZE: WorkerListPageSize = 10;
 
 export async function listWorkersPageWithCurrentAssignment(
   filters: WorkerListFilters,

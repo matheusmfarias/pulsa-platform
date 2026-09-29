@@ -13,7 +13,8 @@ import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 
 import type { WorkerListFilters } from "../schemas/worker-schemas";
-import { listWorkersPageWithCurrentAssignment, type WorkerListPageSize } from "../services/list-workers-with-current-assignment";
+import { listWorkersPageWithCurrentAssignment } from "../services/list-workers-with-current-assignment";
+import type { WorkerListPageSize } from "../domain/worker-list-pagination";
 import { WorkerFilterBar } from "./worker-filter-bar";
 import { WorkerCreateSuccessToast } from "./worker-create-success-toast";
 import { hasActiveWorkerFilters, workerListHref } from "./worker-list-filters";

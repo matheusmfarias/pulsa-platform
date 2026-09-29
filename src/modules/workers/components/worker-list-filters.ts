@@ -1,6 +1,7 @@
 import type { WorkerListFilters } from "../schemas/worker-schemas";
 import { workerListFiltersSchema } from "../schemas/worker-schemas";
-import { WORKER_LIST_PAGE_SIZE, WORKER_LIST_PAGE_SIZES, type WorkerListPageSize } from "../services/list-workers-with-current-assignment";
+import { WORKER_LIST_PAGE_SIZE, WORKER_LIST_PAGE_SIZES, type WorkerListPageSize } from "../domain/worker-list-pagination";
+export { WORKER_LIST_PAGE_SIZE, WORKER_LIST_PAGE_SIZES, type WorkerListPageSize } from "../domain/worker-list-pagination";
 
 export type WorkerListSearchParams = {
   q?: string | string[];

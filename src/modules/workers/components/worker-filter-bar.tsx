@@ -18,7 +18,7 @@ import {
   WORKER_STATUS_LABELS,
   type WorkerStatus,
 } from "../domain/worker";
-import type { WorkerListPageSize } from "../services/list-workers-with-current-assignment";
+import type { WorkerListPageSize } from "../domain/worker-list-pagination";
 import { parseWorkerListSearchParams, workerListHref } from "./worker-list-filters";
 
 type WorkerStatusFilter = WorkerStatus | "all";
