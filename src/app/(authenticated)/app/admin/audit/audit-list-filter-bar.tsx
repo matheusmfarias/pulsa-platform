@@ -9,7 +9,13 @@ import { ListPendingSurface, useListNavigation } from "@/components/layout/list-
 import { Button } from "@/components/ui/button";
 import { FilterSelect, type FilterSelectOption } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
-import { AUDIT_ACTION_LABELS, AUDIT_ENTITY_LABELS, type AuditAction, type AuditEntityType, type AuditListFilters } from "@/modules/administration";
+import {
+  AUDIT_ACTION_LABELS,
+  AUDIT_ENTITY_LABELS,
+  type AuditAction,
+  type AuditEntityType,
+} from "@/modules/administration/domain/audit-event";
+import type { AuditListFilters } from "@/modules/administration/schemas/administration-schemas";
 
 const entityOptions: FilterSelectOption<string>[] = [
   { label: "Todas", value: "all" },
