@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { ActiveFilters } from "@/components/layout/list";
-import { ListPendingSurface, useListNavigation } from "@/components/layout/list-navigation";
+import { useListNavigation } from "@/components/layout/list-navigation";
 import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/filter-chip";
 import {
@@ -189,9 +189,7 @@ export function WorkerFilterBar({ children, pageSize }: { children: React.ReactN
         ) : null}
       </div>
 
-      <ListPendingSurface className="border-t border-border-default/80">
-        {children}
-      </ListPendingSurface>
+      <div className="border-t border-border-default/80">{children}</div>
     </section>
   );
 }

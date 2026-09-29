@@ -63,14 +63,15 @@ export default async function AbsencesPage({ searchParams }: PageProps<"/app/abs
               <Link aria-current={withoutCoverage ? "page" : undefined} href="/app/absences?coverage=uncovered">Sem cobertura</Link>
             </Button>
           </nav>
-          <ListPendingSurface>
           <p className="text-sm text-muted-foreground">
             <span className="font-medium tabular-nums text-foreground">{absences.length}</span>{" "}
             {absences.length === 1 ? "ausência encontrada" : "ausências encontradas"}
             {withoutCoverage ? " sem cobertura" : ""}
           </p>
           {absences.length ? (
-            <AbsenceTable absences={absences} />
+            <ListPendingSurface>
+              <AbsenceTable absences={absences} />
+            </ListPendingSurface>
           ) : (
             <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
               <h2 className="font-medium">
@@ -83,7 +84,6 @@ export default async function AbsencesPage({ searchParams }: PageProps<"/app/abs
               </p>
             </section>
           )}
-          </ListPendingSurface>
         </div>
         </ListNavigationProvider>
         <RoutePerformanceDiagnostics enabledByQuery={params.perf === "1"} resultCount={absences.length} route="Ausências" serverStages={serverStages} />

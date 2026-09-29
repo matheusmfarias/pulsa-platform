@@ -6,7 +6,7 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { ListPagination } from "@/components/layout/list-pagination";
-import { ListNavigationProvider } from "@/components/layout/list-navigation";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -138,6 +138,7 @@ export default async function AdministrationAuditPage({
             </p>
           </section>
         ) : (
+          <ListPendingSurface>
           <section className="mt-4 overflow-hidden rounded-card bg-surface shadow-card">
             <ul className="divide-y divide-border-default md:hidden">
               {events.map(({ event, summary }) => (
@@ -220,6 +221,7 @@ export default async function AdministrationAuditPage({
               total={result.total}
             />
           </section>
+          </ListPendingSurface>
         )}
         </AuditListFilterBar>
       </ContentContainer>

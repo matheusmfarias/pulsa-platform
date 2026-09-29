@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { FilterSelect, type FilterSelectOption } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 
-import { ListPendingSurface, useListNavigation } from "./list-navigation";
+import { useListNavigation } from "./list-navigation";
 
 const SEARCH_DEBOUNCE_MS = 350;
 
@@ -114,7 +114,7 @@ export function SearchStatusList({
             <ActiveFiltersSummary className="min-w-0 flex-1 border-0 pt-0">
               <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
               {[
-                queryDraft.trim() ? `${queryLabel.replace(/^Buscar\s+/i, "")}: ${queryDraft.trim()}` : null,
+                queryDraft.trim() ? `Busca: ${queryDraft.trim()}` : null,
                 statusDraft !== "all" ? `Status: ${selectedStatus?.label ?? statusDraft}` : null,
               ].filter(Boolean).join(" · ")}
             </ActiveFiltersSummary>
@@ -124,7 +124,7 @@ export function SearchStatusList({
           </div>
         ) : null}
       </ListFilterBar>
-      <ListPendingSurface className="mt-5 sm:mt-6">{children}</ListPendingSurface>
+      <div className="mt-5 sm:mt-6">{children}</div>
     </>
   );
 }

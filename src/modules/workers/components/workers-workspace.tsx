@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { ListEmptyState, ListResultSummary } from "@/components/layout/list";
 import { ListPagination } from "@/components/layout/list-pagination";
-import { ListNavigationProvider } from "@/components/layout/list-navigation";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -188,7 +188,11 @@ async function WorkersResults({
                 </Link>
               </Button>
             </div>
-          ) : <WorkerTable workers={workers} />}
+          ) : (
+            <ListPendingSurface>
+              <WorkerTable workers={workers} />
+            </ListPendingSurface>
+          )}
           <ListPagination
             currentPage={result.page}
             getHref={(targetPage) => workerListHref("/app/workers", filters, targetPage, pageSize)}

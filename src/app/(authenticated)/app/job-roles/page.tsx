@@ -9,7 +9,7 @@ import {
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
-import { ListNavigationProvider } from "@/components/layout/list-navigation";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { PermissionGate } from "@/modules/authorization";
 import {
   JobRoleFilterBar,
@@ -113,7 +113,9 @@ export default async function JobRolesPage({
               </p>
             </section>
           ) : (
-            <JobRoleTable jobRoles={jobRoles} />
+            <ListPendingSurface>
+              <JobRoleTable jobRoles={jobRoles} />
+            </ListPendingSurface>
           )}
         </div>
         </JobRoleFilterBar>

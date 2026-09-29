@@ -6,7 +6,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { ListNavigationProvider } from "@/components/layout/list-navigation";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Button } from "@/components/ui/button";
 import { PermissionGate } from "@/modules/authorization";
@@ -116,7 +116,9 @@ export default async function PositionsPage({
               </p>
             </section>
           ) : (
-            <PositionTable positions={positions} />
+            <ListPendingSurface>
+              <PositionTable positions={positions} />
+            </ListPendingSurface>
           )}
         </div>
         </PositionFilterBar>

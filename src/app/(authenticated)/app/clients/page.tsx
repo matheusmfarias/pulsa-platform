@@ -6,7 +6,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
-import { ListNavigationProvider } from "@/components/layout/list-navigation";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
@@ -136,7 +136,9 @@ export default async function ClientsPage({
               </p>
             </section>
           ) : (
-            <ClientTable clients={clients} />
+            <ListPendingSurface>
+              <ClientTable clients={clients} />
+            </ListPendingSurface>
           )}
         </div>
         </ClientFilterBar>
