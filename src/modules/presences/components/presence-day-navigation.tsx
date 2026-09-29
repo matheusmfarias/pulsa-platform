@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { PresenceDateLoadingStatus, usePresenceDateTransition } from "@/modules/presences/components/presence-date-transition";
 
 const WEEKDAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const MONTHS = Array.from({ length: 12 }, (_, month) =>
@@ -59,22 +58,14 @@ function calendarDates(month: Date) {
   });
 }
 
-function calendarHref(date: string, preserveDiagnostics: boolean) {
-  const params = new URLSearchParams({ date });
-  if (preserveDiagnostics) params.set("perf", "1");
-  return `/app/presences?${params.toString()}`;
-}
-
 export function PresenceDayNavigation({
   date,
   today,
-  preserveDiagnostics = false,
 }: {
   date: string;
   today: string;
-  preserveDiagnostics?: boolean;
 }) {
-  const router = useRouter();
+  const { isPending, navigateToDate } = usePresenceDateTransition();
   const [open, setOpen] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(() => monthStart(parseCivilDate(date)));
   const [focusedDate, setFocusedDate] = useState(date);
@@ -119,11 +110,6 @@ export function PresenceDayNavigation({
     };
   }, [open]);
 
-  const navigateToDate = useCallback((nextDate: string) => {
-    setOpen(false);
-    router.push(calendarHref(nextDate, preserveDiagnostics), { scroll: false });
-  }, [preserveDiagnostics, router]);
-
   const moveFocus = (days: number) => {
     const nextDate = shiftPresenceDate(focusedDate, days);
     const next = parseCivilDate(nextDate);
@@ -143,14 +129,14 @@ export function PresenceDayNavigation({
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div aria-label="Navegação diária" className="inline-flex items-center gap-1 rounded-control border border-border-default bg-surface p-1">
-        <Button asChild aria-label="Dia anterior" size="icon" variant="ghost">
-          <Link href={calendarHref(shiftPresenceDate(date, -1), preserveDiagnostics)}><ChevronLeft aria-hidden="true" className="size-4" /></Link>
+        <Button aria-label="Dia anterior" disabled={isPending} onClick={() => navigateToDate(shiftPresenceDate(date, -1))} size="icon" type="button" variant="ghost">
+          <ChevronLeft aria-hidden="true" className="size-4" />
         </Button>
-        <Button asChild size="sm" variant={date === today ? "default" : "outline"}>
-          <Link href={calendarHref(today, preserveDiagnostics)}>Hoje</Link>
+        <Button disabled={isPending} onClick={() => navigateToDate(today)} size="sm" type="button" variant={date === today ? "default" : "outline"}>
+          Hoje
         </Button>
-        <Button asChild aria-label="Próximo dia" size="icon" variant="ghost">
-          <Link href={calendarHref(shiftPresenceDate(date, 1), preserveDiagnostics)}><ChevronRight aria-hidden="true" className="size-4" /></Link>
+        <Button aria-label="Próximo dia" disabled={isPending} onClick={() => navigateToDate(shiftPresenceDate(date, 1))} size="icon" type="button" variant="ghost">
+          <ChevronRight aria-hidden="true" className="size-4" />
         </Button>
       </div>
 
@@ -159,6 +145,7 @@ export function PresenceDayNavigation({
           aria-expanded={open}
           aria-haspopup="dialog"
           className="max-w-full justify-between gap-2"
+          disabled={isPending}
           onClick={() => setOpen((value) => !value)}
           ref={triggerRef}
           type="button"
@@ -238,7 +225,11 @@ export function PresenceDayNavigation({
                       aria-label={formatCivilDate(key)}
                       aria-pressed={isSelected}
                       className={`size-9 rounded-control text-sm tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${isSelected ? "bg-action-primary font-semibold text-primary-foreground" : "text-foreground hover:bg-hover"} ${!isCurrentMonth && !isSelected ? "text-muted-foreground/60" : ""} ${isToday && !isSelected ? "ring-1 ring-border-strong font-semibold" : ""}`}
-                      onClick={() => navigateToDate(key)}
+                      disabled={isPending}
+                      onClick={() => {
+                        setOpen(false);
+                        navigateToDate(key);
+                      }}
                       onFocus={() => setFocusedDate(key)}
                       onKeyDown={(event) => {
                         if (event.key === "ArrowLeft") { event.preventDefault(); moveFocus(-1); }
@@ -266,11 +257,15 @@ export function PresenceDayNavigation({
 
             <div className="mt-4 flex items-center justify-between border-t border-border-default pt-3">
               <p className="text-xs text-muted-foreground">Hoje: {new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone: "UTC" }).format(parseCivilDate(today))}</p>
-              <Button onClick={() => navigateToDate(today)} size="sm" type="button" variant="outline">Ir para hoje</Button>
+              <Button disabled={isPending} onClick={() => {
+                setOpen(false);
+                navigateToDate(today);
+              }} size="sm" type="button" variant="outline">Ir para hoje</Button>
             </div>
           </div>
         ) : null}
       </div>
+      <PresenceDateLoadingStatus />
     </div>
   );
 }

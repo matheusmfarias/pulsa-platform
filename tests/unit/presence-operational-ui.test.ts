@@ -20,6 +20,10 @@ const dayNavigation = readFileSync(
   resolve("src/modules/presences/components/presence-day-navigation.tsx"),
   "utf8",
 );
+const dateTransition = readFileSync(
+  resolve("src/modules/presences/components/presence-date-transition.tsx"),
+  "utf8",
+);
 
 describe("Supervisor operational Presence UI", () => {
   it("adds Presença to operational navigation and keeps context navigation safe", () => {
@@ -49,6 +53,16 @@ describe("Supervisor operational Presence UI", () => {
     expect(dayNavigation).toContain('role="grid"');
     expect(dayNavigation).toContain('aria-current={isToday ? "date" : undefined}');
     expect(dayNavigation).toContain('event.key === "ArrowDown"');
+  });
+
+  it("shows date-specific loading feedback only for the data region while navigating", () => {
+    expect(page).toContain("<PresenceDateTransitionProvider");
+    expect(page).toContain("<PresenceDayLoadingRegion>");
+    expect(dateTransition).toContain("Carregando presença de");
+    expect(dateTransition).toContain("aria-busy={isPending}");
+    expect(dateTransition).toContain("PresenceDaySkeleton");
+    expect(dayNavigation).toContain("<PresenceDateLoadingStatus />");
+    expect(dayNavigation).toContain("disabled={isPending}");
   });
 
   it("does not offer arrival for an uncovered Absence", () => {
