@@ -145,4 +145,22 @@ describe("Absence services", () => {
       limit: 3,
     });
   });
+
+  it("reports authorization, Supabase query, and result validation as separate stages", async () => {
+    vi.mocked(findAbsences).mockResolvedValue({
+      data: [absenceListItem],
+      error: null,
+    } as never);
+    const stages: Array<{ label: string; durationMs: number }> = [];
+
+    await expect(listAbsences(undefined, {}, (stage) => stages.push(stage)))
+      .resolves.toEqual([absenceListItem]);
+
+    expect(stages.map(({ label }) => label)).toEqual([
+      "Autorização de ausências",
+      "Consulta ao Supabase (ausências)",
+      "Validação dos registros de ausência",
+    ]);
+    expect(stages.every(({ durationMs }) => durationMs >= 0)).toBe(true);
+  });
 });

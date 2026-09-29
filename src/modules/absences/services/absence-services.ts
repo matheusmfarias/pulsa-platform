@@ -54,11 +54,35 @@ export async function getAbsenceById(id: unknown): Promise<Absence> {
 export async function listAbsences(
   operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
   options: { withoutCoverage?: boolean; limit?: number } = {},
+  onPerformanceStage?: (stage: { label: string; durationMs: number }) => void,
 ): Promise<AbsenceListItem[]> {
+  const permissionStartedAt = onPerformanceStage ? performance.now() : 0;
   const { organizationId } = await requirePermission("absence:read");
-  const { data, error } = await findAbsences(organizationId, operationalContext, options);
+  onPerformanceStage?.({
+    label: "Autorização de ausências",
+    durationMs: Math.round(performance.now() - permissionStartedAt),
+  });
+
+  const queryStartedAt = onPerformanceStage ? performance.now() : 0;
+  const { data, error } = await findAbsences(
+    organizationId,
+    operationalContext,
+    options,
+  );
   if (error) throwAbsenceRepositoryError(error, "list_absences");
-  return (data ?? []).map((row) => absenceListItemSchema.parse(row));
+
+  onPerformanceStage?.({
+    label: "Consulta ao Supabase (ausências)",
+    durationMs: Math.round(performance.now() - queryStartedAt),
+  });
+
+  const mappingStartedAt = onPerformanceStage ? performance.now() : 0;
+  const items = (data ?? []).map((row) => absenceListItemSchema.parse(row));
+  onPerformanceStage?.({
+    label: "Validação dos registros de ausência",
+    durationMs: Math.round(performance.now() - mappingStartedAt),
+  });
+  return items;
 }
 
 export async function getAbsenceDetailsById(

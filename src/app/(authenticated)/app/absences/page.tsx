@@ -22,11 +22,11 @@ export default async function AbsencesPage({ searchParams }: PageProps<"/app/abs
     // eslint-disable-next-line react-hooks/purity
     serverStages.push({ label: "Contexto operacional", durationMs: Math.round(performance.now() - preparationStartedAt) });
     withoutCoverage = params.coverage === "uncovered";
-    // eslint-disable-next-line react-hooks/purity
-    const queryStartedAt = performance.now();
-    absences = await listAbsences(context, { withoutCoverage });
-    // eslint-disable-next-line react-hooks/purity
-    serverStages.push({ label: "Consulta de ausências", durationMs: Math.round(performance.now() - queryStartedAt) });
+    absences = await listAbsences(
+      context,
+      { withoutCoverage },
+      params.perf === "1" ? (stage) => serverStages.push(stage) : undefined,
+    );
   } catch (error) {
     return (
       <PageShell>
