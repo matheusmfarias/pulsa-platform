@@ -4,18 +4,18 @@
   --brand-lime: oklch(0.82 0.12 119);
   --brand-mint: oklch(0.78 0.09 179);
   --brand-cyan: oklch(0.7 0.12 210);
-  --canvas: oklch(0.975 0.004 220);
+  --canvas: oklch(0.945 0.007 235);
   --surface: oklch(1 0 0);
-  --subtle: oklch(0.948 0.008 220);
-  --foreground-default: oklch(0.24 0.02 230);
-  --foreground-muted: oklch(0.49 0.024 230);
-  --border-default: oklch(0.885 0.012 220);
-  --border-strong: oklch(0.78 0.018 220);
-  --action-primary: oklch(0.33 0.07 188);
-  --action-primary-hover: oklch(0.28 0.065 188);
-  --action-primary-active: oklch(0.24 0.06 188);
-  --focus-ring: oklch(0.52 0.11 190);
-  --hover: oklch(0.94 0.012 190);
+  --subtle: oklch(0.97 0.005 235);
+  --foreground-default: oklch(0.2 0.015 235);
+  --foreground-muted: oklch(0.5 0.018 235);
+  --border-default: oklch(0.89 0.009 235);
+  --border-strong: oklch(0.79 0.015 235);
+  --action-primary: oklch(0.36 0.075 174);
+  --action-primary-hover: oklch(0.31 0.07 174);
+  --action-primary-active: oklch(0.27 0.065 174);
+  --focus-ring: oklch(0.49 0.1 174);
+  --hover: oklch(0.95 0.014 174);
 
   --status-success-foreground: oklch(0.44 0.11 155);
   --status-success-background: oklch(0.96 0.025 155);
@@ -33,16 +33,16 @@
   --status-neutral-background: var(--subtle);
   --status-neutral-border: var(--border-default);
 
-  --control-radius: 0.5rem;
-  --surface-radius: 0.625rem;
-  --card-radius: 1rem;
+  --control-radius: 0.625rem;
+  --surface-radius: 0.875rem;
+  --card-radius: 1.25rem;
   --pill-radius: 9999px;
   --card-shadow:
-    0 1px 2px color-mix(in oklch, var(--foreground-default) 5%, transparent),
-    0 8px 24px -18px color-mix(in oklch, var(--foreground-default) 26%, transparent);
+    0 1px 2px color-mix(in oklch, var(--foreground-default) 4%, transparent),
+    0 12px 32px -20px color-mix(in oklch, var(--foreground-default) 30%, transparent);
   --card-shadow-hover:
-    0 2px 4px color-mix(in oklch, var(--foreground-default) 6%, transparent),
-    0 16px 34px -20px color-mix(in oklch, var(--foreground-default) 32%, transparent);
+    0 2px 5px color-mix(in oklch, var(--foreground-default) 5%, transparent),
+    0 20px 42px -22px color-mix(in oklch, var(--foreground-default) 34%, transparent);
 
   /* Compatibility aliases for existing screens during the incremental migration. */
   --brand-primary: var(--action-primary);

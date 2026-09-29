@@ -9,7 +9,7 @@ export function Card({
   return (
     <section
       className={cn(
-        "rounded-card border border-border-default/80 bg-surface shadow-card",
+        "rounded-card bg-surface shadow-card",
         className,
       )}
       {...props}
@@ -32,4 +32,4 @@ export function CardContent({
 }
 
 export const interactiveCardClassName =
-  "transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out motion-reduce:transform-none motion-reduce:transition-none hover:-translate-y-0.5 hover:border-border-strong/80 hover:shadow-card-hover";
+  "transition-[transform,box-shadow,background-color] duration-200 ease-out motion-reduce:transform-none motion-reduce:transition-none hover:-translate-y-0.5 hover:shadow-card-hover";

@@ -535,7 +535,7 @@ function AccountNavigation({
     <div
       ref={rootRef}
       className={cn(
-        "relative border-t border-border",
+        "relative",
         collapsed ? "px-2 py-3" : "px-3 py-3",
       )}
     >
@@ -651,14 +651,14 @@ export function DesktopNavigation({
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "peer fixed left-0 top-0 z-40 hidden h-dvh min-h-screen flex-col border-r border-border bg-card lg:flex overflow-x-visible",
+        "peer fixed left-3 top-3 z-40 hidden h-[calc(100dvh-1.5rem)] min-h-0 flex-col overflow-x-visible rounded-[1.5rem] bg-card shadow-card lg:flex",
         "transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
         collapsed ? "w-[4.25rem]" : "w-64",
       )}
     >
       <div
         className={cn(
-          "relative flex h-16 shrink-0 items-center border-b border-border transition-[padding] duration-300",
+          "relative flex h-16 shrink-0 items-center transition-[padding] duration-300",
           collapsed ? "justify-center px-2" : "px-5",
         )}
       >
@@ -693,7 +693,7 @@ export function DesktopNavigation({
 
       <div
         className={cn(
-          "shrink-0 border-b border-border transition-[padding] duration-300",
+          "shrink-0 transition-[padding] duration-300",
           collapsed ? "px-2 py-3" : "px-3 py-3",
         )}
       >
@@ -703,7 +703,7 @@ export function DesktopNavigation({
         />
       </div>
 
-      <div className="shrink-0 border-b border-border px-3 py-3">
+      <div className="shrink-0 px-3 py-3">
         <NavigationSearch collapsed={collapsed} shortcut showAdministration={showAdministration} />
       </div>
 
@@ -795,9 +795,9 @@ export function MobileNavigation({
         >
           <aside
             id="authenticated-navigation-drawer"
-            className="relative flex h-full w-[min(18rem,calc(100vw-2rem))] flex-col border-r border-border bg-card shadow-lg"
+            className="relative m-3 flex h-[calc(100%-1.5rem)] w-[min(18rem,calc(100vw-1.5rem))] flex-col rounded-[1.5rem] bg-card shadow-card"
           >
-            <div className="flex h-16 items-center justify-between border-b px-5">
+            <div className="flex h-16 items-center justify-between px-5">
               <Link
                 href="/app"
                 onClick={() => setIsOpen(false)}
@@ -817,7 +817,7 @@ export function MobileNavigation({
                 <X className="size-5" aria-hidden="true" />
               </Button>
             </div>
-            <div className="border-b px-3 py-3">
+            <div className="px-3 py-3">
               <OperationalContextSwitcher state={operationalContextState} />
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-5">

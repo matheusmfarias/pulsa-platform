@@ -121,7 +121,7 @@ export default async function InternalHomePage() {
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
-          className="rounded-card border border-border-default/70 bg-surface px-5 py-5 shadow-card sm:px-7 sm:py-6"
+          className="rounded-card bg-surface px-5 py-5 shadow-card sm:px-7 sm:py-6"
           description="Veja o que precisa de atenção e acesse as tarefas do dia."
           eyebrow="Panorama operacional"
           title="Visão geral"
@@ -257,7 +257,7 @@ export default async function InternalHomePage() {
               { href: "/app/workers", label: "Ver colaboradores", description: "Encontre pessoas e seus vínculos.", icon: Users },
             ].map(({ href, label, description, icon: Icon }) => (
               <Link
-                className={`${interactiveCardClassName} group flex min-h-36 flex-col justify-between gap-5 rounded-card border border-border-default/80 bg-surface p-5 shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring`}
+                className={`${interactiveCardClassName} group flex min-h-36 flex-col justify-between gap-5 rounded-card bg-surface p-5 shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring`}
                 href={href}
                 key={href}
               >
@@ -275,7 +275,7 @@ export default async function InternalHomePage() {
           </div>
         </section>
 
-        <details className="group mt-8 rounded-card border border-border-default/80 bg-surface shadow-card">
+        <details className="group mt-8 overflow-hidden rounded-card bg-surface shadow-card">
           <summary className="flex cursor-pointer list-none flex-col items-start justify-between gap-3 rounded-card px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:flex-row sm:items-center sm:gap-4 sm:px-6 [&::-webkit-details-marker]:hidden">
             <span className="min-w-0">
             <h2
@@ -296,10 +296,10 @@ export default async function InternalHomePage() {
             </span>
           </summary>
 
-          <div className="grid gap-3 border-t border-border-default/70 bg-subtle/35 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
+          <div className="grid gap-3 bg-canvas/65 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
             {kpis.map(({ label, value, icon: Icon }) => (
               <article
-                className="flex min-h-28 flex-col justify-between rounded-card border border-border-default/70 bg-surface px-5 py-4 shadow-card"
+                className="flex min-h-28 flex-col justify-between rounded-card bg-surface px-5 py-4 shadow-card"
                 key={label}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -319,7 +319,7 @@ export default async function InternalHomePage() {
               </article>
             ))}
 
-            <article className="flex min-h-28 flex-col justify-between rounded-card border border-border-default/70 bg-surface px-5 py-4 shadow-card sm:col-span-2 lg:col-span-2">
+            <article className="flex min-h-28 flex-col justify-between rounded-card bg-surface px-5 py-4 shadow-card sm:col-span-2 lg:col-span-2">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
