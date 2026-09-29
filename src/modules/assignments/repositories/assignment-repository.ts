@@ -38,42 +38,22 @@ export async function findAssignmentsPage(
   pageSize: number,
 ) {
   const supabase = await createServerSupabaseClient();
-  let pageQuery = supabase
+  let query = supabase
     .from("assignments")
-    .select(ASSIGNMENT_WITH_CONTEXT_SELECT)
+    .select(ASSIGNMENT_WITH_CONTEXT_SELECT, { count: "exact" })
     .order("start_date", { ascending: false })
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
-  if (filters.workerId) pageQuery = pageQuery.eq("worker_id", filters.workerId);
-  if (filters.positionId) pageQuery = pageQuery.eq("position_id", filters.positionId);
-  if (filters.status) pageQuery = pageQuery.eq("status", filters.status);
-  pageQuery = applyOperationalContextFilter(
-    pageQuery,
+  if (filters.workerId) query = query.eq("worker_id", filters.workerId);
+  if (filters.positionId) query = query.eq("position_id", filters.positionId);
+  if (filters.status) query = query.eq("status", filters.status);
+  const filteredQuery = applyOperationalContextFilter(
+    query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
   );
-
-  let countQuery = supabase.from("assignments").select("id", { count: "exact", head: true });
-  if (filters.workerId) countQuery = countQuery.eq("worker_id", filters.workerId);
-  if (filters.positionId) countQuery = countQuery.eq("position_id", filters.positionId);
-  if (filters.status) countQuery = countQuery.eq("status", filters.status);
-  countQuery = applyOperationalContextFilter(
-    countQuery,
-    operationalContext,
-    OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
-  );
-
-  const [pageResult, countResult] = await Promise.all([
-    measureServerStage("assignments.list_page_data_query", () => pageQuery),
-    measureServerStage("assignments.list_page_count_query", () => countQuery),
-  ]);
-
-  return {
-    ...pageResult,
-    error: pageResult.error ?? countResult.error,
-    count: countResult.count,
-  };
+  return measureServerStage("assignments.list_page_query", () => filteredQuery);
 }
 
 export async function findAssignmentsForOperation(operationId: string) {
