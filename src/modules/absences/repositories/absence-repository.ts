@@ -58,46 +58,24 @@ export async function findAbsences(
 ) {
   const supabase = await createServerSupabaseClient();
   if (options.withoutCoverage) {
-    const { data: selected, error: selectionError } = await supabase.rpc(
-      "list_uncovered_absence_ids",
-      {
-        organization_id: organizationId,
-        client_id:
-          operationalContext.type === "all"
-            ? undefined
-            : operationalContext.clientId,
-        contract_id:
-          operationalContext.type === "contract"
-            ? operationalContext.contractId
-            : undefined,
-        result_limit: options.limit,
-      },
-    );
-    if (selectionError) return { data: null, error: selectionError };
-    const ids = (selected ?? []).map((item) => item.absence_id);
-    if (ids.length === 0) return { data: [], error: null };
-
-    const hydratedQuery = applyOperationalContextFilter(
-      supabase
+    let uncoveredQuery = supabase
       .from("absences")
-        .select(ABSENCE_LIST_SELECT)
-        .eq("organization_id", organizationId)
-        .in("id", ids),
+      .select(`${ABSENCE_LIST_SELECT}, active_replacements:replacements()`)
+      .eq("organization_id", organizationId)
+      .eq("status", "reported")
+      .eq("active_replacements.status", "active")
+      .is("active_replacements", null)
+      .order("starts_at", { referencedTable: "schedule_entry", ascending: true })
+      .order("id", { ascending: true });
+
+    uncoveredQuery = applyOperationalContextFilter(
+      uncoveredQuery,
       operationalContext,
       OPERATIONAL_CONTEXT_QUERY_PATHS.absences,
     );
-    const result = await hydratedQuery;
-    const order = new Map(ids.map((id, index) => [id, index]));
-    return {
-      ...result,
-      data: result.data
-        ? [...result.data].sort(
-            (left, right) =>
-              (order.get((left as { id: string }).id) ?? 0) -
-              (order.get((right as { id: string }).id) ?? 0),
-          )
-        : result.data,
-    };
+    if (options.limit) uncoveredQuery = uncoveredQuery.limit(options.limit);
+
+    return measureServerStage("absences.uncovered_list", () => uncoveredQuery);
   }
 
   const query = supabase
