@@ -48,11 +48,12 @@ export async function findAssignmentsPage(
   if (filters.workerId) query = query.eq("worker_id", filters.workerId);
   if (filters.positionId) query = query.eq("position_id", filters.positionId);
   if (filters.status) query = query.eq("status", filters.status);
-  return applyOperationalContextFilter(
+  const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
   );
+  return measureServerStage("assignments.list_page_query", () => filteredQuery);
 }
 
 export async function findAssignmentsForOperation(operationId: string) {
