@@ -151,6 +151,22 @@ seu novo layout foi verificado por código e build, mas ficou sem conferência
 visual com dados. Nenhuma ação de negócio foi enviada durante a revisão visual.
 Regras de acesso e transições permanecem sob os serviços existentes.
 
+## Quinta rodada
+
+- A sidebar mantém o controle de recolher e expandir, assim como a preferência
+  salva por navegador. A seção ativa agora usa um destaque preenchido da cor da
+  marca nos estados expandido e compacto; os títulos dos grupos ficam mais
+  fáceis de distinguir.
+- O panorama abre os indicadores depois dos alertas e atalhos. O cartão de
+  alocação sobre efetivo base ganha contraste próprio e continua identificado
+  como uma relação com o efetivo, sem sugerir cobertura de escala.
+- As tabelas mantêm seu realce de linha ao passar o cursor e o foco por teclado;
+  cards de atalho seguem usando elevação discreta ao interagir.
+
+As versões expandida e compacta da sidebar, o panorama e as telas de lista foram
+conferidos no ambiente dev em desktop e telefone. A preferência de navegação e
+as regras operacionais foram preservadas.
+
 ## Próximo ciclo de desenho
 
 - Observar com Operações e RH os percursos de ausência, presença, escala e

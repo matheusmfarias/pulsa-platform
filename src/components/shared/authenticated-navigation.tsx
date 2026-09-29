@@ -355,7 +355,7 @@ function NavigationLinks({
   return (
     <nav
       aria-label="Navegação principal"
-      className="space-y-3"
+      className="space-y-4"
     >
       {navigation.map((group, groupIndex) => {
         const groupId = `navigation-group-${groupIndex}`;
@@ -385,8 +385,8 @@ function NavigationLinks({
                   onClick={() => toggleGroup(group.label!, groupCollapsed)}
                   className={cn(
                     "group/sidebar-section mb-1 flex min-h-9 w-full items-center justify-between rounded-lg px-3 py-2",
-                    "text-xs font-semibold text-muted-foreground",
-                    "transition-colors hover:bg-muted/70 hover:text-foreground",
+                    "text-[0.6875rem] font-semibold uppercase tracking-[0.11em] text-muted-foreground",
+                    "transition-colors hover:bg-hover hover:text-foreground",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   )}
                 >
@@ -427,11 +427,11 @@ function NavigationLinks({
                               aria-current={active ? "page" : undefined}
                               aria-label={item.label}
                               className={cn(
-                                "relative flex min-h-10 items-center justify-center rounded-lg px-0 text-sm font-medium",
+                                "relative flex min-h-10 items-center justify-center rounded-xl px-0 text-sm font-medium",
                                 "transition-[background-color,color,padding,gap] duration-200",
                                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                 active
-                                  ? "bg-primary/10 text-primary"
+                                  ? "bg-action-primary text-primary-foreground shadow-sm"
                                   : "text-muted-foreground hover:bg-hover hover:text-foreground",
                               )}
                             >
@@ -439,7 +439,7 @@ function NavigationLinks({
                                 aria-hidden="true"
                                 className={cn(
                                   "size-[1.125rem] shrink-0",
-                                  active && "text-primary",
+                                  active && "text-primary-foreground",
                                 )}
                               />
                             </Link>
@@ -450,26 +450,19 @@ function NavigationLinks({
                             onClick={onNavigate}
                             aria-current={active ? "page" : undefined}
                             className={cn(
-                              "relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium",
+                              "relative flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium",
                               "transition-[background-color,color,padding,gap] duration-200",
                               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                               active
-                                ? "bg-primary/10 text-primary"
+                                ? "bg-action-primary text-primary-foreground shadow-sm"
                                 : "text-muted-foreground hover:bg-hover hover:text-foreground",
                             )}
                           >
-                            {active ? (
-                              <span
-                                aria-hidden="true"
-                                className="absolute left-0 h-5 w-0.5 rounded-full bg-primary"
-                              />
-                            ) : null}
-
                             <Icon
                               aria-hidden="true"
                               className={cn(
                                 "size-[1.125rem] shrink-0 transition-transform duration-200",
-                                active && "text-primary",
+                                active && "text-primary-foreground",
                                 "group-hover/navigation-item:scale-[1.03]",
                               )}
                             />

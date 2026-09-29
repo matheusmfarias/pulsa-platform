@@ -275,7 +275,7 @@ export default async function InternalHomePage() {
           </div>
         </section>
 
-        <details className="group mt-8 overflow-hidden rounded-card bg-surface shadow-card">
+        <details open className="group mt-8 overflow-hidden rounded-card bg-surface shadow-card">
           <summary className="flex cursor-pointer list-none flex-col items-start justify-between gap-3 rounded-card px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:flex-row sm:items-center sm:gap-4 sm:px-6 [&::-webkit-details-marker]:hidden">
             <span className="min-w-0">
             <h2
@@ -286,7 +286,7 @@ export default async function InternalHomePage() {
             </h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Estrutura ativa dentro do contexto selecionado.
+              Estrutura e alocação no contexto operacional selecionado.
             </p>
             </span>
             <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-primary sm:self-center">
@@ -319,13 +319,13 @@ export default async function InternalHomePage() {
               </article>
             ))}
 
-            <article className="flex min-h-28 flex-col justify-between rounded-card bg-surface px-5 py-4 shadow-card sm:col-span-2 lg:col-span-2">
+            <article className="flex min-h-28 flex-col justify-between rounded-card bg-action-primary px-5 py-4 text-primary-foreground shadow-card sm:col-span-2 lg:col-span-2">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                  <p className="flex items-center gap-2 text-xs font-medium text-primary-foreground/80">
                     <Gauge
                       aria-hidden="true"
-                      className="size-4 text-primary"
+                      className="size-4 text-primary-foreground/80"
                     />
 
                     Alocação sobre efetivo base
@@ -337,7 +337,7 @@ export default async function InternalHomePage() {
                   </p>
                 </div>
 
-                <span className="text-sm font-medium tabular-nums text-primary">
+                <span className="text-sm font-medium tabular-nums text-primary-foreground">
                   {rawOccupancyPercent}%
                 </span>
               </div>
@@ -348,11 +348,11 @@ export default async function InternalHomePage() {
                 aria-valuemin={0}
                 aria-valuenow={progressValue}
                 aria-valuetext={`${activeAssignments} de ${totalRequiredHeadcount}, ${rawOccupancyPercent}%`}
-                className="mt-4 h-2 overflow-hidden rounded-full bg-muted"
+                className="mt-4 h-2 overflow-hidden rounded-full bg-primary-foreground/20"
                 role="progressbar"
               >
                 <div
-                  className="h-full rounded-full bg-primary"
+                  className="h-full rounded-full bg-primary-foreground"
                   style={{
                     width: `${progressValue}%`,
                   }}
