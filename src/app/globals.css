@@ -35,7 +35,14 @@
 
   --control-radius: 0.5rem;
   --surface-radius: 0.625rem;
+  --card-radius: 1rem;
   --pill-radius: 9999px;
+  --card-shadow:
+    0 1px 2px color-mix(in oklch, var(--foreground-default) 5%, transparent),
+    0 8px 24px -18px color-mix(in oklch, var(--foreground-default) 26%, transparent);
+  --card-shadow-hover:
+    0 2px 4px color-mix(in oklch, var(--foreground-default) 6%, transparent),
+    0 16px 34px -20px color-mix(in oklch, var(--foreground-default) 32%, transparent);
 
   /* Compatibility aliases for existing screens during the incremental migration. */
   --brand-primary: var(--action-primary);
@@ -107,7 +114,10 @@
   --color-hover: var(--hover);
   --radius-control: var(--control-radius);
   --radius-surface: var(--surface-radius);
+  --radius-card: var(--card-radius);
   --radius-pill: var(--pill-radius);
+  --shadow-card: var(--card-shadow);
+  --shadow-card-hover: var(--card-shadow-hover);
   --radius-sm: var(--control-radius);
   --radius-md: var(--control-radius);
   --radius-lg: var(--surface-radius);

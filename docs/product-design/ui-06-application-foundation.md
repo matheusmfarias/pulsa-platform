@@ -17,11 +17,15 @@ densidade média e hierarquia suficiente para leitura, comparação e ação.
 - Inter é a tipografia da aplicação e Lucide é a biblioteca de ícones.
 - Os tokens semânticos Pulsa existentes são a autoridade visual.
 - O canvas é neutro e off-white, com surfaces claras e bem delimitadas.
-- Preferir borders antes de shadows. Shadows são reservadas para situações em
-  que a elevação comunica uma relação espacial ou estado de interação.
+- Cards de visão geral e atalhos usam raio de aproximadamente 16 px, border
+  discreta e sombra curta. A sombra separa a superfície do canvas e pode
+  aumentar levemente no hover quando toda a superfície for interativa.
+- Demais superfícies continuam preferindo borders. Shadows são reservadas para
+  cards, situações em que a elevação comunica uma relação espacial ou estado
+  de interação.
 - Cores da marca funcionam como acento, não como decoração dominante.
 - Controles usam radius de aproximadamente 8 px; surfaces, aproximadamente
-  12 px; dialogs e drawers, aproximadamente 16 px.
+  12 px; cards, dialogs e drawers, aproximadamente 16 px.
 - Cada contexto deve possuir uma ação primária clara, sem competir com ações
   secundárias.
 - Status nunca depende somente de cor: deve possuir também rótulo textual,

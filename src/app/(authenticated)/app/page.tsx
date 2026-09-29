@@ -22,6 +22,7 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Card, interactiveCardClassName } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -120,23 +121,30 @@ export default async function InternalHomePage() {
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
+          className="rounded-card border border-border-default/70 bg-surface px-5 py-5 shadow-card sm:px-7 sm:py-6"
           description="Veja o que precisa de atenção e acesse as tarefas do dia."
+          eyebrow="Panorama operacional"
           title="Visão geral"
         />
 
-        <section
+        <Card
           aria-labelledby="attention-heading"
-          className="mt-6 overflow-hidden rounded-surface border border-border-default bg-surface"
+          className="mt-5 overflow-hidden"
         >
-          <header className="flex items-center gap-2 border-b border-border-default px-4 py-3">
-            <AlertTriangle
-              aria-hidden="true"
+          <header className="flex items-center gap-3 border-b border-border-default/70 px-5 py-4 sm:px-6">
+            <span
               className={
                 hasAttention
-                  ? "size-4 text-warning"
-                  : "size-4 text-muted-foreground"
+                  ? "flex size-9 shrink-0 items-center justify-center rounded-xl bg-status-warning-background text-warning"
+                  : "flex size-9 shrink-0 items-center justify-center rounded-xl bg-status-success-background text-success"
               }
-            />
+            >
+              {hasAttention ? (
+                <AlertTriangle aria-hidden="true" className="size-4.5" />
+              ) : (
+                <CheckCircle2 aria-hidden="true" className="size-4.5" />
+              )}
+            </span>
 
             <div>
               <h2
@@ -146,24 +154,24 @@ export default async function InternalHomePage() {
                 Requer atenção
               </h2>
 
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Pendências que podem exigir ação operacional.
               </p>
             </div>
           </header>
 
           {hasAttention ? (
-            <div className="divide-y divide-border-default px-4">
+            <div className="divide-y divide-border-default/70 px-5 sm:px-6">
               {uncoveredAbsences.slice(0, 3).map((absence) => {
                 const entry = absence.schedule_entry;
                 const position = entry.assignment.position;
                 const timeZone = position.unit.timezone;
                 const when = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone }).format(new Date(entry.starts_at));
-                return <Link className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm transition-colors hover:bg-hover" href={`/app/absences/${absence.id}`} key={absence.id}><span className="font-medium">Ausência sem cobertura · {entry.assignment.worker.full_name}</span><span className="text-xs text-muted-foreground">{when} · {position.unit.operation.name} · {position.unit.name} · {position.job_role.name}</span></Link>;
+                return <Link className="group -mx-2 flex flex-col gap-1.5 rounded-xl px-2 py-3.5 text-sm transition-colors hover:bg-hover/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring" href={`/app/absences/${absence.id}`} key={absence.id}><span className="font-medium">Ausência sem cobertura · {entry.assignment.worker.full_name}</span><span className="text-xs leading-5 text-muted-foreground">{when} · {position.unit.operation.name} · {position.unit.name} · {position.job_role.name}</span></Link>;
               })}
               {overview.attention.underfilledPositions > 0 ? (
                 <Link
-                  className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm font-medium transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                  className="group -mx-2 flex flex-col gap-1.5 rounded-xl px-2 py-3.5 text-sm font-medium transition-colors hover:bg-hover/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   href="/app/positions"
                 >
                   <span className="flex items-center gap-2.5">
@@ -192,7 +200,7 @@ export default async function InternalHomePage() {
               {overview.attention.activeWorkersWithoutAssignment >
               0 ? (
                 <Link
-                  className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm font-medium transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                  className="group -mx-2 flex flex-col gap-1.5 rounded-xl px-2 py-3.5 text-sm font-medium transition-colors hover:bg-hover/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   href="/app/workers"
                 >
                   <span className="flex items-center gap-2.5">
@@ -223,7 +231,7 @@ export default async function InternalHomePage() {
               ) : null}
             </div>
           ) : (
-            <p className="flex items-center gap-2 px-4 py-4 text-sm text-muted-foreground">
+            <p className="flex items-center gap-2 px-5 py-5 text-sm text-muted-foreground sm:px-6">
               <CheckCircle2
                 aria-hidden="true"
                 className="size-4 text-success"
@@ -232,7 +240,7 @@ export default async function InternalHomePage() {
               Nenhuma pendência operacional identificada.
             </p>
           )}
-        </section>
+        </Card>
 
         <section aria-labelledby="work-shortcuts-heading" className="mt-8">
           <header>
@@ -241,7 +249,7 @@ export default async function InternalHomePage() {
               Acesse as rotinas mais usadas sem percorrer os cadastros.
             </p>
           </header>
-          <div className="mt-3 grid gap-px overflow-hidden rounded-surface border border-border-default bg-border-default sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
               { href: "/app/presences", label: "Acompanhar presença", description: "Veja quem chegou e quem é esperado.", icon: ClipboardCheck },
               { href: "/app/absences", label: "Resolver ausências", description: "Consulte faltas e coberturas.", icon: CalendarX2 },
@@ -249,25 +257,27 @@ export default async function InternalHomePage() {
               { href: "/app/workers", label: "Ver colaboradores", description: "Encontre pessoas e seus vínculos.", icon: Users },
             ].map(({ href, label, description, icon: Icon }) => (
               <Link
-                className="group flex min-h-28 flex-col justify-between gap-3 bg-surface p-4 transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
+                className={`${interactiveCardClassName} group flex min-h-36 flex-col justify-between gap-5 rounded-card border border-border-default/80 bg-surface p-5 shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring`}
                 href={href}
                 key={href}
               >
-                <Icon aria-hidden="true" className="size-5 text-action-primary" />
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-action-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <Icon aria-hidden="true" className="size-5" />
+                </span>
                 <span>
-                  <span className="flex items-center gap-1.5 text-sm font-semibold">
+                  <span className="flex items-center justify-between gap-2 text-sm font-semibold">
                     {label}<ArrowRight aria-hidden="true" className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                   </span>
-                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">{description}</span>
+                  <span className="mt-1.5 block text-xs leading-5 text-muted-foreground">{description}</span>
                 </span>
               </Link>
             ))}
           </div>
         </section>
 
-        <details className="group mt-8 border-t border-border-default pt-5">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring [&::-webkit-details-marker]:hidden">
-            <span>
+        <details className="group mt-8 rounded-card border border-border-default/80 bg-surface shadow-card">
+          <summary className="flex cursor-pointer list-none flex-col items-start justify-between gap-3 rounded-card px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring sm:flex-row sm:items-center sm:gap-4 sm:px-6 [&::-webkit-details-marker]:hidden">
+            <span className="min-w-0">
             <h2
               className="font-semibold"
               id="indicators-heading"
@@ -279,17 +289,17 @@ export default async function InternalHomePage() {
               Estrutura ativa dentro do contexto selecionado.
             </p>
             </span>
-            <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-primary">
+            <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-primary sm:self-center">
               <span className="group-open:hidden">Ver indicadores</span>
               <span className="hidden group-open:inline">Ocultar indicadores</span>
               <ChevronDown aria-hidden="true" className="size-4 transition-transform group-open:rotate-180" />
             </span>
           </summary>
 
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 border-t border-border-default/70 bg-subtle/35 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
             {kpis.map(({ label, value, icon: Icon }) => (
               <article
-                className="flex min-h-24 flex-col justify-between rounded-surface border border-border-default bg-surface px-4 py-3.5"
+                className="flex min-h-28 flex-col justify-between rounded-card border border-border-default/70 bg-surface px-5 py-4 shadow-card"
                 key={label}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -299,17 +309,17 @@ export default async function InternalHomePage() {
 
                   <Icon
                     aria-hidden="true"
-                    className="size-4 text-primary"
+                    className="size-4.5 text-primary"
                   />
                 </div>
 
-                <p className="mt-2 text-2xl font-semibold tabular-nums">
+                <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
                   {value}
                 </p>
               </article>
             ))}
 
-            <article className="flex min-h-24 flex-col justify-between rounded-surface border border-border-default bg-surface px-4 py-3.5 sm:col-span-2 lg:col-span-2">
+            <article className="flex min-h-28 flex-col justify-between rounded-card border border-border-default/70 bg-surface px-5 py-4 shadow-card sm:col-span-2 lg:col-span-2">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -321,7 +331,7 @@ export default async function InternalHomePage() {
                     Alocação sobre efetivo base
                   </p>
 
-                  <p className="mt-2 text-2xl font-semibold tabular-nums">
+                  <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
                     {activeAssignments} de{" "}
                     {totalRequiredHeadcount}
                   </p>
@@ -338,7 +348,7 @@ export default async function InternalHomePage() {
                 aria-valuemin={0}
                 aria-valuenow={progressValue}
                 aria-valuetext={`${activeAssignments} de ${totalRequiredHeadcount}, ${rawOccupancyPercent}%`}
-                className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"
+                className="mt-4 h-2 overflow-hidden rounded-full bg-muted"
                 role="progressbar"
               >
                 <div
