@@ -130,8 +130,8 @@ export function AssignmentFilterBar({
       />
 
       {hasActiveFilters ? (
-        <>
-          <ActiveFiltersSummary className="flex-1 sm:basis-full">
+        <div className="flex w-full min-w-0 items-center gap-2 border-t border-border-default pt-3">
+          <ActiveFiltersSummary className="min-w-0 flex-1 border-0 pt-0">
             <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
             {[
               queryDraft.trim() ? `Colaborador: ${queryDraft.trim()}` : null,
@@ -140,7 +140,7 @@ export function AssignmentFilterBar({
           </ActiveFiltersSummary>
           <Button
             aria-label="Limpar filtros de alocações"
-            className="self-end sm:ml-auto"
+            className="shrink-0"
             onClick={clearFilters}
             size="icon"
             type="button"
@@ -148,7 +148,7 @@ export function AssignmentFilterBar({
           >
             <X aria-hidden="true" className="size-4" />
           </Button>
-        </>
+        </div>
       ) : null}
     </ListFilterBar>
   );
