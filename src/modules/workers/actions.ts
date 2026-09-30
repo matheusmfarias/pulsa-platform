@@ -139,6 +139,7 @@ export async function createWorkerInDrawerAction(
 
 export async function updateWorkerAction(
   workerId: string,
+  returnTab: string,
   _previousState: WorkerActionState,
   formData: FormData,
 ): Promise<WorkerActionState> {
@@ -155,7 +156,8 @@ export async function updateWorkerAction(
 
   revalidatePath("/app/workers");
   revalidatePath(`/app/workers/${id.data}`);
-  redirect(`/app/workers/${id.data}`);
+  const tab = returnTab === "record" || returnTab === "access" ? `?tab=${returnTab}` : "";
+  redirect(`/app/workers/${id.data}${tab}`);
 }
 
 export async function changeWorkerStatusAction(
@@ -175,5 +177,5 @@ export async function changeWorkerStatusAction(
 
   revalidatePath("/app/workers");
   revalidatePath(`/app/workers/${input.data.id}`);
-  redirect(`/app/workers/${input.data.id}`);
+  redirect(`/app/workers/${input.data.id}?tab=record`);
 }

@@ -1,18 +1,33 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { Pencil } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useRef, type KeyboardEvent, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
 import { ScrollShadow } from "@/components/ui/scroll-shadow";
 
+import { parseWorkerDetailTab, type WorkerDetailTabId } from "./worker-detail-navigation";
+
 type WorkerDetailTab = {
-  id: string;
+  id: WorkerDetailTabId;
   label: string;
   content: ReactNode;
 };
 
 export function WorkerDetailTabs({ tabs }: { tabs: WorkerDetailTab[] }) {
-  const [activeId, setActiveId] = useState(tabs[0].id);
+  const searchParams = useSearchParams();
+  const requestedTab = parseWorkerDetailTab(searchParams.get("tab"));
+  const activeId = tabs.some((tab) => tab.id === requestedTab) ? requestedTab : tabs[0].id;
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  function selectTab(id: WorkerDetailTabId) {
+    const url = new URL(window.location.href);
+    if (id === "assignments") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", id);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
 
   function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     let nextIndex: number;
@@ -33,7 +48,7 @@ export function WorkerDetailTabs({ tabs }: { tabs: WorkerDetailTab[] }) {
         return;
     }
     event.preventDefault();
-    setActiveId(tabs[nextIndex].id);
+    selectTab(tabs[nextIndex].id);
     tabRefs.current[nextIndex]?.focus();
   }
 
@@ -50,7 +65,7 @@ export function WorkerDetailTabs({ tabs }: { tabs: WorkerDetailTab[] }) {
                 className={`min-h-12 border-b-2 px-1 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-inset ${selected ? "border-action-primary text-foreground-default" : "border-transparent text-muted-foreground hover:text-foreground-default"}`}
                 id={`worker-tab-${tab.id}`}
                 key={tab.id}
-                onClick={() => setActiveId(tab.id)}
+                onClick={() => selectTab(tab.id)}
                 onKeyDown={(event) => onTabKeyDown(event, index)}
                 ref={(element) => { tabRefs.current[index] = element; }}
                 role="tab"
@@ -76,5 +91,20 @@ export function WorkerDetailTabs({ tabs }: { tabs: WorkerDetailTab[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+export function WorkerEditLink({ workerId }: { workerId: string }) {
+  const searchParams = useSearchParams();
+  const tab = parseWorkerDetailTab(searchParams.get("tab"));
+  const suffix = tab === "assignments" ? "" : `?tab=${tab}`;
+
+  return (
+    <Button asChild variant="outline">
+      <Link href={`/app/workers/${workerId}/edit${suffix}`}>
+        <Pencil aria-hidden="true" className="size-4" />
+        Editar
+      </Link>
+    </Button>
   );
 }

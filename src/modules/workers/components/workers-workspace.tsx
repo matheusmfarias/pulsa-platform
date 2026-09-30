@@ -88,39 +88,70 @@ function WorkersResultsLoading() {
         </div>
       </div>
       <div className="border-t border-border-default">
-        <div aria-hidden="true" className="grid min-h-10 grid-cols-[minmax(0,1fr)_5rem_2rem] items-center gap-3 bg-subtle/45 px-3 sm:grid-cols-[2fr_1fr_1.5fr_1.5fr_1fr_auto] sm:gap-6 sm:px-5">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="h-3 w-12 sm:hidden" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-16 sm:block" />
-          <Skeleton className="hidden h-3 w-5 justify-self-end sm:block" />
-        </div>
-        <div className="divide-y divide-border-default/80">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div
-              className={`grid min-h-14 grid-cols-[minmax(0,1fr)_5rem_2rem] items-center gap-3 px-3 py-2.5 sm:grid-cols-[2fr_1fr_1.5fr_1.5fr_1fr_auto] sm:gap-6 sm:px-5 ${index === 3 ? "hidden sm:grid" : ""}`}
-              key={index}
-            >
-              <div className="min-w-0">
-                <Skeleton className="h-4 w-4/5" />
-                <div className="mt-1.5 space-y-1 sm:hidden">
-                  <Skeleton className="h-3 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                  <Skeleton className="h-3 w-2/3" />
+        <div className="grid gap-2 bg-subtle/35 p-3 xl:hidden">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div className="rounded-surface border border-border-default/80 bg-surface p-4" key={index}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <Skeleton className="h-5 w-3/5" />
+                  <Skeleton className="mt-2 h-3 w-4/5" />
                 </div>
+                <Skeleton className="h-6 w-16 rounded-full" />
               </div>
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="hidden h-4 w-full sm:block" />
-              <Skeleton className="hidden h-4 w-full sm:block" />
-              <Skeleton className="hidden h-5 w-16 sm:block" />
-              <Skeleton className="h-5 w-5 justify-self-end" />
+              <div className="mt-3 grid grid-cols-2 gap-4 border-t border-border-default/70 pt-3">
+                <div><Skeleton className="h-3 w-10" /><Skeleton className="mt-2 h-4 w-28 max-w-full" /></div>
+                <div><Skeleton className="h-3 w-14" /><Skeleton className="mt-2 h-4 w-32 max-w-full" /></div>
+              </div>
             </div>
           ))}
         </div>
+        <div className="hidden xl:block">
+          <div aria-hidden="true" className="grid min-h-10 grid-cols-[24%_16%_21%_23%_11%_5%] items-center bg-subtle/45 px-4">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-3 w-12" />
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-12" />
+          </div>
+          <div className="divide-y divide-border-default/80">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              className="grid min-h-14 grid-cols-[24%_16%_21%_23%_11%_5%] items-center px-4 py-2.5"
+              key={index}
+            >
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-4/5" />
+              <div><Skeleton className="h-4 w-3/4" /><Skeleton className="mt-1.5 h-3 w-1/2" /></div>
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-5 justify-self-end" />
+            </div>
+          ))}
+          </div>
+        </div>
       </div>
     </div>
+  );
+}
+
+export function WorkersListLoading() {
+  return (
+    <PageShell className="py-7 sm:py-8">
+      <ContentContainer size="list">
+        <div aria-hidden="true" className="min-h-28">
+          <Skeleton className="h-3 w-44" />
+          <Skeleton className="mt-3 h-8 w-52" />
+          <Skeleton className="mt-3 h-4 w-80 max-w-full" />
+        </div>
+        <section aria-label="Carregando colaboradores" className="mt-6 overflow-hidden rounded-card bg-surface shadow-card" role="status">
+          <div className="flex flex-col gap-2.5 p-3 sm:flex-row sm:p-4">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <div className="border-t border-border-default/80"><WorkersResultsLoading /></div>
+        </section>
+      </ContentContainer>
+    </PageShell>
   );
 }
 

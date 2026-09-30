@@ -107,19 +107,16 @@ export function WorkerTable({
         ))}
       </ul>
       <div className="hidden border-t border-border-default/80 xl:block">
-      <TableScrollArea bounded label="Tabela de colaboradores" shadow>
-        <Table className="min-w-full table-fixed sm:min-w-[960px] sm:table-auto">
-          <TableHeader className="sticky top-0 z-10 bg-subtle/45 text-xs normal-case tracking-normal text-muted-foreground">
+      <TableScrollArea label="Tabela de colaboradores" shadow>
+        <Table className="min-w-full table-fixed">
+          <TableHeader className="bg-subtle/45 text-xs normal-case tracking-normal text-muted-foreground">
             <TableRow>
-              <TableHead className="w-auto px-3 sm:w-[24%] sm:px-5">
-                <span className="sm:hidden">Colaborador</span>
-                <span className="hidden sm:inline">Nome</span>
-              </TableHead>
-              <TableHead className="hidden w-[16%] sm:table-cell sm:px-5">CPF</TableHead>
-              <TableHead className="hidden w-[23%] sm:table-cell sm:px-5">Contato</TableHead>
-              <TableHead className="hidden w-[25%] sm:table-cell sm:px-5">Alocação atual</TableHead>
-              <TableHead className="w-28 px-2 sm:w-[12%] sm:px-5">Status</TableHead>
-              <TableHead className="w-12 px-1 text-right sm:w-14 sm:px-4">
+              <TableHead className="w-[24%] px-4">Nome</TableHead>
+              <TableHead className="w-[16%] px-3">CPF</TableHead>
+              <TableHead className="w-[21%] px-3">Contato</TableHead>
+              <TableHead className="w-[23%] px-3">Alocação atual</TableHead>
+              <TableHead className="w-[11%] px-3">Status</TableHead>
+              <TableHead className="w-[5%] px-2 text-right">
                 <span className="sr-only">Ações</span>
               </TableHead>
             </TableRow>
@@ -127,7 +124,7 @@ export function WorkerTable({
           <TableBody className="divide-border-default/65">
             {workers.map((worker) => (
               <TableRow className="h-14 hover:bg-hover/40 focus-within:bg-hover/50" key={worker.id}>
-                <TableCell className="min-w-0 px-3 py-2.5 sm:px-5">
+                <TableCell className="min-w-0 px-4 py-2.5">
                   <Link
                     className={identityLinkClass}
                     href={"/app/workers/" + worker.id}
@@ -135,29 +132,22 @@ export function WorkerTable({
                   >
                     {worker.full_name}
                   </Link>
-                  <div className="mt-1.5 space-y-0.5 font-normal text-xs leading-5 text-muted-foreground sm:hidden">
-                    <p className="tabular-nums">CPF {formatCpf(worker.document_number)}</p>
-                    <p className="max-w-52 truncate">{contactLabel(worker)}</p>
-                    <p className="break-words">
-                      <AssignmentSummary compact worker={worker} />
-                    </p>
-                  </div>
                 </TableCell>
-                <TableCell className="hidden whitespace-nowrap tabular-nums text-foreground/75 sm:table-cell sm:px-5">
+                <TableCell className="truncate whitespace-nowrap px-3 tabular-nums text-foreground/75">
                   {formatCpf(worker.document_number)}
                 </TableCell>
-                <TableCell className="hidden max-w-56 text-foreground/75 sm:table-cell sm:px-5">
+                <TableCell className="max-w-56 px-3 text-foreground/75">
                   <span className="block truncate">{contactLabel(worker)}</span>
                 </TableCell>
-                <TableCell className="hidden max-w-64 sm:table-cell sm:px-5">
+                <TableCell className="max-w-64 px-3">
                   <span className="block truncate">
                     <AssignmentSummary worker={worker} />
                   </span>
                 </TableCell>
-                <TableCell className="px-2 sm:px-5">
+                <TableCell className="px-3">
                   <WorkerStatusBadge status={worker.status} />
                 </TableCell>
-                <TableCell className="px-1 text-right sm:px-4">
+                <TableCell className="px-2 text-right">
                   <Button asChild className="text-muted-foreground/80 hover:bg-hover/70 hover:text-foreground" size="icon" variant="ghost">
                     <Link
                       aria-label={"Ver detalhes de " + worker.full_name}

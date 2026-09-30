@@ -21,6 +21,7 @@ import {
 } from "../actions";
 import { formatCpf } from "../domain/document-number";
 import type { Worker } from "../domain/worker";
+import type { WorkerDetailTabId } from "./worker-detail-navigation";
 import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 import {
   formatBrazilianPhoneInput,
@@ -168,10 +169,10 @@ function WorkerFormSection({
   title: string;
 }) {
   return (
-    <div className={divided ? `border-t border-border-default ${drawer ? "pt-6" : "pt-7"}` : ""}>
+    <div className={divided ? `border-t border-border-default ${drawer ? "pt-6" : "pt-5"}` : ""}>
       <fieldset className="min-w-0">
         <legend className="text-base font-semibold">{title}</legend>
-        <div className="mt-5">{children}</div>
+        <div className={drawer ? "mt-5" : "mt-4"}>{children}</div>
       </fieldset>
     </div>
   );
@@ -187,7 +188,7 @@ function WorkerFormSections({
   worker?: Worker;
 }) {
   return (
-    <div className="space-y-7">
+    <div className={drawer ? "space-y-7" : "space-y-5"}>
       <WorkerFormSection drawer={drawer} title="Identificação">
         <IdentificationFields autoFocus={drawer} state={state} twoColumns={!drawer} worker={worker} />
       </WorkerFormSection>
@@ -225,15 +226,17 @@ export function WorkerForm({
   createReturnHref,
   onDirtyChange,
   presentation = "page",
+  returnTab = "assignments",
 }: {
   worker?: Worker;
   cancelHref?: string;
   createReturnHref?: string;
   onDirtyChange?: (dirty: boolean) => void;
   presentation?: "page" | "drawer";
+  returnTab?: WorkerDetailTabId;
 }) {
   const action = worker
-    ? updateWorkerAction.bind(null, worker.id)
+    ? updateWorkerAction.bind(null, worker.id, returnTab)
     : createReturnHref
       ? createWorkerInDrawerAction.bind(null, createReturnHref)
       : createWorkerAction;
@@ -292,9 +295,9 @@ export function WorkerForm({
   }
 
   return (
-    <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={formRef}>
+    <form action={formAction} className="space-y-4" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={formRef}>
       <WorkerFormSections drawer={false} state={state} worker={worker} />
-      <div className="flex flex-col-reverse gap-2 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 border-t border-border-default pt-4 sm:flex-row sm:justify-end">
         <Button asChild className="min-h-11" variant="ghost">
           <Link href={cancelHref}>Cancelar</Link>
         </Button>

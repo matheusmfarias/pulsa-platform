@@ -1,12 +1,11 @@
 import { Suspense } from "react";
 
-import { DataRouteSkeleton } from "@/components/ui/data-route-skeleton";
-
 import {
   parseWorkerListSearchParams,
   parseWorkerListPage,
   parseWorkerListPageSize,
   WorkersWorkspace,
+  WorkersListLoading,
   type WorkerListSearchParams,
 } from "@/modules/workers";
 
@@ -28,15 +27,7 @@ export default function WorkersPage({
   searchParams: Promise<WorkerListSearchParams>;
 }) {
   return (
-    <Suspense
-      fallback={
-        <DataRouteSkeleton
-          kind="collection"
-          label="Carregando colaboradores"
-          scope="core"
-        />
-      }
-    >
+    <Suspense fallback={<WorkersListLoading />}>
       <WorkersPageContent searchParams={searchParams} />
     </Suspense>
   );

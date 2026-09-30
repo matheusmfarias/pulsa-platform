@@ -147,7 +147,7 @@ describe("worker create drawer flow", () => {
     expect(form.indexOf("<DrawerBody>")).toBeLessThan(
       form.indexOf("<DrawerFooter>"),
     );
-    expect(form).toContain('twoColumns={false}');
+    expect(form).toContain('twoColumns={!drawer}');
   });
 
   it("protects dirty forms before closing from every drawer close action", () => {

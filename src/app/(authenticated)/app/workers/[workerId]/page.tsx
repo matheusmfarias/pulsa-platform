@@ -1,4 +1,4 @@
-import { Pencil, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -27,7 +27,7 @@ import {
 } from "@/modules/workers";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { WorkerDetailTabs } from "@/modules/workers/components/worker-detail-tabs";
+import { WorkerDetailTabs, WorkerEditLink } from "@/modules/workers/components/worker-detail-tabs";
 
 const relationLinkClass =
   "rounded-sm font-medium underline decoration-border-strong underline-offset-4 hover:decoration-action-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -98,12 +98,7 @@ export default async function WorkerDetailsPage({
         <PageHeader
           actions={
             <PermissionGate permission="worker:update">
-              <Button asChild variant="outline">
-                <Link href={"/app/workers/" + worker.id + "/edit"}>
-                  <Pencil aria-hidden="true" className="size-4" />
-                  Editar
-                </Link>
-              </Button>
+              <WorkerEditLink workerId={worker.id} />
             </PermissionGate>
           }
           breadcrumb={
@@ -315,7 +310,7 @@ export default async function WorkerDetailsPage({
             </div>,
           },
           ...(workerAccess ? [{
-            id: "access",
+            id: "access" as const,
             label: "Acesso",
             content: <DetailSection
               id="worker-access"

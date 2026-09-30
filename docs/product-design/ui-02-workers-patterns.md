@@ -48,6 +48,8 @@ listagens.
   telas estreitas.
 - Overflow horizontal é aceitável quando preservar colunas melhora a comparação
   entre registros.
+- Na largura desktop usual, as seis colunas cabem na superfície. A página faz a
+  rolagem vertical; a tabela não cria uma segunda rolagem para poucas linhas.
 - Quando pertinente, ScrollShadow deve indicar o overflow horizontal real.
 - Ainda não há uma única estratégia responsiva definitiva. A golden screen
   `/app/workers` será usada para validar a solução final.
@@ -59,6 +61,8 @@ listagens.
 - Loading replica a geometria da página para reduzir mudança brusca de layout.
 - Mudanças de filtro mantêm cabeçalho e toolbar estáveis; o estado pending e o
   loading ficam restritos à região de resultados.
+- Os loadings da lista e da edição espelham suas superfícies reais: uma lista
+  responsiva e um formulário único, sem cards ou tabelas aninhadas artificiais.
 - Erros usam FeedbackMessage, linguagem operacional e ação de nova tentativa.
 
 ## Row actions
@@ -73,6 +77,8 @@ listagens.
   card para cada agrupamento.
 - O loading do detalhe espelha apenas o cabeçalho e a aba inicial, sem tabela
   ou superfícies aninhadas.
+- A aba ativa fica na URL para que edição, cancelamento e salvamento retornem
+  ao mesmo contexto.
 - Worker, alocação atual, histórico de alocações e mudanças de situação possuem
   responsabilidades textualmente explícitas.
 - Relações com unidade, operação, cliente, posto e alocação são apresentadas
