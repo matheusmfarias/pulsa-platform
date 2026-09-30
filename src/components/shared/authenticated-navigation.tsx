@@ -769,7 +769,7 @@ export function MobileNavigation({
 
   return (
     <>
-      <div className="flex items-center gap-2 lg:hidden">
+      <div className="flex w-full items-center gap-3 lg:hidden">
         <Button
           ref={menuButtonRef}
           type="button"
@@ -783,6 +783,14 @@ export function MobileNavigation({
         >
           <Menu className="size-5" aria-hidden="true" />
         </Button>
+        <Link
+          aria-label="Pulsa — visão geral"
+          className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+          href="/app"
+        >
+          <BrandMark />
+        </Link>
+        <span aria-hidden="true" className="flex-1" />
         <NavigationSearch collapsed showAdministration={showAdministration} />
       </div>
       {isOpen ? (

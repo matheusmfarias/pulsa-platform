@@ -52,7 +52,7 @@ describe("Workers list view", () => {
     expect(hasActiveWorkerFilters({ query: "", status: "inactive" })).toBe(true);
   });
 
-  it("keeps identification, status and the row action available on mobile", () => {
+  it("renders a compact mobile list and preserves the desktop table", () => {
     const worker = {
       id: "00000000-0000-4000-8000-000000000001",
       full_name: "Maria da Silva",
@@ -67,17 +67,19 @@ describe("Workers list view", () => {
       createElement(WorkerTable, { workers: [worker] }),
     );
 
-    expect(html).toContain('aria-label="Tabela de colaboradores"');
-    expect(html).toContain('tabindex="0"');
+    expect(html).toContain('aria-label="Lista de colaboradores"');
+    expect(html).toContain("xl:hidden");
+    expect(html).toContain("hidden border-t border-border-default/80 xl:block");
     expect(html).toContain("Maria da Silva");
     expect(html).toContain("CPF 123.456.789-09");
     expect(html).toContain("maria@example.invalid");
     expect(html).toContain("Sem alocação");
     expect(html).toContain("Ativo");
+    expect(html).toContain('aria-label="Tabela de colaboradores"');
+    expect(html).toContain('tabindex="0"');
     expect(html).toContain('aria-label="Ver detalhes de Maria da Silva"');
     expect(html).toContain('title="Ver colaborador"');
     expect(html).toContain("lucide-chevron-right");
-    expect(html).toContain("sm:hidden");
-    expect(html).toContain("sm:min-w-[960px]");
+    expect(html).toContain("xl:min-w-[960px]");
   });
 });

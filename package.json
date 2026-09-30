@@ -22,6 +22,8 @@
     "test:worker-access:real": "node tests/integration/worker-access-real-validation.mjs",
     "test:worker-schedule:real": "node tests/integration/worker-schedule-real-validation.mjs",
     "test:worker-presence:real": "node tests/integration/worker-presence-real-validation.mjs",
+    "test:integration:dev": "node --env-file=.env.test.local scripts/run-supabase-integration-tests.mjs",
+    "benchmark:dev": "node --env-file=.env.test.local scripts/prepare-dev-benchmark.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {

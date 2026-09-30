@@ -211,7 +211,7 @@ try {
   assert(recruiterCancelError?.code === "42501", "RECRUITER cancelled an Absence");
 
   const absenceReadModel =
-    "*, reporter:profiles!absences_reported_by_fkey(id, display_name), schedule_entry:schedule_entries!inner(*, assignment:assignments!inner(id, worker:workers!inner(id, full_name), position:positions!inner(id, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name, contract_id)))), schedule_revision:schedule_revisions!inner(id, schedule:schedules!inner(id, operation:operations!inner(id, contract_id, contract:contracts!inner(id, client_id))))))";
+    "*, reporter:profiles!absences_reported_by_fkey(id, display_name), schedule_entry:schedule_entries!absences_schedule_entry_id_fkey!inner(*, assignment:assignments!inner(id, worker:workers!inner(id, full_name), position:positions!inner(id, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name, contract_id)))), schedule_revision:schedule_revisions!inner(id, schedule:schedules!inner(id, operation:operations!inner(id, contract_id, contract:contracts!inner(id, client_id))))))";
   const { data: readableAbsence, error: recruiterReadError } = await recruiter
     .from("absences")
     .select(absenceReadModel)

@@ -118,7 +118,7 @@ export function WorkerFilterBar({ children }: { children: React.ReactNode }) {
   return (
     <section
       aria-label="Lista de colaboradores"
-      className="mt-6 overflow-hidden rounded-card bg-surface shadow-card"
+      className="mt-5 overflow-hidden rounded-card bg-surface shadow-card sm:mt-6"
     >
       <div
         aria-label="Filtros de colaboradores"

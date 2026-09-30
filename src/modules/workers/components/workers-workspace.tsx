@@ -21,7 +21,7 @@ import { WorkerTable } from "./worker-table";
 function NewWorkerButton({ href }: { href: string }) {
   return (
     <PermissionGate permission="worker:create">
-      <Button asChild>
+      <Button asChild className="w-full sm:w-auto">
         <Link href={href} scroll={false}>
           <Plus aria-hidden="true" className="size-4" />
           Novo colaborador
@@ -155,7 +155,7 @@ async function WorkersResults({
 
   return (
     <>
-      <ListResultSummary className="mt-0 min-h-12 px-5 py-2.5">
+      <ListResultSummary className="mt-0 min-h-12 px-4 py-2.5 sm:px-5">
         <p>
           <span className="text-sm font-semibold tabular-nums text-foreground">
             {workers.length} {workers.length === 1 ? "colaborador nesta página" : "colaboradores nesta página"}
@@ -214,7 +214,7 @@ export function WorkersWorkspace({ filters, page = 1 }: { filters: WorkerListFil
   const filtersKey = `${filters.query}:${filters.status}:${page}`;
 
   return (
-    <PageShell className="py-7 sm:py-8">
+    <PageShell className="py-6 sm:py-8">
       <ContentContainer size="list">
         <PageHeader
           actions={<NewWorkerButton href={createHref} />}

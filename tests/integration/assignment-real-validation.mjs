@@ -22,14 +22,10 @@ const { supabaseUrl, publishableKey, serviceRoleKey } = requireIntegrationTestEn
 
 const options = { auth: { autoRefreshToken: false, persistSession: false } };
 const admin = createClient(supabaseUrl, serviceRoleKey, options);
-const { data: membership, error: membershipError } = await admin
-  .from("organization_members")
-  .select("organization_id, profile_id")
-  .eq("status", "active")
-  .eq("role", "DIRECTOR")
-  .limit(1)
-  .single();
-if (membershipError) throw membershipError;
+const primaryOrganizationId = "00000000-0000-4000-8000-000000000001";
+const fixtureWorkerId = "00000000-0000-4000-8000-000000000625";
+const membership = { organization_id: primaryOrganizationId, profile_id: null };
+const suffix = String(Date.now()).slice(-9);
 
 async function authenticatedClientFor(user) {
   const { data: link, error: linkError } = await admin.auth.admin.generateLink({ type: "magiclink", email: user.email });
@@ -40,30 +36,9 @@ async function authenticatedClientFor(user) {
   return client;
 }
 
-const { data: users, error: usersError } = await admin.auth.admin.listUsers();
-if (usersError) throw usersError;
-const director = users.users.find((user) => user.id === membership.profile_id);
-assert(director?.email, "Director Auth user unavailable");
-const actor = await authenticatedClientFor(director);
-
-const { data: worker, error: workerError } = await admin
-  .from("workers")
-  .select("id")
-  .eq("organization_id", membership.organization_id)
-  .eq("status", "active")
-  .limit(1)
-  .single();
-if (workerError) throw workerError;
-const { data: position, error: positionError } = await admin
-  .from("positions")
-  .select("id, unit_id, job_role_id")
-  .eq("status", "active")
-  .limit(1)
-  .single();
-if (positionError) throw positionError;
-
-const suffix = String(Date.now()).slice(-9);
 let assignmentId;
+let directorUserId;
+let actor;
 let noMembershipUserId;
 let incompatibleWorkerId;
 let inactivePositionId;
@@ -71,6 +46,46 @@ let otherOrganizationId;
 let otherWorkerId;
 
 try {
+  const directorEmail = `assignment-director-${suffix}@example.invalid`;
+  const { data: directorUser, error: directorUserError } = await admin.auth.admin.createUser({
+    email: directorEmail,
+    password: randomUUID(),
+    email_confirm: true,
+  });
+  if (directorUserError) throw directorUserError;
+  directorUserId = directorUser.user.id;
+
+  const { error: directorProfileError } = await admin.from("profiles").insert({
+    id: directorUserId,
+    display_name: "Assignment Validation Director",
+  });
+  if (directorProfileError) throw directorProfileError;
+  const { error: directorMembershipError } = await admin.from("organization_members").insert({
+    organization_id: membership.organization_id,
+    profile_id: directorUserId,
+    role: "DIRECTOR",
+    status: "active",
+  });
+  if (directorMembershipError) throw directorMembershipError;
+  membership.profile_id = directorUserId;
+  actor = await authenticatedClientFor(directorUser.user);
+
+  const { data: worker, error: workerError } = await admin
+    .from("workers")
+    .select("id")
+    .eq("id", fixtureWorkerId)
+    .eq("organization_id", membership.organization_id)
+    .eq("status", "active")
+    .single();
+  if (workerError) throw workerError;
+  const { data: position, error: positionError } = await admin
+    .from("positions")
+    .select("id, unit_id, job_role_id")
+    .eq("status", "active")
+    .limit(1)
+    .single();
+  if (positionError) throw positionError;
+
   const { data: assignment, error: createError } = await actor.rpc("mutate_assignment_with_audit", {
     operation: "create",
     worker_id: worker.id,
@@ -245,5 +260,10 @@ try {
     await admin.from("organization_members").delete().eq("profile_id", noMembershipUserId);
     await admin.from("profiles").delete().eq("id", noMembershipUserId);
     await admin.auth.admin.deleteUser(noMembershipUserId);
+  }
+  if (directorUserId) {
+    await admin.from("organization_members").delete().eq("profile_id", directorUserId);
+    await admin.from("profiles").delete().eq("id", directorUserId);
+    await admin.auth.admin.deleteUser(directorUserId);
   }
 }
