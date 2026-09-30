@@ -226,7 +226,8 @@ as regras operacionais foram preservadas.
 
 - As primeiras superfícies de cada página entram com deslocamento curto e
   duração escalonada. A transição comunica a chegada de conteúdo sem atrasar
-  a leitura nem animar listas inteiras.
+  a leitura nem animar listas inteiras. A camada de animação é liberada ao fim
+  para os calendários e seletores flutuarem acima do restante da página.
 - Botões e cartões interativos respondem ao toque; janelas, gavetas, menu
   móvel, seletores e notificações recebem entrada breve e coerente.
 - O movimento é restrito ao Core. `prefers-reduced-motion` desativa essas
@@ -245,5 +246,7 @@ paginação e filtros receberam alvos de toque maiores no telefone.
 
 A Auditoria apresentava erro de carga sem filtros porque o parser não aceitava
 todos os tipos e ações já gravados pelo banco, inclusive escala e acesso
-Worker. A leitura foi alinhada às migrations. A verificação com dados deve ser
-feita no preview após a publicação.
+Worker. A leitura foi alinhada às migrations. No preview publicado, a consulta
+sem filtros exibiu 3.216 eventos. As listas principais foram verificadas em
+320 e 390 px sem rolagem horizontal; o calendário de Presença foi aberto e
+ajustado para manter os seletores legíveis em 320 px.

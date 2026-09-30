@@ -152,7 +152,7 @@ export function PresenceDayNavigation({
           variant="outline"
         >
           <CalendarDays aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate capitalize">{formattedDate}</span>
+          <span className="truncate">{formattedDate}</span>
           <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
         </Button>
 
@@ -162,10 +162,10 @@ export function PresenceDayNavigation({
             className="absolute left-0 top-full z-40 mt-2 w-[min(21rem,calc(100vw-2rem))] rounded-surface border border-border-default bg-surface p-3 shadow-lg sm:p-4"
             role="dialog"
           >
-            <div className="mb-4 flex items-center justify-between gap-2">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <Button
                 aria-label="Mês anterior"
-                className="shrink-0"
+                className="order-2 shrink-0 sm:order-none"
                 onClick={() => setVisibleMonth((value) => shiftPresenceMonth(value, -1))}
                 size="icon"
                 type="button"
@@ -173,7 +173,7 @@ export function PresenceDayNavigation({
               >
                 <ChevronLeft aria-hidden="true" className="size-4" />
               </Button>
-              <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_6rem] gap-2">
+              <div className="order-1 grid w-full min-w-0 grid-cols-[minmax(0,1fr)_6rem] gap-2 sm:order-none sm:w-auto sm:flex-1">
                 <Select
                   aria-label="Mês"
                   className="min-w-0 px-2 capitalize"
@@ -193,7 +193,7 @@ export function PresenceDayNavigation({
               </div>
               <Button
                 aria-label="Próximo mês"
-                className="shrink-0"
+                className="order-3 shrink-0 sm:order-none"
                 onClick={() => setVisibleMonth((value) => shiftPresenceMonth(value, 1))}
                 size="icon"
                 type="button"
