@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AUDIT_ACTION_LABELS,
+  AUDIT_ENTITY_LABELS,
+  parseAuditEvent,
   readAuditMetadata,
 } from "@/modules/administration/domain/audit-event";
 import { auditListFiltersSchema, inviteOrganizationUserSchema } from "@/modules/administration/schemas/administration-schemas";
@@ -64,5 +67,24 @@ describe("administration domain", () => {
       entityType: "presence",
       action: "record_arrival",
     });
+  });
+
+  it("reads scheduling and Worker access events already recorded by the database", () => {
+    const base = {
+      id: "00000000-0000-4000-8000-000000000001",
+      organization_id: "00000000-0000-4000-8000-000000000002",
+      actor_user_id: "00000000-0000-4000-8000-000000000003",
+      entity_id: "00000000-0000-4000-8000-000000000004",
+      metadata: {},
+      created_at: "2026-09-29T12:00:00Z",
+      actor: null,
+    };
+
+    expect(parseAuditEvent({ ...base, entity_type: "schedule_revision", action: "publish" }))
+      .toMatchObject({ entity_type: "schedule_revision", action: "publish" });
+    expect(parseAuditEvent({ ...base, entity_type: "worker_access_link", action: "claim" }))
+      .toMatchObject({ entity_type: "worker_access_link", action: "claim" });
+    expect(AUDIT_ENTITY_LABELS.schedule_revision).toBe("Revisão de escala");
+    expect(AUDIT_ACTION_LABELS.publish).toBe("Publicação");
   });
 });

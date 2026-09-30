@@ -38,6 +38,7 @@ export function Toast({
       role="status"
     >
       <div
+        data-core-motion="toast"
         className={cn(
           "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-surface border border-status-success-border bg-surface p-4 text-foreground shadow-lg",
           className,

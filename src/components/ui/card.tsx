@@ -32,4 +32,4 @@ export function CardContent({
 }
 
 export const interactiveCardClassName =
-  "transition-[transform,box-shadow,background-color] duration-200 ease-out motion-reduce:transform-none motion-reduce:transition-none hover:-translate-y-0.5 hover:shadow-card-hover";
+  "transition-[transform,box-shadow,background-color] duration-200 ease-out motion-reduce:transform-none motion-reduce:transition-none hover:-translate-y-0.5 hover:shadow-card-hover motion-safe:active:translate-y-0 motion-safe:active:scale-[0.99] focus-visible:shadow-card-hover";

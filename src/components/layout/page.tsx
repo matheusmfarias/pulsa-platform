@@ -22,7 +22,7 @@ export function PageShell({
   className,
   ...props
 }: React.ComponentProps<"main">) {
-  return <main className={cn("py-6 sm:py-10", className)} {...props} />;
+  return <main className={cn("core-page py-6 sm:py-10", className)} {...props} />;
 }
 
 export interface ContentContainerProps extends React.ComponentProps<"div"> {
@@ -42,7 +42,7 @@ export function ContentContainer({
       )}
     >
       <div
-        className={cn("w-full", containerWidths[size], className)}
+        className={cn("core-content w-full", containerWidths[size], className)}
         {...props}
       />
     </div>
@@ -86,7 +86,7 @@ export function PageHeader({
         ) : eyebrow ? (
           <p className="text-sm font-medium text-primary">{eyebrow}</p>
         ) : null}
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-[1.75rem] leading-tight font-semibold tracking-[-0.025em] sm:text-3xl">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
             {description}

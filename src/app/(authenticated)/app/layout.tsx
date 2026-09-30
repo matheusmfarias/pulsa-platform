@@ -34,7 +34,7 @@ export default async function AuthenticatedLayout({
   const showAdministration = can(authorization, "organization_member:read");
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-canvas">
+    <div className="core-app min-h-screen overflow-x-hidden bg-canvas">
       <DesktopNavigation
         email={email}
         operationalContextState={operationalContextState}

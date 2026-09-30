@@ -109,7 +109,7 @@ export function FilterSelect<Value extends string>({
       {open ? (
         <div
           aria-label={ariaLabel}
-          className="absolute right-0 z-30 mt-1.5 min-w-56 rounded-surface border border-border-default bg-surface p-1.5 shadow-sm"
+          className="core-popover absolute right-0 z-30 mt-1.5 min-w-56 rounded-surface border border-border-default bg-surface p-1.5 shadow-sm"
           id={menuId}
           role="menu"
         >

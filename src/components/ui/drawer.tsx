@@ -64,6 +64,7 @@ export function Drawer({
 
   return (
     <dialog
+      data-core-motion="drawer"
       aria-describedby={description ? descriptionId : undefined}
       aria-labelledby={titleId}
       aria-modal="true"

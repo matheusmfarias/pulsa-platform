@@ -795,6 +795,7 @@ export function MobileNavigation({
       </div>
       {isOpen ? (
         <dialog
+          data-core-motion="menu"
           aria-label="Menu de navegação"
           className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-transparent p-0 text-foreground backdrop:bg-foreground/20 lg:hidden"
           onCancel={(event) => { event.preventDefault(); setIsOpen(false); }}
