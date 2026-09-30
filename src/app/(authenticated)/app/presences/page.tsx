@@ -13,6 +13,10 @@ import {
   summarizeOperationalPresences,
 } from "@/modules/presences";
 import { PresenceDayNavigation } from "@/modules/presences/components/presence-day-navigation";
+import {
+  PresenceDateTransitionProvider,
+  PresenceDayLoadingRegion,
+} from "@/modules/presences/components/presence-date-transition";
 import { PresenceOperationalTable } from "@/modules/presences/components/presence-operational-table";
 import {
   PresenceDateTransitionProvider,

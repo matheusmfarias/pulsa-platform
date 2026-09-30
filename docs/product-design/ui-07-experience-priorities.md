@@ -167,7 +167,7 @@ As versões expandida e compacta da sidebar, o panorama e as telas de lista fora
 conferidos no ambiente dev em desktop e telefone. A preferência de navegação e
 as regras operacionais foram preservadas.
 
-## Próximo ciclo de desenho
+## Continuidade das melhorias mobile
 
 ### Ajuste mobile da tela Presença
 
@@ -181,6 +181,20 @@ as regras operacionais foram preservadas.
   oferece alvo de toque maior.
 - Conferido em viewport de 390×844 e 360×844: sem rolagem horizontal, cartões
   visíveis e tabela desktop oculta.
+
+### Calendário de presença e lista de ausências
+
+- A navegação mensal personalizada da Presença permanece disponível junto dos
+  controles de dia. O seletor de mês/ano, os atalhos de teclado e o feedback de
+  carregamento foram restaurados; no telefone, o acionador ocupa uma linha e o
+  calendário limita sua largura à viewport.
+- Ausências passam a usar cartões abaixo de `xl`, com colaborador, jornada,
+  unidade, posto, motivo, cobertura e acesso aos detalhes. A tabela completa é
+  mantida no desktop. Os filtros mobile receberam alvos de toque maiores.
+- Conferido em viewports de 320×844, 360×844 e 390×844: sem rolagem horizontal,
+  calendário aberto contido na viewport e cartões legíveis.
+
+## Próximo ciclo de desenho
 
 - Observar com Operações e RH os percursos de ausência, presença, escala e
   alocação sem fornecer o manual antes; registrar dúvidas e etapas evitáveis.

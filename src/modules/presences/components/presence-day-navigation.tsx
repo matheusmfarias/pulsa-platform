@@ -127,7 +127,7 @@ export function PresenceDayNavigation({
   }).format(visibleMonth);
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
       <div aria-label="Navegação diária" className="inline-flex items-center gap-1 rounded-control border border-border-default bg-surface p-1">
         <Button aria-label="Dia anterior" disabled={isPending} onClick={() => navigateToDate(shiftPresenceDate(date, -1))} size="icon" type="button" variant="ghost">
           <ChevronLeft aria-hidden="true" className="size-4" />
@@ -140,11 +140,11 @@ export function PresenceDayNavigation({
         </Button>
       </div>
 
-      <div className="relative" ref={popoverRef}>
+      <div className="relative w-full sm:w-auto" ref={popoverRef}>
         <Button
           aria-expanded={open}
           aria-haspopup="dialog"
-          className="max-w-full justify-between gap-2"
+          className="h-11 w-full justify-between gap-2 sm:h-10 sm:w-auto sm:min-w-64"
           disabled={isPending}
           onClick={() => setOpen((value) => !value)}
           ref={triggerRef}
@@ -159,7 +159,7 @@ export function PresenceDayNavigation({
         {open ? (
           <div
             aria-label="Escolher data da presença"
-            className="absolute left-0 top-full z-40 mt-2 w-[min(21rem,calc(100vw-2rem))] rounded-surface border border-border-default bg-surface p-4 shadow-lg"
+            className="absolute left-0 top-full z-40 mt-2 w-[min(21rem,calc(100vw-2rem))] rounded-surface border border-border-default bg-surface p-3 shadow-lg sm:p-4"
             role="dialog"
           >
             <div className="mb-4 flex items-center justify-between gap-2">
@@ -204,7 +204,7 @@ export function PresenceDayNavigation({
             </div>
 
             <div aria-label={`${monthLabel} ${visibleMonth.getUTCFullYear()}`} className="space-y-1" role="grid">
-              <div className="grid grid-cols-7 gap-1" role="row">
+              <div className="grid grid-cols-7 gap-0.5 sm:gap-1" role="row">
                 {WEEKDAYS.map((weekday, index) => (
                   <div aria-label={["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"][index]} className="flex h-8 items-center justify-center text-xs font-medium text-muted-foreground" key={weekday + index} role="columnheader">
                     {weekday}
@@ -212,7 +212,7 @@ export function PresenceDayNavigation({
                 ))}
               </div>
               {Array.from({ length: 6 }, (_, week) => (
-                <div className="grid grid-cols-7 gap-1" key={week} role="row">
+                <div className="grid grid-cols-7 gap-0.5 sm:gap-1" key={week} role="row">
                   {dates.slice(week * 7, week * 7 + 7).map((calendarDate) => {
                 const key = civilDateKey(calendarDate);
                 const isCurrentMonth = calendarDate.getUTCMonth() === visibleMonth.getUTCMonth();
