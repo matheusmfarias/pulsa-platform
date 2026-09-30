@@ -194,6 +194,25 @@ as regras operacionais foram preservadas.
 - Conferido em viewports de 320×844, 360×844 e 390×844: sem rolagem horizontal,
   calendário aberto contido na viewport e cartões legíveis.
 
+### Listas operacionais e estrutura no telefone
+
+- Escalas, Alocações, Operações, Unidades, Postos, Clientes, Contratos e Cargos
+  apresentam registros completos em cartões nas larguras menores. Nome,
+  situação, contexto e acesso ao detalhe permanecem juntos. As tabelas são
+  usadas no desktop para comparação entre registros.
+- A Visão geral apresenta suas operações em cartões com cliente e métricas.
+  Nos detalhes de Operação e Unidade, as listas relacionadas mostram nomes,
+  status e efetivo sem comprimir colunas. Mudanças de Auditoria mostram os
+  valores anterior e posterior em sequência no telefone.
+- O cabeçalho compartilhado aproxima o conteúdo do topo e expande a ação
+  principal no telefone. A criação de Escalas ganhou escolhas e ações de
+  largura total; na programação semanal, nomes e controles ficam mais fáceis
+  de ler e tocar.
+- Os cartões e o formulário foram conferidos em prévia local com dados de
+  amostra a 320, 360 e 390 px, sem rolagem horizontal. As oito tabelas foram
+  conferidas a 1280 px. As listas internas de detalhe foram verificadas por
+  código e build.
+
 ## Próximo ciclo de desenho
 
 - Observar com Operações e RH os percursos de ausência, presença, escala e

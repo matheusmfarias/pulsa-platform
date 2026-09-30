@@ -44,9 +44,9 @@ export function ScheduleForm({ organizationId, operations, copySources, schedule
       <fieldset className="space-y-3">
         <legend className="text-sm font-semibold">1. Ponto de partida</legend>
         <p className="text-sm leading-6 text-muted-foreground">Crie um rascunho vazio ou use as jornadas de uma escala publicada anterior como base editável.</p>
-        <div className="flex flex-wrap gap-2">
-          <Button aria-pressed={mode === "blank"} onClick={() => setMode("blank")} type="button" variant={mode === "blank" ? "default" : "outline"}>Começar sem jornadas</Button>
-          <Button aria-pressed={mode === "copy"} onClick={() => setMode("copy")} type="button" variant={mode === "copy" ? "default" : "outline"}>Copiar escala anterior</Button>
+        <div className="grid gap-2 sm:flex sm:flex-wrap">
+          <Button aria-pressed={mode === "blank"} className="h-11 sm:h-10" onClick={() => setMode("blank")} type="button" variant={mode === "blank" ? "default" : "outline"}>Começar sem jornadas</Button>
+          <Button aria-pressed={mode === "copy"} className="h-11 sm:h-10" onClick={() => setMode("copy")} type="button" variant={mode === "copy" ? "default" : "outline"}>Copiar escala anterior</Button>
         </div>
       </fieldset>
 
@@ -91,11 +91,11 @@ export function ScheduleForm({ organizationId, operations, copySources, schedule
 
       <input name="creation_mode" type="hidden" value={mode} />
       {state.error && !editedFields.length ? <FeedbackMessage variant="danger">{state.error}</FeedbackMessage> : null}
-      <div className="flex flex-col-reverse gap-4 border-t border-border-default pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 border-t border-border-default pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-md text-sm leading-6 text-muted-foreground">Ao criar, você vai para o detalhe da escala. Ela só ficará disponível para a operação depois da aprovação e publicação.</p>
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <Button asChild variant="ghost"><Link href="/app/scheduling">Cancelar</Link></Button>
-          <Button disabled={pending || invalidPeriod || Boolean(conflict) || noCopySource || (mode === "copy" && !sourceScheduleId)} type="submit">{pending ? "Criando…" : "Criar rascunho"}</Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+          <Button asChild className="h-11 sm:h-10" variant="ghost"><Link href="/app/scheduling">Cancelar</Link></Button>
+          <Button className="h-11 sm:h-10" disabled={pending || invalidPeriod || Boolean(conflict) || noCopySource || (mode === "copy" && !sourceScheduleId)} type="submit">{pending ? "Criando…" : "Criar rascunho"}</Button>
         </div>
       </div>
     </form>

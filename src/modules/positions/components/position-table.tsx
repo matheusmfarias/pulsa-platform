@@ -27,13 +27,59 @@ function getOccupiedHeadcount(position: PositionGlobalListItem): number {
   ).length;
 }
 
+function MobilePositionCard({ position }: { position: PositionGlobalListItem }) {
+  const href = `/app/positions/${position.id}`;
+  const occupied = getOccupiedHeadcount(position);
+
+  return (
+    <li>
+      <article className="rounded-surface border border-border-default/80 bg-surface p-4">
+        <header className="flex items-start justify-between gap-3">
+          <Link
+            className="min-w-0 break-words rounded-sm text-base font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            href={href}
+          >
+            {position.job_role.name}
+          </Link>
+          <PositionStatusBadge status={position.status} />
+        </header>
+        <p className="mt-3 break-words text-sm leading-5">
+          <Link className={relationLinkClass} href={`/app/units/${position.unit.id}`}>
+            {position.unit.name}
+          </Link>
+        </p>
+        <p className="mt-0.5 break-words text-xs leading-5 text-muted-foreground">
+          {position.unit.operation.name} · {position.unit.operation.contract.client.trade_name}
+        </p>
+        <dl className="mt-3 border-t border-border-default/70 pt-3">
+          <dt className="text-xs text-muted-foreground">Efetivo alocado</dt>
+          <dd className="mt-1 text-lg font-semibold tabular-nums">
+            {occupied} <span className="text-sm font-normal text-muted-foreground">de {position.base_required_headcount}</span>
+          </dd>
+        </dl>
+        <div className="mt-3 border-t border-border-default/70 pt-3">
+          <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant="outline">
+            <Link href={href}>Ver posto <ArrowRight aria-hidden="true" className="size-4" /></Link>
+          </Button>
+        </div>
+      </article>
+    </li>
+  );
+}
+
 export function PositionTable({
   positions,
 }: {
   positions: PositionGlobalListItem[];
 }) {
   return (
-    <TableFrame className="mt-4">
+    <>
+      <ul aria-label="Lista de postos" className="mt-4 grid gap-3 xl:hidden">
+        {positions.map((position) => (
+         <MobilePositionCard key={position.id} position={position} />
+        ))}
+      </ul>
+      <TableFrame className="mt-4 hidden xl:block">
       <TableScrollArea bounded label="Tabela de postos">
         <Table className="min-w-full table-fixed xl:min-w-[980px] xl:table-auto">
           <TableHeader className="lg:sticky lg:top-0 lg:z-10">
@@ -155,6 +201,7 @@ export function PositionTable({
           </TableBody>
         </Table>
       </TableScrollArea>
-    </TableFrame>
+      </TableFrame>
+    </>
   );
 }

@@ -28,6 +28,57 @@ function formatDate(value: string | null): string {
   }).format(new Date(value + "T00:00:00Z"));
 }
 
+function MobileAssignmentCard({ assignment }: { assignment: AssignmentListItem }) {
+  const href = `/app/assignments/${assignment.id}`;
+
+  return (
+    <li>
+      <article className="rounded-surface border border-border-default/80 bg-surface p-4">
+        <header className="flex items-start justify-between gap-3">
+          <Link
+            className="min-w-0 break-words rounded-sm text-base font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            href={href}
+          >
+            {assignment.worker.full_name}
+          </Link>
+          <AssignmentStatusBadge status={assignment.status} />
+        </header>
+
+        <dl className="mt-3 space-y-2 border-t border-border-default/70 pt-3 text-sm">
+          <div>
+            <dt className="text-xs font-medium text-muted-foreground">Posto</dt>
+            <dd className="mt-0.5 break-words">
+              <Link className={relationLinkClass} href={`/app/positions/${assignment.position.id}`}>
+                {assignment.position.job_role.name}
+              </Link>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium text-muted-foreground">Unidade</dt>
+            <dd className="mt-0.5 break-words">
+              <Link className={relationLinkClass} href={`/app/units/${assignment.position.unit.id}`}>
+                {assignment.position.unit.name}
+              </Link>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium text-muted-foreground">Período</dt>
+            <dd className="mt-0.5 tabular-nums">
+              {formatDate(assignment.start_date)} — {formatDate(assignment.end_date)}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="mt-3 border-t border-border-default/70 pt-3">
+          <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant="outline">
+            <Link href={href}>Ver alocação <ArrowRight aria-hidden="true" className="size-4" /></Link>
+          </Button>
+        </div>
+      </article>
+    </li>
+  );
+}
+
 export function AssignmentTable({
   assignments,
   footer,
@@ -36,7 +87,13 @@ export function AssignmentTable({
   footer?: ReactNode;
 }) {
   return (
-    <TableFrame className="mt-4">
+    <>
+      <ul aria-label="Lista de alocações" className="mt-4 grid gap-3 xl:hidden">
+        {assignments.map((assignment) => (
+         <MobileAssignmentCard assignment={assignment} key={assignment.id} />
+        ))}
+      </ul>
+      <TableFrame className="mt-4 hidden xl:block">
       <TableScrollArea bounded label="Tabela de alocações">
         <Table className="min-w-full table-fixed xl:min-w-[920px] xl:table-auto">
           <TableHeader className="lg:sticky lg:top-0 lg:z-10">
@@ -147,8 +204,13 @@ export function AssignmentTable({
           </TableBody>
         </Table>
       </TableScrollArea>
-      {footer}
-    </TableFrame>
+      </TableFrame>
+      {footer ? (
+        <div className="mt-3 overflow-hidden rounded-card bg-surface shadow-card [&>nav]:border-t-0">
+          {footer}
+        </div>
+      ) : null}
+    </>
   );
 }
 

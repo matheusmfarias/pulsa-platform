@@ -177,13 +177,13 @@ function EntryItem({ scheduleId, revisionId, entry, editable, canCreateAbsence, 
 
   return (
     <div className={`min-w-0 border-b border-border-default py-2 last:border-0 ${activeAbsence ? "rounded-control bg-status-warning-background/20 px-2" : ""}`}>
-      {editable ? <label className="float-right"><Checkbox aria-label={`Selecionar ${workerName}`} checked={selected} onChange={(event) => onSelect(entry.id, event.target.checked)} /></label> : null}
-      <p className="truncate font-medium" title={workerName}>{workerName}</p>
+      {editable ? <label className="float-right flex size-11 items-center justify-center lg:size-6"><Checkbox aria-label={`Selecionar ${workerName}`} checked={selected} onChange={(event) => onSelect(entry.id, event.target.checked)} /></label> : null}
+      <p className="break-words font-medium lg:truncate" title={workerName}>{workerName}</p>
       <p className="text-xs tabular-nums text-muted-foreground">{start}–{end}</p>
       {pause ? <p className="text-xs tabular-nums text-muted-foreground">Intervalo {pause}</p> : null}
       <ScheduleEntryAbsenceControl activeAbsence={activeAbsence ? { ...activeAbsence, replacementWorkerName: activeReplacement?.replacement_assignment.worker.full_name } : null} canCreate={canCreateAbsence} scheduleEntryId={entry.id} scheduleId={scheduleId} />
       {editable ? <>
-        <Button aria-label={`Gerenciar jornada de ${workerName}`} className="mt-1 h-8 gap-1.5 px-2 text-xs" onClick={() => { setMode("edit"); setCopyTargets([]); setCopyAttempted(false); setOpen(true); }} size="sm" type="button" variant="ghost">
+        <Button aria-label={`Gerenciar jornada de ${workerName}`} className="mt-2 h-11 w-full gap-1.5 px-3 text-sm lg:mt-1 lg:h-8 lg:w-auto lg:px-2 lg:text-xs" onClick={() => { setMode("edit"); setCopyTargets([]); setCopyAttempted(false); setOpen(true); }} size="sm" type="button" variant="ghost">
           <Pencil aria-hidden="true" className="size-3.5" />Gerenciar
         </Button>
         {open ? <Dialog className="max-w-xl" description={`${workerName} · ${days.find((day) => day.key === entryDay)?.label ?? entryDay} · ${start}–${end}`} onOpenChange={setOpen} open={open} title="Gerenciar jornada">
