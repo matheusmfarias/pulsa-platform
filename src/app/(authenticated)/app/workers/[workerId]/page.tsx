@@ -80,10 +80,19 @@ export default async function WorkerDetailsPage({
   const workerAccess = can(authorization, "worker_access:read")
     ? await getWorkerAccessAdministration(worker.id)
     : null;
+  const accessSummary = workerAccess?.linkStatus === "active"
+    ? { title: "Acesso ativo", detail: "O colaborador pode usar o aplicativo." }
+    : workerAccess?.linkStatus === "suspended"
+      ? { title: "Acesso suspenso", detail: "O uso do aplicativo está temporariamente suspenso." }
+      : workerAccess?.linkStatus === "revoked"
+        ? { title: "Acesso revogado", detail: "O acesso foi encerrado e o histórico permanece disponível." }
+        : workerAccess?.invitationStatus === "pending"
+          ? { title: "Convite pendente", detail: "O convite aguarda a confirmação do colaborador." }
+          : { title: "Ainda sem acesso", detail: "Envie um convite para liberar o aplicativo ao colaborador." };
 
   return (
     <PageShell>
-      <ContentContainer size="detail-wide">
+      <ContentContainer className="mx-auto max-w-5xl" size="detail-wide">
         <PageHeader
           actions={
             <PermissionGate permission="worker:update">
@@ -104,13 +113,14 @@ export default async function WorkerDetailsPage({
               ]}
             />
           }
-          description="Local de trabalho, histórico e dados do vínculo."
           metadata={
             <div className="flex flex-wrap items-center gap-3">
               <WorkerStatusBadge status={worker.status} />
-              <span className="tabular-nums">
-                CPF {formatCpf(worker.document_number)}
-              </span>
+              {activeAssignment ? (
+                <span>{activeAssignment.position.job_role.name} · {activeAssignment.position.unit.name}</span>
+              ) : (
+                <span>Sem alocação ativa</span>
+              )}
             </div>
           }
           title={worker.full_name}
@@ -134,20 +144,16 @@ export default async function WorkerDetailsPage({
                 </PermissionGate>
               ) : null
             }
-            description="Cargo e local de trabalho vinculados neste momento."
             id="current-assignment"
             title="Alocação atual"
           >
             {activeAssignment ? (
-              <div className="rounded-r-surface border-l-4 border-action-primary bg-subtle px-5 py-5 sm:px-6">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Cargo atual
-                </p>
-                <p className="mt-1 text-xl font-semibold leading-tight tracking-tight">
+              <div>
+                <p className="text-2xl font-semibold leading-tight tracking-tight">
                   {activeAssignment.position.job_role.name}
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Na unidade{" "}
+                  Unidade ·{" "}
                   <Link
                     className={relationLinkClass + " text-foreground-default"}
                     href={"/app/units/" + activeAssignment.position.unit.id}
@@ -261,37 +267,32 @@ export default async function WorkerDetailsPage({
             label: "Cadastro",
             content: <div className="divide-y divide-border-default">
           <DetailSection
-            description="Informações cadastrais e período do vínculo."
             id="worker-data"
-            title="Dados do colaborador"
+            title="Dados cadastrais"
           >
-            <div className="grid gap-7 lg:grid-cols-2 lg:gap-10">
-              <div>
-                <h3 className="mb-4 text-sm font-semibold">Contato</h3>
-                <dl className="grid gap-5 sm:grid-cols-2">
-                  <DetailItem label="E-mail" value={<span className="break-all">{worker.email ?? "Não informado"}</span>} />
-                  <DetailItem label="Telefone" value={worker.phone ?? "Não informado"} />
-                </dl>
-              </div>
-              <div className="border-t border-border-default pt-6 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-                <h3 className="mb-4 text-sm font-semibold">Vínculo</h3>
-                <dl className="grid gap-5 sm:grid-cols-2">
-                  <DetailItem label="Início" value={formatDate(worker.engagement_start_date, "Não informado")} />
-                  <DetailItem
-                    label="Fim"
-                    value={formatDate(
-                      worker.engagement_end_date,
-                      worker.status === "terminated" ? "Não informado" : "Em aberto",
-                    )}
-                  />
-                </dl>
-              </div>
-            </div>
+            <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+              <DetailItem label="CPF" value={<span className="tabular-nums">{formatCpf(worker.document_number)}</span>} />
+              <DetailItem label="E-mail" value={<span className="break-all">{worker.email ?? "Não informado"}</span>} />
+              <DetailItem label="Telefone" value={worker.phone ?? "Não informado"} />
+            </dl>
+          </DetailSection>
+
+          <DetailSection id="worker-engagement" title="Vínculo">
+            <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+              <DetailItem label="Início" value={formatDate(worker.engagement_start_date, "Não informado")} />
+              <DetailItem
+                label="Fim"
+                value={formatDate(
+                  worker.engagement_end_date,
+                  worker.status === "terminated" ? "Não informado" : "Em aberto",
+                )}
+              />
+            </dl>
           </DetailSection>
 
           {can(authorization, "worker:update") ? (
             <DetailSection
-              description="Altere a situação cadastral. O histórico operacional permanece disponível."
+              description="As mudanças preservam o histórico operacional."
               id="worker-status-actions"
               title="Situação do colaborador"
             >
@@ -304,15 +305,23 @@ export default async function WorkerDetailsPage({
             id: "access",
             label: "Acesso",
             content: <DetailSection
-              description="Convite e acesso ao aplicativo em que o colaborador consulta a escala e registra presença."
               id="worker-access"
               title="Acesso ao Pulsa Worker"
             >
-              <WorkerAccessAdministrationPanel
-                access={workerAccess}
-                workerEmail={worker.email}
-                workerId={worker.id}
-              />
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1fr)] lg:gap-10">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Situação do acesso</p>
+                  <p className="mt-2 text-lg font-semibold">{accessSummary.title}</p>
+                  <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{accessSummary.detail}</p>
+                </div>
+                <div className="border-t border-border-default pt-6 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                  <WorkerAccessAdministrationPanel
+                    access={workerAccess}
+                    workerEmail={worker.email}
+                    workerId={worker.id}
+                  />
+                </div>
+              </div>
             </DetailSection>,
           }] : []),
         ]} />
