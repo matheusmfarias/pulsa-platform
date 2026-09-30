@@ -71,6 +71,8 @@ listagens.
 
 - O detalhe é uma superfície contínua organizada por seções e divisores, sem um
   card para cada agrupamento.
+- O loading do detalhe espelha apenas o cabeçalho e a aba inicial, sem tabela
+  ou superfícies aninhadas.
 - Worker, alocação atual, histórico de alocações e mudanças de situação possuem
   responsabilidades textualmente explícitas.
 - Relações com unidade, operação, cliente, posto e alocação são apresentadas
