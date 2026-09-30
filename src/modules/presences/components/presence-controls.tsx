@@ -88,7 +88,7 @@ function QuickAction({ row }: { row: OperationalPresenceRow }) {
   return (
     <div>
       <form action={formAction}>
-        <Button disabled={pending} size="sm" type="submit">
+        <Button className="h-11 w-full sm:h-9 sm:w-auto" disabled={pending} size="sm" type="submit">
           {isStart ? <LogIn aria-hidden="true" className="size-4" /> : <LogOut aria-hidden="true" className="size-4" />}
           {pending ? "Registrando…" : isStart ? "Registrar chegada" : "Registrar saída"}
         </Button>
@@ -187,8 +187,8 @@ export function PresenceControls({
   const startAvailable = canStart && ["awaiting_confirmation", "replacement_expected"].includes(row.operational_status);
   const completeAvailable = canComplete && row.operational_status === "present";
   return (
-    <div className="flex items-center justify-end gap-1">
-      {startAvailable || completeAvailable ? <QuickAction row={row} /> : null}
+    <div className={`flex w-full items-center gap-2 sm:w-auto sm:justify-end ${startAvailable || completeAvailable ? "justify-between" : "justify-end"}`}>
+      {startAvailable || completeAvailable ? <div className="w-full sm:w-auto"><QuickAction row={row} /></div> : null}
       {row.presence_id ? <PresenceDetails canCancel={canCancel} canCorrect={canCorrect} row={row} /> : null}
     </div>
   );

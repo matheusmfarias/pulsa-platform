@@ -31,6 +31,92 @@ export type PresenceCapabilities = {
   cancel: boolean;
 };
 
+function MobilePresenceCard({
+  row,
+  capabilities,
+}: {
+  row: OperationalPresenceRow;
+  capabilities: PresenceCapabilities;
+}) {
+  const replacementExpected = row.replacement_worker_name !== null;
+  const uncovered = row.operational_status === "uncovered_absence";
+  const expectedWorker = uncovered
+    ? row.original_worker_name
+    : row.replacement_worker_name ?? row.original_worker_name;
+
+  return (
+    <li>
+      <article className="rounded-surface border border-border-default/80 bg-surface p-4">
+        <header className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-muted-foreground">
+              {uncovered ? "Jornada sem cobertura" : "Horário previsto"}
+            </p>
+            <p className="mt-1 whitespace-nowrap text-base font-semibold leading-6 tabular-nums sm:text-lg">
+              {formatTime(row.starts_at, row.unit_timezone)}
+              <span className="px-1 text-muted-foreground">–</span>
+              {formatTime(row.ends_at, row.unit_timezone)}
+            </p>
+          </div>
+          <PresenceStatusBadge status={row.operational_status} />
+        </header>
+
+        <div className="mt-3 min-w-0">
+          <p className="break-words font-semibold leading-5">
+            {uncovered ? "Cobertura pendente" : expectedWorker}
+          </p>
+          {uncovered ? (
+            <p className="mt-0.5 text-sm text-muted-foreground">Jornada de {expectedWorker}</p>
+          ) : replacementExpected ? (
+            <p className="mt-0.5 text-sm text-muted-foreground">Substitui {row.original_worker_name}</p>
+          ) : null}
+          <p className="mt-2 break-words text-sm leading-5 text-muted-foreground">
+            {row.unit_name} · {row.job_role_name}
+          </p>
+          <p className="break-words text-xs leading-5 text-muted-foreground">
+            {row.operation_name}
+          </p>
+        </div>
+
+        {(row.arrived_at || row.departed_at || row.arrived_after_start || row.departed_before_end) ? (
+          <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border-default/70 pt-3 text-sm">
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">Chegada</dt>
+              <dd className="mt-0.5 tabular-nums">{formatTime(row.arrived_at, row.unit_timezone)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">Saída</dt>
+              <dd className="mt-0.5 tabular-nums">{formatTime(row.departed_at, row.unit_timezone)}</dd>
+            </div>
+          </dl>
+        ) : null}
+        {row.arrived_after_start ? (
+          <p className="mt-2 text-xs font-medium text-status-warning-foreground">Chegada após início</p>
+        ) : null}
+        {row.departed_before_end ? (
+          <p className="mt-1 text-xs font-medium text-status-warning-foreground">Saída antes do fim</p>
+        ) : null}
+
+        <div className="mt-3 border-t border-border-default/70 pt-3">
+          {uncovered && row.absence_id ? (
+            <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant="outline">
+              <Link href={`/app/absences/${row.absence_id}`}>Definir cobertura</Link>
+            </Button>
+          ) : (
+            <PresenceControls
+              canCancel={capabilities.cancel}
+              canComplete={capabilities.update}
+              canCorrect={capabilities.update}
+              canStart={capabilities.create}
+              row={row}
+            />
+          )}
+        </div>
+      </article>
+    </li>
+  );
+}
+
 export function PresenceOperationalTable({
   rows,
   capabilities,
@@ -39,7 +125,13 @@ export function PresenceOperationalTable({
   capabilities: PresenceCapabilities;
 }) {
   return (
-    <TableFrame className="mt-4">
+    <>
+      <ul aria-label="Acompanhamento operacional de presença" className="mt-4 grid gap-3 xl:hidden">
+        {rows.map((row) => (
+          <MobilePresenceCard capabilities={capabilities} key={row.schedule_entry_id} row={row} />
+        ))}
+      </ul>
+      <TableFrame className="mt-4 hidden xl:block">
       <TableScrollArea label="Acompanhamento operacional de presença">
         <Table className="min-w-full table-fixed xl:min-w-[1180px] xl:table-auto">
           <TableHeader>
@@ -106,6 +198,7 @@ export function PresenceOperationalTable({
           </TableBody>
         </Table>
       </TableScrollArea>
-    </TableFrame>
+      </TableFrame>
+    </>
   );
 }

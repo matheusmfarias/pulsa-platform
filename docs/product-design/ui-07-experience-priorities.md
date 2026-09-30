@@ -153,6 +153,19 @@ Regras de acesso e transições permanecem sob os serviços existentes.
 
 ## Próximo ciclo de desenho
 
+### Ajuste mobile da tela Presença
+
+- Em telas abaixo de `xl`, o acompanhamento diário passa a apresentar cada
+  jornada em um cartão com horário previsto, colaborador esperado, operação,
+  unidade, posto, horários realizados e alertas pertinentes. A tabela completa
+  permanece no desktop.
+- A ausência sem cobertura destaca a pendência e oferece o acesso para definir
+  cobertura. Registrar chegada e saída continua usando as ações e permissões
+  já existentes; no telefone, o botão principal ocupa a largura disponível e
+  oferece alvo de toque maior.
+- Conferido em viewport de 390×844 e 360×844: sem rolagem horizontal, cartões
+  visíveis e tabela desktop oculta.
+
 - Observar com Operações e RH os percursos de ausência, presença, escala e
   alocação sem fornecer o manual antes; registrar dúvidas e etapas evitáveis.
 - Validar com as diretorias os novos grupos do menu, os termos de busca e os
