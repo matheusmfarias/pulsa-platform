@@ -94,6 +94,9 @@ listagens.
   visualmente independente.
 - `/app/workers/new` representa a listagem de colaboradores com o drawer de
   criação aberto; filtros relevantes permanecem expressos na URL.
+- A criação não exibe skeleton de formulário: os campos são estáticos e o
+  drawer aparece quando a rota está pronta. O loading da lista fica restrito
+  aos resultados ao fundo.
 - Header e footer ficam fixos, enquanto o body pode usar ScrollShadow quando
   houver overflow real.
 - Em telas pequenas, o mesmo drawer ocupa praticamente toda a viewport.
