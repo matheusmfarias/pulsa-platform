@@ -302,7 +302,7 @@ export default async function WorkerDetailsPage({
           },
           ...(workerAccess ? [{
             id: "access",
-            label: "Acesso ao Worker",
+            label: "Acesso",
             content: <DetailSection
               description="Convite e acesso ao aplicativo em que o colaborador consulta a escala e registra presença."
               id="worker-access"
