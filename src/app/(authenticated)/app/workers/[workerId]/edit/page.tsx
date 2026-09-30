@@ -35,15 +35,15 @@ export default async function EditWorkerPage({
 
   return (
     <PageShell>
-      <ContentContainer size="form">
+      <ContentContainer className="max-w-4xl" size="form">
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Pessoas" }, { label: "Colaboradores", href: "/app/workers" }, { label: worker.full_name, href: "/app/workers/" + worker.id }, { label: "Editar" }]} />}
-          description="Atualize somente os dados cadastrais do colaborador."
+          description={worker.full_name}
           title="Editar colaborador"
         />
         <section
           aria-label="Formulário de edição do colaborador"
-          className="mt-8 rounded-card bg-surface shadow-card p-6 sm:p-8"
+          className="mt-6 rounded-card bg-surface p-6 shadow-card sm:p-8"
         >
           <WorkerForm
             cancelHref={"/app/workers/" + worker.id}

@@ -80,8 +80,9 @@ listagens.
 
 ## Form
 
-- Formulários de página agrupam Identificação e Contato e vínculo; no drawer
-  de criação, Identificação, Contato e Vínculo permanecem seções distintas.
+- Formulários de edição e criação agrupam Identificação, Contato e Vínculo em
+  seções distintas. A edição organiza os campos em colunas no desktop; o drawer
+  de criação mantém uma coluna para leitura e preenchimento sequenciais.
 - A ação primária fica no final; Cancelar é secundária e retorna ao contexto
   adequado de criação ou edição.
 - Required, optional, ajuda e erros continuam governados pelos primitives da

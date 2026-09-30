@@ -32,14 +32,16 @@ const initialState: WorkerActionState = { error: null };
 function IdentificationFields({
   autoFocus,
   state,
+  twoColumns,
   worker,
 }: {
   autoFocus: boolean;
   state: WorkerActionState;
+  twoColumns: boolean;
   worker?: Worker;
 }) {
   return (
-    <div className="mt-5 space-y-5">
+    <div className={twoColumns ? "grid gap-5 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "grid gap-5"}>
       <Field
         error={state.fieldErrors?.full_name}
         id="full_name"
@@ -154,6 +156,27 @@ function EngagementFields({
   );
 }
 
+function WorkerFormSection({
+  children,
+  divided = false,
+  drawer,
+  title,
+}: {
+  children: React.ReactNode;
+  divided?: boolean;
+  drawer: boolean;
+  title: string;
+}) {
+  return (
+    <div className={divided ? `border-t border-border-default ${drawer ? "pt-6" : "pt-7"}` : ""}>
+      <fieldset className="min-w-0">
+        <legend className="text-base font-semibold">{title}</legend>
+        <div className="mt-5">{children}</div>
+      </fieldset>
+    </div>
+  );
+}
+
 function WorkerFormSections({
   drawer,
   state,
@@ -164,49 +187,18 @@ function WorkerFormSections({
   worker?: Worker;
 }) {
   return (
-    <div className="space-y-5">
-      <fieldset>
-        <legend className="text-sm font-semibold">Identificação</legend>
-        <p className="mt-1 text-xs leading-4 text-muted-foreground/85">
-          Dados usados para localizar e identificar o colaborador.
-        </p>
-        <IdentificationFields autoFocus={drawer} state={state} worker={worker} />
-      </fieldset>
+    <div className="space-y-7">
+      <WorkerFormSection drawer={drawer} title="Identificação">
+        <IdentificationFields autoFocus={drawer} state={state} twoColumns={!drawer} worker={worker} />
+      </WorkerFormSection>
 
-      {drawer ? (
-        <>
-          <fieldset className="border-t border-border-default pt-5">
-            <legend className="px-1 text-sm font-semibold">Contato</legend>
-            <p className="mt-1 text-xs leading-4 text-muted-foreground/85">
-              Canais opcionais para contato com a pessoa.
-            </p>
-            <div className="mt-5">
-              <ContactFields state={state} twoColumns={false} worker={worker} />
-            </div>
-          </fieldset>
+      <WorkerFormSection divided drawer={drawer} title="Contato">
+        <ContactFields state={state} twoColumns={!drawer} worker={worker} />
+      </WorkerFormSection>
 
-          <fieldset className="border-t border-border-default pt-5">
-            <legend className="px-1 text-sm font-semibold">Vínculo</legend>
-            <p className="mt-1 text-xs leading-4 text-muted-foreground/85">
-              Período opcional do relacionamento com a organização.
-            </p>
-            <div className="mt-5">
-              <EngagementFields state={state} twoColumns={false} worker={worker} />
-            </div>
-          </fieldset>
-        </>
-      ) : (
-        <fieldset className="border-t border-border-default pt-6">
-          <legend className="px-1 text-sm font-semibold">Contato e vínculo</legend>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            Informações complementares para contato e período de relacionamento.
-          </p>
-          <div className="mt-5 space-y-5">
-            <ContactFields state={state} twoColumns worker={worker} />
-            <EngagementFields state={state} twoColumns worker={worker} />
-          </div>
-        </fieldset>
-      )}
+      <WorkerFormSection divided drawer={drawer} title="Vínculo">
+        <EngagementFields state={state} twoColumns={!drawer} worker={worker} />
+      </WorkerFormSection>
 
       {state.error ? (
         <FeedbackMessage variant="danger">{state.error}</FeedbackMessage>
@@ -217,7 +209,7 @@ function WorkerFormSections({
 
 function SubmitButton({ pending, worker }: { pending: boolean; worker?: Worker }) {
   return (
-    <Button disabled={pending} type="submit">
+    <Button className="min-h-11" disabled={pending} type="submit">
       {pending
         ? "Salvando…"
         : worker
@@ -303,7 +295,7 @@ export function WorkerForm({
     <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={formRef}>
       <WorkerFormSections drawer={false} state={state} worker={worker} />
       <div className="flex flex-col-reverse gap-2 border-t border-border-default pt-6 sm:flex-row sm:justify-end">
-        <Button asChild variant="ghost">
+        <Button asChild className="min-h-11" variant="ghost">
           <Link href={cancelHref}>Cancelar</Link>
         </Button>
         <SubmitButton pending={pending} worker={worker} />
