@@ -9,6 +9,7 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { AssignmentStatusBadge } from "@/modules/assignments";
 import { can, getAuthorizationContext, PermissionGate } from "@/modules/authorization";
@@ -19,6 +20,7 @@ import {
 import {
   formatCpf,
   getWorkerOperationalDetail,
+  WORKER_STATUS_TRANSITIONS,
   WorkerStatusAction,
   WorkerStatusBadge,
   workerIdSchema,
@@ -296,7 +298,18 @@ export default async function WorkerDetailsPage({
               id="worker-status-actions"
               title="Situação do colaborador"
             >
-              <WorkerStatusAction currentStatus={worker.status} workerId={worker.id} />
+              {WORKER_STATUS_TRANSITIONS[worker.status].length > 0 ? (
+                <Disclosure>
+                  <DisclosureTrigger className="min-h-11 w-full max-w-xs border border-border-default px-4 py-2">
+                    Alterar situação
+                  </DisclosureTrigger>
+                  <DisclosureContent className="pt-4">
+                    <WorkerStatusAction currentStatus={worker.status} workerId={worker.id} />
+                  </DisclosureContent>
+                </Disclosure>
+              ) : (
+                <WorkerStatusAction currentStatus={worker.status} workerId={worker.id} />
+              )}
             </DetailSection>
           ) : null}
             </div>,
