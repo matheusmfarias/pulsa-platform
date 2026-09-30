@@ -24,7 +24,7 @@ import { WorkerTable } from "./worker-table";
 function NewWorkerButton({ href }: { href: string }) {
   return (
     <PermissionGate permission="worker:create">
-      <Button asChild>
+      <Button asChild className="w-full sm:w-auto">
         <Link href={href} scroll={false}>
           <Plus aria-hidden="true" className="size-4" />
           Novo colaborador

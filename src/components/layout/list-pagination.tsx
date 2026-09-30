@@ -52,7 +52,7 @@ export function ListPagination({
               asChild
               aria-current={pageSize === size ? "true" : undefined}
               aria-label={`${size} itens por página`}
-              className="h-8 min-w-8 px-2 text-xs tabular-nums"
+              className="h-10 min-w-10 px-2 text-xs tabular-nums sm:h-8 sm:min-w-8"
               key={size}
               size="sm"
               variant={pageSize === size ? "default" : "ghost"}
@@ -70,10 +70,10 @@ export function ListPagination({
           </Button>
         ) : <Button aria-label="Primeira página" className="hidden sm:inline-flex" disabled size="icon" variant="ghost"><ChevronsLeft aria-hidden="true" className="size-4" /></Button>}
         {previous ? (
-          <Button asChild aria-label="Página anterior" className="min-h-10" size="sm" variant="outline">
+          <Button asChild aria-label="Página anterior" className="min-h-11 sm:min-h-10" size="sm" variant="outline">
             <Link href={getHref(previous)} scroll={false}><ArrowLeft aria-hidden="true" className="size-4" /><span className="sm:hidden">Anterior</span></Link>
           </Button>
-        ) : <Button aria-label="Página anterior" className="min-h-10" disabled size="sm" variant="outline"><ArrowLeft aria-hidden="true" className="size-4" /><span className="sm:hidden">Anterior</span></Button>}
+        ) : <Button aria-label="Página anterior" className="min-h-11 sm:min-h-10" disabled size="sm" variant="outline"><ArrowLeft aria-hidden="true" className="size-4" /><span className="sm:hidden">Anterior</span></Button>}
 
         <span className="px-2 text-xs font-medium tabular-nums text-muted-foreground sm:hidden">{currentPage} / {pageCount}</span>
         <div className="hidden items-center gap-1 sm:flex">
@@ -95,10 +95,10 @@ export function ListPagination({
         </div>
 
         {next ? (
-          <Button asChild aria-label="Próxima página" className="min-h-10" size="sm" variant="outline">
+          <Button asChild aria-label="Próxima página" className="min-h-11 sm:min-h-10" size="sm" variant="outline">
             <Link href={getHref(next)} scroll={false}><span className="sm:hidden">Próxima</span><ArrowRight aria-hidden="true" className="size-4" /></Link>
           </Button>
-        ) : <Button aria-label="Próxima página" className="min-h-10" disabled size="sm" variant="outline"><span className="sm:hidden">Próxima</span><ArrowRight aria-hidden="true" className="size-4" /></Button>}
+        ) : <Button aria-label="Próxima página" className="min-h-11 sm:min-h-10" disabled size="sm" variant="outline"><span className="sm:hidden">Próxima</span><ArrowRight aria-hidden="true" className="size-4" /></Button>}
         {next ? (
           <Button asChild aria-label="Última página" className="hidden sm:inline-flex" size="icon" variant="ghost">
             <Link href={getHref(pageCount)} scroll={false}><ChevronsRight aria-hidden="true" className="size-4" /></Link>

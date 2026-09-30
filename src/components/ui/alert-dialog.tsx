@@ -49,7 +49,7 @@ export function AlertDialog({
       aria-labelledby={titleId}
       aria-modal="true"
       className={cn(
-        "fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-surface border border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/20",
+        "fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-card border border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/20",
         className,
       )}
       onCancel={(event) => {

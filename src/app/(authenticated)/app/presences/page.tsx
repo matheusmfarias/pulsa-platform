@@ -18,10 +18,6 @@ import {
   PresenceDayLoadingRegion,
 } from "@/modules/presences/components/presence-date-transition";
 import { PresenceOperationalTable } from "@/modules/presences/components/presence-operational-table";
-import {
-  PresenceDateTransitionProvider,
-  PresenceDayLoadingRegion,
-} from "@/modules/presences/components/presence-date-transition";
 import { toPublicErrorMessage } from "@/shared/errors";
 import { RoutePerformanceDiagnostics } from "@/shared/performance/route-performance-diagnostics";
 import type { RouteServerStage } from "@/shared/performance/layout-performance-stages";

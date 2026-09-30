@@ -237,10 +237,13 @@ as regras operacionais foram preservadas.
 
 ### Validação do ambiente com dados
 
-O preview `codex-perf-dev-benchmark` exibe dados fictícios, mas parte de uma
-linha de desenvolvimento diferente daquela das melhorias mobile. A inspeção em
-390 px encontrou tabelas compactadas em Colaboradores, Alocações, Unidades,
-Postos, Cargos, Clientes e Contratos. A Auditoria apresentou erro de carga sem
-filtros; o parser de eventos foi alinhado aos tipos e ações já aceitos pelo
-banco, incluindo escala e acesso Worker. A correção ainda precisa ser conferida
-depois da publicação no ambiente com dados.
+O preview `codex-perf-dev-benchmark` exibe os dados fictícios. Antes da
+integração, a inspeção em 390 px encontrou tabelas compactadas em
+Colaboradores, Alocações, Unidades, Postos, Cargos, Clientes e Contratos. As
+listas mobile foram integradas à paginação desse branch. Os controles de
+paginação e filtros receberam alvos de toque maiores no telefone.
+
+A Auditoria apresentava erro de carga sem filtros porque o parser não aceitava
+todos os tipos e ações já gravados pelo banco, inclusive escala e acesso
+Worker. A leitura foi alinhada às migrations. A verificação com dados deve ser
+feita no preview após a publicação.

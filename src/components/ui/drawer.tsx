@@ -69,7 +69,7 @@ export function Drawer({
       aria-labelledby={titleId}
       aria-modal="true"
       className={cn(
-        "fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-full max-w-none overflow-hidden border-0 border-l border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/15 sm:w-[32rem] sm:max-w-[calc(100vw-2rem)] sm:rounded-l-surface",
+        "fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-full max-w-none overflow-hidden border-0 border-l border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/15 sm:w-[32rem] sm:max-w-[calc(100vw-2rem)] sm:rounded-l-card",
         className,
       )}
       onCancel={(event) => {

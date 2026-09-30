@@ -73,7 +73,40 @@ export function WorkerTable({
   workers: WorkerWithCurrentAssignment[];
 }) {
   return (
-    <div className="border-t border-border-default/80">
+    <>
+      <ul aria-label="Lista de colaboradores" className="grid gap-2 border-t border-border-default/80 bg-subtle/35 p-3 xl:hidden">
+        {workers.map((worker) => (
+          <li key={worker.id}>
+            <article className="rounded-surface border border-border-default/80 bg-surface p-4">
+              <header className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <Link
+                    className="block break-words rounded-sm text-base font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                    href={`/app/workers/${worker.id}`}
+                  >
+                    {worker.full_name}
+                  </Link>
+                  <p className="mt-1 break-words text-sm leading-5 text-muted-foreground">
+                    <AssignmentSummary compact worker={worker} />
+                  </p>
+                </div>
+                <WorkerStatusBadge status={worker.status} />
+              </header>
+              <dl className="mt-3 grid gap-2 border-t border-border-default/70 pt-3 text-sm sm:grid-cols-2">
+                <div className="min-w-0">
+                  <dt className="text-xs font-medium text-muted-foreground">CPF</dt>
+                  <dd className="mt-0.5 break-words tabular-nums">{formatCpf(worker.document_number)}</dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="text-xs font-medium text-muted-foreground">Contato</dt>
+                  <dd className="mt-0.5 break-words">{contactLabel(worker)}</dd>
+                </div>
+              </dl>
+            </article>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden border-t border-border-default/80 xl:block">
       <TableScrollArea bounded label="Tabela de colaboradores" shadow>
         <Table className="min-w-full table-fixed sm:min-w-[960px] sm:table-auto">
           <TableHeader className="sticky top-0 z-10 bg-subtle/45 text-xs normal-case tracking-normal text-muted-foreground">
@@ -140,6 +173,7 @@ export function WorkerTable({
           </TableBody>
         </Table>
       </TableScrollArea>
-    </div>
+      </div>
+    </>
   );
 }

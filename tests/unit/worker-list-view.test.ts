@@ -5,9 +5,12 @@ import { describe, expect, it, vi } from "vitest";
 const navigation = vi.hoisted(() => ({ replace: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: navigation.replace }),
+  useRouter: () => ({ replace: navigation.replace, push: vi.fn() }),
+  usePathname: () => "/app/workers",
   useSearchParams: () => new URLSearchParams("q=Maria&status=active"),
 }));
+
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 
 import {
   hasActiveWorkerFilters,
@@ -21,9 +24,13 @@ describe("Workers list view", () => {
   it("renders removable filter chips and an accessible clear action", () => {
     const html = renderToStaticMarkup(
       createElement(
-        WorkerFilterBar,
+        ListNavigationProvider,
         null,
-        createElement("div", null, "Resultados"),
+        createElement(
+          WorkerFilterBar,
+          null,
+          createElement(ListPendingSurface, null, "Resultados"),
+        ),
       ),
     );
 
@@ -67,17 +74,18 @@ describe("Workers list view", () => {
       createElement(WorkerTable, { workers: [worker] }),
     );
 
+    expect(html).toContain('aria-label="Lista de colaboradores"');
     expect(html).toContain('aria-label="Tabela de colaboradores"');
     expect(html).toContain('tabindex="0"');
     expect(html).toContain("Maria da Silva");
-    expect(html).toContain("CPF 123.456.789-09");
+    expect(html).toContain("123.456.789-09");
     expect(html).toContain("maria@example.invalid");
     expect(html).toContain("Sem alocação");
     expect(html).toContain("Ativo");
     expect(html).toContain('aria-label="Ver detalhes de Maria da Silva"');
     expect(html).toContain('title="Ver colaborador"');
     expect(html).toContain("lucide-chevron-right");
-    expect(html).toContain("sm:hidden");
-    expect(html).toContain("sm:min-w-[960px]");
+    expect(html).toContain("xl:hidden");
+    expect(html).toContain("xl:block");
   });
 });

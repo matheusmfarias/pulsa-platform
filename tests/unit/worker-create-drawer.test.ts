@@ -86,7 +86,7 @@ describe("worker create drawer flow", () => {
       "utf8",
     );
 
-    expect(newPage).toContain("<WorkersWorkspace filters={filters} page={page} />");
+    expect(newPage).toContain("<WorkersWorkspace filters={filters} page={page} pageSize={pageSize} />");
     expect(newPage).toContain("<NewWorkerDrawer returnHref={returnHref} />");
     expect(drawer).toContain("router.replace(returnHref, { scroll: false })");
   });

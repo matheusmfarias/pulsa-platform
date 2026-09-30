@@ -81,7 +81,7 @@ export function FilterSelect<Value extends string>({
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={ariaLabel}
-        className="inline-flex h-10 max-w-64 items-center justify-between gap-2 rounded-control border border-input bg-background px-3 text-sm font-medium text-foreground shadow-[0_1px_0_rgb(0_0_0/0.025)] transition-[background-color,border-color,color] hover:border-border-strong hover:bg-hover/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1"
+        className="inline-flex h-11 max-w-64 items-center justify-between gap-2 rounded-control border border-input bg-background px-3 text-sm font-medium text-foreground shadow-[0_1px_0_rgb(0_0_0/0.025)] transition-[background-color,border-color,color] hover:border-border-strong hover:bg-hover/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1 sm:h-10"
         onClick={() => setOpen((current) => !current)}
         ref={triggerRef}
         type="button"
@@ -120,7 +120,7 @@ export function FilterSelect<Value extends string>({
               <button
                 aria-checked={selected}
                 className={cn(
-                  "grid min-h-9 w-full grid-cols-[minmax(0,1fr)_1rem] items-center gap-3 rounded-control px-2.5 py-2 text-left text-sm text-foreground transition-colors hover:bg-hover/55 focus-visible:bg-hover/65 focus-visible:outline-none",
+                  "grid min-h-11 w-full grid-cols-[minmax(0,1fr)_1rem] items-center gap-3 rounded-control px-2.5 py-2 text-left text-sm text-foreground transition-colors hover:bg-hover/55 focus-visible:bg-hover/65 focus-visible:outline-none sm:min-h-9",
                   selected && "bg-subtle/70 font-medium",
                 )}
                 key={option.value}
