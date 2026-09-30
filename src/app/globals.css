@@ -226,6 +226,9 @@ table a:not([class*="text-"]) {
   }
 
   .core-app .core-form-content {
+    display: flex;
+    min-height: calc(100% - 0.75rem);
+    flex-direction: column;
     max-width: none;
   }
 
@@ -254,6 +257,9 @@ table a:not([class*="text-"]) {
   }
 
   .core-app .core-form-content > section {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     margin: 0;
     border: 0;
     border-radius: 0;
@@ -262,11 +268,17 @@ table a:not([class*="text-"]) {
     padding: 1.25rem 1.25rem 1.5rem;
   }
 
+  .core-app .core-form-content > section > form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+
   .core-app .core-form-content form > div:last-child {
     position: sticky;
     bottom: 0;
     z-index: 10;
-    margin: 0 -1.25rem -1.5rem;
+    margin: auto -1.25rem -1.5rem;
     border-top: 1px solid var(--border-default);
     background: var(--surface);
     padding: 0.75rem 1.25rem max(1rem, env(safe-area-inset-bottom));
