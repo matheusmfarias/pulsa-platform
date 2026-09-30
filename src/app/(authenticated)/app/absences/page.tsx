@@ -40,11 +40,11 @@ export default async function AbsencesPage({ searchParams }: PageProps<"/app/abs
           title="Ausências"
         />
         <div className="mt-5 sm:mt-6">
-          <nav aria-label="Filtrar ausências por cobertura" className="mb-4 flex flex-wrap items-center gap-2">
-            <Button asChild size="sm" variant={withoutCoverage ? "outline" : "default"}>
+          <nav aria-label="Filtrar ausências por cobertura" className="mb-4 grid grid-cols-2 gap-2 sm:flex sm:items-center">
+            <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant={withoutCoverage ? "outline" : "default"}>
               <Link aria-current={!withoutCoverage ? "page" : undefined} href="/app/absences">Todas</Link>
             </Button>
-            <Button asChild size="sm" variant={withoutCoverage ? "default" : "outline"}>
+            <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant={withoutCoverage ? "default" : "outline"}>
               <Link aria-current={withoutCoverage ? "page" : undefined} href="/app/absences?coverage=uncovered">Sem cobertura</Link>
             </Button>
           </nav>
