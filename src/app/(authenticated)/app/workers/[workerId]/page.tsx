@@ -25,6 +25,7 @@ import {
 } from "@/modules/workers";
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { WorkerDetailTabs } from "@/modules/workers/components/worker-detail-tabs";
 
 const relationLinkClass =
   "rounded-sm font-medium underline decoration-border-strong underline-offset-4 hover:decoration-action-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
@@ -115,7 +116,11 @@ export default async function WorkerDetailsPage({
           title={worker.full_name}
         />
 
-        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
+        <WorkerDetailTabs tabs={[
+          {
+            id: "assignments",
+            label: "Alocações",
+            content: <div className="divide-y divide-border-default">
           <DetailSection
             actions={
               worker.status === "active" ? (
@@ -198,7 +203,7 @@ export default async function WorkerDetailsPage({
           </DetailSection>
 
           <DetailSection
-            description="Demais relações, além da alocação atual, da mais recente para a mais antiga."
+            description={otherAssignments.length > 0 ? "Relações anteriores, da mais recente para a mais antiga." : undefined}
             id="assignment-history"
             title={`Histórico de alocações (${otherAssignments.length})`}
           >
@@ -249,6 +254,12 @@ export default async function WorkerDetailsPage({
             )}
           </DetailSection>
 
+            </div>,
+          },
+          {
+            id: "record",
+            label: "Cadastro",
+            content: <div className="divide-y divide-border-default">
           <DetailSection
             description="Informações cadastrais e período do vínculo."
             id="worker-data"
@@ -278,49 +289,33 @@ export default async function WorkerDetailsPage({
             </div>
           </DetailSection>
 
-          {workerAccess || can(authorization, "worker:update") ? (
+          {can(authorization, "worker:update") ? (
             <DetailSection
-              description="Gerencie o acesso ao aplicativo e a situação cadastral do colaborador."
-              id="worker-administration"
-              title="Administração"
+              description="Altere a situação cadastral. O histórico operacional permanece disponível."
+              id="worker-status-actions"
+              title="Situação do colaborador"
             >
-              <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
-                {workerAccess ? (
-                  <section aria-labelledby="worker-access">
-                    <h3 className="text-sm font-semibold" id="worker-access">
-                      Acesso ao Pulsa Worker
-                    </h3>
-                    <p className="mt-1 mb-4 text-sm leading-6 text-muted-foreground">
-                      Aplicativo para consultar a escala e registrar presença.
-                    </p>
-                    <WorkerAccessAdministrationPanel
-                      access={workerAccess}
-                      workerEmail={worker.email}
-                      workerId={worker.id}
-                    />
-                  </section>
-                ) : null}
-                <PermissionGate permission="worker:update">
-                  <section
-                    aria-labelledby="worker-status-actions"
-                    className={workerAccess ? "border-t border-border-default pt-7 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0" : ""}
-                  >
-                    <h3 className="text-sm font-semibold" id="worker-status-actions">
-                      Situação do colaborador
-                    </h3>
-                    <p className="mt-1 mb-4 text-sm leading-6 text-muted-foreground">
-                      Altere a situação cadastral. O histórico operacional permanece disponível.
-                    </p>
-                    <WorkerStatusAction
-                      currentStatus={worker.status}
-                      workerId={worker.id}
-                    />
-                  </section>
-                </PermissionGate>
-              </div>
+              <WorkerStatusAction currentStatus={worker.status} workerId={worker.id} />
             </DetailSection>
           ) : null}
-        </div>
+            </div>,
+          },
+          ...(workerAccess ? [{
+            id: "access",
+            label: "Acesso ao Worker",
+            content: <DetailSection
+              description="Convite e acesso ao aplicativo em que o colaborador consulta a escala e registra presença."
+              id="worker-access"
+              title="Acesso ao Pulsa Worker"
+            >
+              <WorkerAccessAdministrationPanel
+                access={workerAccess}
+                workerEmail={worker.email}
+                workerId={worker.id}
+              />
+            </DetailSection>,
+          }] : []),
+        ]} />
       </ContentContainer>
     </PageShell>
   );
