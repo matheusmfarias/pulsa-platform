@@ -214,7 +214,28 @@ export default async function UnitDetailsPage({
                 Esta unidade ainda não possui postos cadastrados.
               </p>
             ) : (
-              <TableFrame>
+              <>
+                <ul aria-label="Postos da unidade" className="divide-y divide-border-default lg:hidden">
+                  {unit.positions.map((position) => (
+                    <li className="py-4 first:pt-0 last:pb-0" key={position.id}>
+                      <div className="flex items-start justify-between gap-3">
+                        <Link
+                          className={relationLinkClass + " min-w-0 break-words font-semibold"}
+                          href={`/app/units/${unit.id}/positions/${position.id}`}
+                        >
+                          {position.job_role.name}
+                        </Link>
+                        <PositionStatusBadge status={position.status} />
+                      </div>
+                      <dl className="mt-3 grid grid-cols-3 gap-2 text-sm tabular-nums">
+                        <div><dt className="text-xs text-muted-foreground">Efetivo base</dt><dd className="mt-1 font-semibold">{position.base_required_headcount}</dd></div>
+                        <div><dt className="text-xs text-muted-foreground">Alocados</dt><dd className="mt-1 font-semibold">{position.activeAssignments}</dd></div>
+                        <div><dt className="text-xs text-muted-foreground">Déficit</dt><dd className="mt-1 font-semibold">{position.deficit}</dd></div>
+                      </dl>
+                    </li>
+                  ))}
+                </ul>
+              <TableFrame className="hidden lg:block">
                 <TableScrollArea label="Postos da unidade">
                   <Table className="min-w-full table-fixed lg:min-w-[720px] lg:table-auto">
                     <TableHeader>
@@ -321,6 +342,7 @@ export default async function UnitDetailsPage({
                   </Table>
                 </TableScrollArea>
               </TableFrame>
+              </>
             )}
           </DetailSection>
 

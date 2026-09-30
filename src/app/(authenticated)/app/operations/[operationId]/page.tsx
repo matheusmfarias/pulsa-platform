@@ -234,7 +234,32 @@ export default async function OperationDetailsPage({
                 Esta operação ainda não possui unidades cadastradas.
               </p>
             ) : (
-              <TableFrame>
+              <>
+                <ul aria-label="Unidades da operação" className="divide-y divide-border-default lg:hidden">
+                  {operation.units.map((unit) => {
+                    const location = [unit.city, unit.state].filter(Boolean).join(" / ") || unit.code || "Localização não informada";
+                    return (
+                      <li className="py-4 first:pt-0 last:pb-0" key={unit.id}>
+                        <div className="flex items-start justify-between gap-3">
+                          <Link
+                            className={relationLinkClass + " min-w-0 break-words font-semibold"}
+                            href={`/app/units/${unit.id}`}
+                          >
+                            {unit.name}
+                          </Link>
+                          <UnitStatusBadge status={unit.status} />
+                        </div>
+                        <p className="mt-1 break-words text-xs text-muted-foreground">{location}</p>
+                        <dl className="mt-3 grid grid-cols-3 gap-2 text-sm tabular-nums">
+                          <div><dt className="text-xs text-muted-foreground">Postos</dt><dd className="mt-1 font-semibold">{unit.activePositions}</dd></div>
+                          <div><dt className="text-xs text-muted-foreground">Efetivo base</dt><dd className="mt-1 font-semibold">{unit.baseRequiredHeadcount}</dd></div>
+                          <div><dt className="text-xs text-muted-foreground">Alocados</dt><dd className="mt-1 font-semibold">{unit.activeAssignments}</dd></div>
+                        </dl>
+                      </li>
+                    );
+                  })}
+                </ul>
+              <TableFrame className="hidden lg:block">
                 <TableScrollArea label="Unidades da operação">
                   <Table className="min-w-full table-fixed lg:min-w-[760px] lg:table-auto">
                     <TableHeader>
@@ -350,6 +375,7 @@ export default async function OperationDetailsPage({
                   </Table>
                 </TableScrollArea>
               </TableFrame>
+              </>
             )}
           </DetailSection>
 

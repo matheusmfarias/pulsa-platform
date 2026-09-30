@@ -22,7 +22,7 @@ export function PageShell({
   className,
   ...props
 }: React.ComponentProps<"main">) {
-  return <main className={cn("py-10", className)} {...props} />;
+  return <main className={cn("py-6 sm:py-10", className)} {...props} />;
 }
 
 export interface ContentContainerProps extends React.ComponentProps<"div"> {
@@ -97,7 +97,7 @@ export function PageHeader({
         ) : null}
       </div>
       {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 [&>*]:w-full [&>a]:min-h-11 [&>button]:min-h-11 sm:w-auto sm:shrink-0 sm:[&>*]:w-auto sm:[&>a]:min-h-0 sm:[&>button]:min-h-0">
           {actions}
         </div>
       ) : null}

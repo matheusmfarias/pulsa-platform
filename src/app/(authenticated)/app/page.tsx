@@ -405,7 +405,38 @@ export default async function InternalHomePage() {
               </p>
             </section>
           ) : (
-            <TableFrame className="mt-4">
+            <>
+              <ul aria-label="Resumo das operações" className="mt-4 grid gap-3 xl:hidden">
+                {overview.operations.map((operation) => (
+                  <li key={operation.id}>
+                    <article className="rounded-card bg-surface p-4 shadow-card">
+                      <Link
+                        className="flex items-start justify-between gap-3 rounded-sm font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                        href={`/app/operations/${operation.id}`}
+                      >
+                        <span className="min-w-0 break-words">{operation.name}</span>
+                        <ArrowRight aria-hidden="true" className="mt-1 size-4 shrink-0" />
+                      </Link>
+                      <p className="mt-1 break-words text-sm text-muted-foreground">{operation.clientName}</p>
+                      <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-border-default/70 pt-3">
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Unidades</dt>
+                          <dd className="mt-1 text-lg font-semibold tabular-nums">{operation.units}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Postos</dt>
+                          <dd className="mt-1 text-lg font-semibold tabular-nums">{operation.positions}</dd>
+                        </div>
+                        <div>
+                          <dt className="break-words text-xs text-muted-foreground">Colaboradores</dt>
+                          <dd className="mt-1 text-lg font-semibold tabular-nums">{operation.allocatedWorkers}</dd>
+                        </div>
+                      </dl>
+                    </article>
+                  </li>
+                ))}
+              </ul>
+              <TableFrame className="mt-4 hidden xl:block">
               <TableScrollArea label="Resumo das operações">
                 <Table className="min-w-[720px]">
                   <TableHeader>
@@ -452,7 +483,8 @@ export default async function InternalHomePage() {
                   </TableBody>
                 </Table>
               </TableScrollArea>
-            </TableFrame>
+              </TableFrame>
+            </>
           )}
         </section>
       </ContentContainer>

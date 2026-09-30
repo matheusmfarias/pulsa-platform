@@ -19,13 +19,47 @@ import { JobRoleStatusBadge } from "./job-role-status-badge";
 const relationLinkClass =
   "rounded-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
 
+function MobileJobRoleCard({ jobRole }: { jobRole: JobRole }) {
+  const href = `/app/job-roles/${jobRole.id}`;
+
+  return (
+    <li>
+      <article className="rounded-surface border border-border-default/80 bg-surface p-4">
+        <header className="flex items-start justify-between gap-3">
+          <Link
+            className="min-w-0 break-words rounded-sm text-base font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            href={href}
+          >
+            {jobRole.name}
+          </Link>
+          <JobRoleStatusBadge status={jobRole.status} />
+        </header>
+        <p className="mt-3 line-clamp-3 break-words text-sm leading-5 text-muted-foreground">
+          {jobRole.description ?? "Descrição não informada"}
+        </p>
+        <div className="mt-3 border-t border-border-default/70 pt-3">
+          <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant="outline">
+            <Link href={href}>Ver cargo <ArrowRight aria-hidden="true" className="size-4" /></Link>
+          </Button>
+        </div>
+      </article>
+    </li>
+  );
+}
+
 export function JobRoleTable({
   jobRoles,
 }: {
   jobRoles: JobRole[];
 }) {
   return (
-    <TableFrame className="mt-4">
+    <>
+      <ul aria-label="Lista de cargos" className="mt-4 grid gap-3 xl:hidden">
+        {jobRoles.map((jobRole) => (
+          <MobileJobRoleCard jobRole={jobRole} key={jobRole.id} />
+        ))}
+      </ul>
+      <TableFrame className="mt-4 hidden xl:block">
       <TableScrollArea label="Tabela de cargos">
         <Table className="min-w-full table-fixed lg:min-w-[720px] lg:table-auto">
           <TableHeader>
@@ -104,6 +138,7 @@ export function JobRoleTable({
           </TableBody>
         </Table>
       </TableScrollArea>
-    </TableFrame>
+      </TableFrame>
+    </>
   );
 }

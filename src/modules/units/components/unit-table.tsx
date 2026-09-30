@@ -19,9 +19,61 @@ import { UnitStatusBadge } from "./unit-status-badge";
 const relationLinkClass =
   "rounded-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
 
+function MobileUnitCard({ unit }: { unit: UnitOperationalSummary }) {
+  const href = `/app/units/${unit.id}`;
+
+  return (
+    <li>
+      <article className="rounded-surface border border-border-default/80 bg-surface p-4">
+        <header className="flex items-start justify-between gap-3">
+          <Link
+            className="min-w-0 break-words rounded-sm text-base font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+            href={href}
+          >
+            {unit.name}
+          </Link>
+          <UnitStatusBadge status={unit.status} />
+        </header>
+        {unit.code ? <p className="mt-1 text-xs text-muted-foreground">Código {unit.code}</p> : null}
+        <p className="mt-3 break-words text-sm leading-5">
+          <Link className={relationLinkClass} href={`/app/operations/${unit.operation.id}`}>
+            {unit.operation.name}
+          </Link>
+        </p>
+        <p className="mt-0.5 break-words text-xs leading-5 text-muted-foreground">
+          {unit.operation.contract.client.trade_name}
+        </p>
+        <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border-default/70 pt-3">
+          <div>
+            <dt className="text-xs text-muted-foreground">Postos ativos</dt>
+            <dd className="mt-1 text-lg font-semibold tabular-nums">{unit.activePositions}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-muted-foreground">Efetivo alocado</dt>
+            <dd className="mt-1 text-lg font-semibold tabular-nums">
+              {unit.activeAssignments} <span className="text-sm font-normal text-muted-foreground">de {unit.baseRequiredHeadcount}</span>
+            </dd>
+          </div>
+        </dl>
+        <div className="mt-3 border-t border-border-default/70 pt-3">
+          <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant="outline">
+            <Link href={href}>Ver unidade <ArrowRight aria-hidden="true" className="size-4" /></Link>
+          </Button>
+        </div>
+      </article>
+    </li>
+  );
+}
+
 export function UnitTable({ units }: { units: UnitOperationalSummary[] }) {
   return (
-    <TableFrame className="mt-4">
+    <>
+      <ul aria-label="Lista de unidades" className="mt-4 grid gap-3 xl:hidden">
+        {units.map((unit) => (
+          <MobileUnitCard key={unit.id} unit={unit} />
+        ))}
+      </ul>
+      <TableFrame className="mt-4 hidden xl:block">
       <TableScrollArea label="Tabela de unidades">
         <Table className="min-w-full table-fixed xl:min-w-[980px] xl:table-auto">
           <TableHeader>
@@ -149,6 +201,7 @@ export function UnitTable({ units }: { units: UnitOperationalSummary[] }) {
           </TableBody>
         </Table>
       </TableScrollArea>
-    </TableFrame>
+      </TableFrame>
+    </>
   );
 }

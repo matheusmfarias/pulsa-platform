@@ -162,7 +162,25 @@ export default async function AuditEventDetailPage({
                 O evento não possui campos resumidos.
               </p>
             ) : (
-              <TableFrame className="mt-5">
+              <>
+                <ul aria-label="Mudanças do evento de auditoria" className="mt-5 divide-y divide-border-default overflow-hidden rounded-surface border border-border-default bg-surface md:hidden">
+                  {metadata.changes.map((field) => (
+                    <li className="p-4" key={field}>
+                      <h3 className="break-words font-semibold">{auditFieldLabel(field)}</h3>
+                      <dl className="mt-3 space-y-3 text-sm">
+                        <div>
+                          <dt className="text-xs font-medium text-muted-foreground">Antes</dt>
+                          <dd className="mt-0.5 break-words text-muted-foreground">{readableValue(metadata.previousState[field])}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs font-medium text-muted-foreground">Depois</dt>
+                          <dd className="mt-0.5 break-words">{readableValue(metadata.newState[field])}</dd>
+                        </div>
+                      </dl>
+                    </li>
+                  ))}
+                </ul>
+              <TableFrame className="mt-5 hidden md:block">
                 <TableScrollArea label="Mudanças do evento de auditoria">
                   <Table className="min-w-full table-fixed sm:min-w-[620px] sm:table-auto">
                     <TableHeader>
@@ -190,6 +208,7 @@ export default async function AuditEventDetailPage({
                   </Table>
                 </TableScrollArea>
               </TableFrame>
+              </>
             )}
           </section>
           <section className="py-6">
