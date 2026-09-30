@@ -50,7 +50,7 @@ export default async function AuthenticatedLayout({
 
   return (
     <LayoutPerformanceStagesProvider serverStages={serverStages}>
-      <div className="min-h-screen overflow-x-hidden bg-canvas">
+      <div className="core-app min-h-screen overflow-x-hidden bg-canvas">
         <DesktopNavigation
           email={email}
           operationalContextState={operationalContextState}

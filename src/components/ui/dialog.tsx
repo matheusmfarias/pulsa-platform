@@ -33,6 +33,7 @@ export function Dialog({ children, className, description, onOpenChange, open, t
   }, [open]);
 
   return <dialog
+    data-core-motion="dialog"
     aria-describedby={description ? descriptionId : undefined}
     aria-labelledby={titleId}
     className={cn("fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-surface border border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/30", className)}

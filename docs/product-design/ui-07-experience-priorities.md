@@ -175,3 +175,26 @@ as regras operacionais foram preservadas.
   atalhos mais usados antes de consolidar a nomenclatura.
 - Avaliar em telefone real a escala, o registro de presença e os estados vazios
   do Worker; ajustar densidade e texto com base em observação.
+
+## Acabamento de interação do Core
+
+- As primeiras superfícies de cada página entram com deslocamento curto e
+  duração escalonada. A transição comunica a chegada de conteúdo sem atrasar
+  a leitura nem animar listas inteiras.
+- Botões e cartões interativos respondem ao toque; janelas, gavetas, menu
+  móvel, seletores e notificações recebem entrada breve e coerente.
+- O movimento é restrito ao Core. `prefers-reduced-motion` desativa essas
+  entradas e a pulsação dos esqueletos de carregamento.
+- Cabeçalhos ganharam uma hierarquia tipográfica mais clara. A prévia local foi
+  inspecionada em 320 e 390 px, com ação principal de 44 px e sem rolagem
+  horizontal.
+
+### Validação do ambiente com dados
+
+O preview `codex-perf-dev-benchmark` exibe dados fictícios, mas parte de uma
+linha de desenvolvimento diferente daquela das melhorias mobile. A inspeção em
+390 px encontrou tabelas compactadas em Colaboradores, Alocações, Unidades,
+Postos, Cargos, Clientes e Contratos. A Auditoria apresentou erro de carga sem
+filtros; o parser de eventos foi alinhado aos tipos e ações já aceitos pelo
+banco, incluindo escala e acesso Worker. A correção ainda precisa ser conferida
+depois da publicação no ambiente com dados.

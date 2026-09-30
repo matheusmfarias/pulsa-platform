@@ -174,3 +174,69 @@ table tbody tr {
 table a:not([class*="text-"]) {
   color: inherit;
 }
+
+/* Core motion is restrained, functional, and scoped away from Pulsa Worker. */
+@keyframes core-content-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes core-dialog-enter {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes core-drawer-enter {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes core-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .core-app .core-page .core-content > :nth-child(-n+4) {
+    animation: core-content-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .core-app .core-page .core-content > :nth-child(2) { animation-delay: 35ms; }
+  .core-app .core-page .core-content > :nth-child(3) { animation-delay: 70ms; }
+  .core-app .core-page .core-content > :nth-child(4) { animation-delay: 105ms; }
+
+  .core-app .core-button {
+    transition: background-color 160ms ease, border-color 160ms ease,
+      color 160ms ease, box-shadow 160ms ease, scale 160ms ease;
+  }
+
+  .core-app .core-button:active:not(:disabled) { scale: 0.975; }
+
+  .core-app dialog[data-core-motion="dialog"][open] {
+    animation: core-dialog-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .core-app dialog[data-core-motion="drawer"][open] {
+    animation: core-drawer-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .core-app dialog[data-core-motion="menu"][open] aside {
+    animation: core-drawer-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .core-app dialog[data-core-motion][open]::backdrop {
+    animation: core-backdrop-enter 220ms ease-out both;
+  }
+
+  .core-app [data-core-motion="toast"],
+  .core-app .core-popover {
+    animation: core-dialog-enter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .core-app .animate-pulse,
+  .core-app .animate-spin {
+    animation: none;
+  }
+}

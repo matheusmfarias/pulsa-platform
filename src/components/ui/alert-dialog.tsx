@@ -44,6 +44,7 @@ export function AlertDialog({
 
   return (
     <dialog
+      data-core-motion="dialog"
       aria-describedby={descriptionId}
       aria-labelledby={titleId}
       aria-modal="true"
