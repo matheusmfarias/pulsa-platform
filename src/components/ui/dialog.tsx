@@ -36,7 +36,7 @@ export function Dialog({ children, className, description, onOpenChange, open, t
     data-core-motion="dialog"
     aria-describedby={description ? descriptionId : undefined}
     aria-labelledby={titleId}
-    className={cn("fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-card border border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/30", className)}
+    className={cn("fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-card border border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/30 sm:inset-0 sm:m-auto sm:w-[calc(100%-2rem)] sm:max-w-lg sm:rounded-card", className)}
     onCancel={(event) => { event.preventDefault(); onOpenChange(false); }}
     onClick={(event) => {
       if (event.target !== event.currentTarget) return;
@@ -44,8 +44,10 @@ export function Dialog({ children, className, description, onOpenChange, open, t
       if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onOpenChange(false);
     }}
     ref={dialogRef}
+    role="dialog"
   >
-    <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-5 sm:p-6">
+    <div className="max-h-[calc(100dvh-max(0.5rem,env(safe-area-inset-top)))] overflow-y-auto overscroll-contain px-5 pt-7 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+      <span aria-hidden="true" className="absolute left-1/2 top-2 h-1 w-9 -translate-x-1/2 rounded-pill bg-border-strong sm:hidden" />
       <header className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-base font-semibold" id={titleId}>{title}</h2>

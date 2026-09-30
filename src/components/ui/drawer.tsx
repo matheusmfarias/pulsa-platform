@@ -69,7 +69,7 @@ export function Drawer({
       aria-labelledby={titleId}
       aria-modal="true"
       className={cn(
-        "fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-full max-w-none overflow-hidden border-0 border-l border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/15 sm:w-[32rem] sm:max-w-[calc(100vw-2rem)] sm:rounded-l-card",
+        "fixed inset-x-0 bottom-0 top-auto m-0 h-[calc(100dvh-max(0.5rem,env(safe-area-inset-top)))] max-h-dvh w-full max-w-none overflow-hidden rounded-t-card border-0 border-t border-border-default bg-surface p-0 text-foreground shadow-xl outline-none backdrop:bg-foreground/25 sm:inset-y-0 sm:right-0 sm:left-auto sm:h-dvh sm:w-[32rem] sm:max-w-[calc(100vw-2rem)] sm:rounded-l-card sm:rounded-tr-none sm:border-t-0 sm:border-l",
         className,
       )}
       onCancel={(event) => {
@@ -92,7 +92,8 @@ export function Drawer({
     >
       <DrawerContext.Provider value={{ close: requestClose }}>
         <div className="flex h-full min-h-0 flex-col">
-          <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border-default px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:px-6 sm:py-4">
+          <header className="relative flex shrink-0 items-start justify-between gap-4 border-b border-border-default px-5 pt-7 pb-4 sm:px-6 sm:py-4">
+            <span aria-hidden="true" className="absolute left-1/2 top-2 h-1 w-9 -translate-x-1/2 rounded-pill bg-border-strong sm:hidden" />
             <div className="min-w-0">
               <h2 className="text-lg font-semibold tracking-tight" id={titleId}>
                 {title}

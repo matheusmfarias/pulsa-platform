@@ -2,6 +2,8 @@ import * as React from "react";
 
 import { cn } from "@/shared/utils";
 
+import { MobileFormExit } from "./mobile-form-exit";
+
 const containerWidths = {
   list: "max-w-none",
   detail: "max-w-6xl",
@@ -39,10 +41,12 @@ export function ContentContainer({
       className={cn(
         "mx-auto w-full px-4 sm:px-6 lg:px-8",
         outerContainerWidths[size],
+        size === "form" && "core-form-container",
       )}
     >
+      {size === "form" ? <MobileFormExit /> : null}
       <div
-        className={cn("core-content w-full", containerWidths[size], className)}
+        className={cn("core-content w-full", containerWidths[size], size === "form" && "core-form-content", className)}
         {...props}
       />
     </div>

@@ -250,3 +250,15 @@ Worker. A leitura foi alinhada às migrations. No preview publicado, a consulta
 sem filtros exibiu 3.216 eventos. As listas principais foram verificadas em
 320 e 390 px sem rolagem horizontal; o calendário de Presença foi aberto e
 ajustado para manter os seletores legíveis em 320 px.
+
+## Formulários como painéis mobile
+
+Os fluxos de criação e edição do Core compartilham um painel que sobe da base
+da tela até a área segura superior. O título e a ação de fechar ficam visíveis,
+o conteúdo rola dentro do painel e a ação de salvar permanece no rodapé. O
+fechamento após alteração pede confirmação antes de descartar os dados.
+
+Drawers e diálogos de tarefas seguem o mesmo sentido de movimento no telefone.
+Em larguras maiores, os formulários continuam em página e os drawers preservam
+a apresentação lateral. O endereço de cada formulário permanece acessível
+diretamente e as ações de domínio não mudam.

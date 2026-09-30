@@ -175,6 +175,123 @@ table a:not([class*="text-"]) {
   color: inherit;
 }
 
+/* Create and edit routes become focused sheets on phone-sized viewports. */
+@media (max-width: 639px) {
+  .core-app .core-page:has(> .core-form-container) {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    overflow: hidden;
+    padding: 0;
+    background: color-mix(in oklch, var(--foreground-default) 24%, transparent);
+  }
+
+  .core-app .core-form-container {
+    position: absolute;
+    inset: max(0.5rem, env(safe-area-inset-top)) 0 0;
+    width: 100%;
+    max-width: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+    background: var(--surface);
+    padding: 0;
+    box-shadow: 0 -12px 40px color-mix(in oklch, var(--foreground-default) 18%, transparent);
+  }
+
+  .core-app .core-form-container::before {
+    content: "";
+    display: block;
+    width: 2.25rem;
+    height: 0.25rem;
+    margin: 0.5rem auto 0;
+    border-radius: var(--pill-radius);
+    background: var(--border-strong);
+  }
+
+  .core-app .core-form-close-slot {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    height: 0;
+    justify-content: flex-end;
+    padding-right: 1rem;
+  }
+
+  .core-app .core-form-close-slot button {
+    width: 2.75rem;
+    height: 2.75rem;
+    background: var(--surface);
+  }
+
+  .core-app .core-form-content {
+    max-width: none;
+  }
+
+  .core-app .core-form-content > header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: block;
+    border-bottom: 1px solid var(--border-default);
+    background: var(--surface);
+    padding: 0.5rem 4.5rem 1rem 1.25rem;
+  }
+
+  .core-app .core-form-content > header .mb-2 {
+    display: none;
+  }
+
+  .core-app .core-form-content > header h1 {
+    font-size: 1.125rem;
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+  }
+
+  .core-app .core-form-content > header p {
+    line-height: 1.4;
+  }
+
+  .core-app .core-form-content > section {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--surface);
+    box-shadow: none;
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .core-app .core-form-content form > div:last-child {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    margin: 0 -1.25rem -1.5rem;
+    border-top: 1px solid var(--border-default);
+    background: var(--surface);
+    padding: 0.75rem 1.25rem max(1rem, env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 22px color-mix(in oklch, var(--foreground-default) 7%, transparent);
+  }
+
+  .core-app .core-form-content form > div:last-child > p,
+  .core-app .core-form-content form > div:last-child a {
+    display: none;
+  }
+
+  .core-app .core-form-content form > div:last-child > div,
+  .core-app .core-form-content form > div:last-child button[type="submit"] {
+    width: 100%;
+  }
+
+  .core-app .core-form-content form > div:last-child button[type="submit"] {
+    min-height: 2.75rem;
+  }
+
+  .core-app .core-page:has(> .core-form-container) .core-content > * {
+    animation: none;
+  }
+}
+
 /* Core motion is restrained, functional, and scoped away from Pulsa Worker. */
 @keyframes core-content-enter {
   from { opacity: 0; transform: translateY(8px); }
@@ -189,6 +306,11 @@ table a:not([class*="text-"]) {
 @keyframes core-drawer-enter {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes core-sheet-enter {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes core-backdrop-enter {
@@ -216,8 +338,25 @@ table a:not([class*="text-"]) {
     animation: core-dialog-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  @media (max-width: 639px) {
+    .core-app dialog[data-core-motion="dialog"][role="dialog"][open] {
+      animation: core-sheet-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+  }
+
   .core-app dialog[data-core-motion="drawer"][open] {
-    animation: core-drawer-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: core-sheet-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  .core-app .core-form-container {
+    animation: core-sheet-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @media (min-width: 640px) {
+    .core-app dialog[data-core-motion="drawer"][open] {
+      animation: core-drawer-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+    .core-app .core-form-container { animation: none; }
   }
 
   .core-app dialog[data-core-motion="menu"][open] aside {
