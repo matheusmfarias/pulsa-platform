@@ -132,6 +132,9 @@ export function Select({
     const option = options[index];
     if (!option || option.disabled) return;
     const nextValue = String(option.value ?? option.children ?? "");
+    if (nextValue !== selectedValue) {
+      containerRef.current?.dispatchEvent(new CustomEvent("pulsa:field-change", { bubbles: true }));
+    }
     if (!isControlled) setUncontrolledValue(nextValue);
     onValueChange?.(nextValue);
     setOpen(false);

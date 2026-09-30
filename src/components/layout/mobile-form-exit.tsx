@@ -46,7 +46,6 @@ export function MobileFormExit() {
 
   React.useEffect(() => {
     const sheet = buttonRef.current?.closest<HTMLElement>(".core-form-container");
-    const form = sheet?.querySelector("form");
     const main = sheet?.closest("main");
     if (!sheet || !main) return;
 
@@ -54,7 +53,9 @@ export function MobileFormExit() {
     const siblings = Array.from(main.parentElement?.children ?? []).filter((node) => node !== main) as HTMLElement[];
     const previousOverflow = document.body.style.overflow;
     const priorInert = siblings.map((node) => node.inert);
-    const markDirty = () => setDirty(true);
+    const markDirty = (event: Event) => {
+      if (event.target instanceof Element && event.target.closest("form")) setDirty(true);
+    };
 
     const sync = () => {
       if (media.matches) {
@@ -74,12 +75,14 @@ export function MobileFormExit() {
 
     sync();
     media.addEventListener("change", sync);
-    form?.addEventListener("input", markDirty);
-    form?.addEventListener("change", markDirty);
+    sheet.addEventListener("input", markDirty);
+    sheet.addEventListener("change", markDirty);
+    sheet.addEventListener("pulsa:field-change", markDirty);
     return () => {
       media.removeEventListener("change", sync);
-      form?.removeEventListener("input", markDirty);
-      form?.removeEventListener("change", markDirty);
+      sheet.removeEventListener("input", markDirty);
+      sheet.removeEventListener("change", markDirty);
+      sheet.removeEventListener("pulsa:field-change", markDirty);
       sheet.removeAttribute("role");
       sheet.removeAttribute("aria-modal");
       sheet.removeAttribute("aria-label");
