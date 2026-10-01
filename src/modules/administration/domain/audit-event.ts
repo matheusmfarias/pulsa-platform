@@ -117,6 +117,44 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   worker_access_link: "Acesso Worker",
 };
 
+const AUDIT_FIELD_LABELS: Record<string, string> = {
+  name: "Nome",
+  full_name: "Nome completo",
+  legal_name: "Razão social",
+  trade_name: "Nome fantasia",
+  description: "Descrição",
+  document_number: "Documento",
+  email: "E-mail",
+  phone: "Telefone",
+  role: "Papel",
+  status: "Status",
+  start_date: "Data de início",
+  end_date: "Data de término",
+  period_start: "Início do período",
+  period_end: "Fim do período",
+  address: "Endereço",
+  city: "Cidade",
+  state: "Estado",
+  timezone: "Fuso horário",
+  client_id: "Cliente",
+  contract_id: "Contrato",
+  operation_id: "Operação",
+  unit_id: "Unidade",
+  job_role_id: "Cargo",
+  position_id: "Posto",
+  worker_id: "Colaborador",
+  manager_user_id: "Gestor responsável",
+  revocation_reason: "Motivo da revogação",
+  revoked_at: "Revogado em",
+  revoked_by: "Revogado por",
+  expires_at: "Expira em",
+  accepted_at: "Aceito em",
+};
+
+export function auditFieldLabel(field: string): string {
+  return AUDIT_FIELD_LABELS[field] ?? field;
+}
+
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   create: "Criação",
   update: "Atualização",

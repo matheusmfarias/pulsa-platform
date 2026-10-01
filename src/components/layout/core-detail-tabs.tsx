@@ -39,7 +39,7 @@ export function CoreDetailTabs({ label, tabs }: { label: string; tabs: DetailTab
 
   return (
     <div className="mt-8 rounded-card bg-surface px-5 shadow-card sm:px-7">
-      <ScrollShadow className="border-b border-border-default" scrollAreaClassName="-mb-px">
+      <ScrollShadow className="border-b border-border-default" scrollAreaClassName="core-tab-scroll -mb-px">
         <div aria-label={label} className="flex min-w-max gap-3 sm:gap-6" role="tablist">
           {tabs.map((tab, index) => {
             const selected = activeId === tab.id;
@@ -73,7 +73,7 @@ export function CoreDetailTabs({ label, tabs }: { label: string; tabs: DetailTab
           role="tabpanel"
           tabIndex={0}
         >
-          {tab.content}
+          {activeId === tab.id ? tab.content : null}
         </div>
       ))}
     </div>

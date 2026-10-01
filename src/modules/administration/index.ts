@@ -3,6 +3,7 @@ export {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_LABELS,
   AUDIT_ENTITY_TYPES,
+  auditFieldLabel,
   readAuditMetadata,
   type AuditAction,
   type AuditEntityType,

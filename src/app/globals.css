@@ -175,6 +175,14 @@ table a:not([class*="text-"]) {
   color: inherit;
 }
 
+.core-tab-scroll {
+  scrollbar-width: none;
+}
+
+.core-tab-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 /* Create and edit routes become focused sheets on phone-sized viewports. */
 @media (min-width: 640px) {
   .core-app .core-page:has(> .core-form-container) {

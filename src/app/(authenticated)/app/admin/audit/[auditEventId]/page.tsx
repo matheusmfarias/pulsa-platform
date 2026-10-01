@@ -21,6 +21,7 @@ import {
 import {
   AUDIT_ACTION_LABELS,
   AUDIT_ENTITY_LABELS,
+  auditFieldLabel,
   auditEventIdSchema,
   getAuditEventById,
   readAuditMetadata,
@@ -43,19 +44,6 @@ function readableValue(value: Json | undefined): string {
     return String(value);
   return JSON.stringify(value);
 }
-const AUDIT_FIELD_LABELS: Record<string, string> = {
-  description: "Descrição",
-  name: "Nome",
-  status: "Status",
-  start_date: "Data de início",
-  end_date: "Data de término",
-  role: "Papel",
-  full_name: "Nome completo",
-};
-function auditFieldLabel(field: string): string {
-  return AUDIT_FIELD_LABELS[field] ?? field;
-}
-
 export default async function AuditEventDetailPage({
   params,
 }: PageProps<"/app/admin/audit/[auditEventId]">) {
@@ -150,7 +138,7 @@ export default async function AuditEventDetailPage({
               </div>
               <div>
                 <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Audit event ID
+                  ID do evento
                 </dt>
                 <dd className="mt-1 break-all font-mono text-sm">{event.id}</dd>
               </div>
@@ -213,12 +201,12 @@ export default async function AuditEventDetailPage({
             )}
           </section>
           <section className="py-6">
-            <Disclosure className="overflow-hidden rounded-card bg-surface shadow-card">
-              <DisclosureTrigger className="rounded-none px-6 py-4 text-base">
-                Metadata técnica
+            <Disclosure className="overflow-hidden rounded-control border border-border-default">
+              <DisclosureTrigger className="rounded-none px-4 py-3">
+                Metadados técnicos
               </DisclosureTrigger>
               <DisclosureContent>
-                <pre className="overflow-x-auto border-t border-border-default bg-subtle/35 p-6 text-xs leading-6">
+                <pre className="overflow-x-auto border-t border-border-default bg-subtle/35 p-4 text-xs leading-6">
                   {JSON.stringify(event.metadata, null, 2)}
                 </pre>
               </DisclosureContent>

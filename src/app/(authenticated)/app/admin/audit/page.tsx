@@ -23,6 +23,7 @@ import {
 import {
   AUDIT_ACTION_LABELS,
   AUDIT_ENTITY_LABELS,
+  auditFieldLabel,
   auditListFiltersSchema,
   listAuditEvents,
   listOrganizationMembers,
@@ -92,16 +93,11 @@ export default async function AdministrationAuditPage({
       </PageShell>
     );
   }
-  const fieldLabels: Record<string, string> = {
-    description: "Descrição",
-    name: "Nome",
-    status: "Status",
-    role: "Papel",
-  };
   const events = result.items.map((event) => {
     const metadata = readAuditMetadata(event.metadata);
-    const summary = metadata.changes.length > 0
-      ? metadata.changes.map((field) => fieldLabels[field] ?? field).join(", ")
+    const labels = metadata.changes.map(auditFieldLabel);
+    const summary = labels.length > 0
+      ? `${labels.slice(0, 3).join(" · ")}${labels.length > 3 ? ` · +${labels.length - 3} ${labels.length === 4 ? "campo" : "campos"}` : ""}`
       : "Sem campos resumidos";
     return { event, summary };
   });
