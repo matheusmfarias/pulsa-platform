@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { OperationalContextSwitcher } from "@/components/shared/operational-context-switcher";
@@ -308,6 +308,26 @@ function NavigationLinks({
   showAdministration: boolean;
 }) {
   const pathname = usePathname() ?? "/app";
+  const [pendingPathname, setPendingPathname] = useState<string | null>(null);
+  const activePathname = pendingPathname ?? pathname;
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setPendingPathname(null));
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!pendingPathname) return;
+    const timeout = window.setTimeout(() => setPendingPathname(null), 15_000);
+    return () => window.clearTimeout(timeout);
+  }, [pendingPathname]);
+
+  function handleNavigate(event: MouseEvent<HTMLAnchorElement>, href: string) {
+    if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      setPendingPathname(href);
+    }
+    onNavigate?.();
+  }
 
   const [groupPreferences, setGroupPreferences] = useState<Record<string, boolean>>({});
 
@@ -360,7 +380,7 @@ function NavigationLinks({
       {navigation.map((group, groupIndex) => {
         const groupId = `navigation-group-${groupIndex}`;
 
-        const activeGroup = group.items.some((item) => isNavigationItemActive(item, pathname));
+        const activeGroup = group.items.some((item) => isNavigationItemActive(item, activePathname));
         const defaultCollapsed = group.label !== "Rotina" && !activeGroup;
         const groupCollapsed = !collapsed && Boolean(group.label) &&
           (groupPreferences[group.label!] ?? defaultCollapsed);
@@ -412,7 +432,7 @@ function NavigationLinks({
                   {group.items.map((item) => {
                     const Icon = item.icon;
 
-                    const active = isNavigationItemActive(item, pathname);
+                    const active = isNavigationItemActive(item, activePathname);
 
                     return (
                       <div
@@ -423,7 +443,7 @@ function NavigationLinks({
                           <RailTooltip label={item.label}>
                             <Link
                               href={item.href}
-                              onClick={onNavigate}
+                              onClick={(event) => handleNavigate(event, item.href)}
                               aria-current={active ? "page" : undefined}
                               aria-label={item.label}
                               className={cn(
@@ -447,7 +467,7 @@ function NavigationLinks({
                         ) : (
                           <Link
                             href={item.href}
-                            onClick={onNavigate}
+                            onClick={(event) => handleNavigate(event, item.href)}
                             aria-current={active ? "page" : undefined}
                             className={cn(
                               "relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium",

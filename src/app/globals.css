@@ -201,6 +201,10 @@ table a:not([class*="text-"]) {
     animation: core-content-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  .core-app .core-page[data-no-entry-animation] .core-content > :nth-child(-n+4) {
+    animation: none;
+  }
+
   .core-app .core-page .core-content > :nth-child(2) { animation-delay: 35ms; }
   .core-app .core-page .core-content > :nth-child(3) { animation-delay: 70ms; }
   .core-app .core-page .core-content > :nth-child(4) { animation-delay: 105ms; }

@@ -80,7 +80,7 @@ test("creates a Worker through the authenticated list drawer", async ({ page }) 
     await drawer.getByLabel("CPF").fill("529.982.247-25");
     await drawer.getByRole("button", { name: "Cadastrar colaborador" }).click();
     await expect(drawer).not.toBeVisible();
-    await expect(page.getByText(workerName)).toBeVisible();
+    await expect(page.getByRole("link", { name: workerName }).first()).toBeVisible();
     await expect(page.getByText("Colaborador cadastrado")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
@@ -88,7 +88,7 @@ test("creates a Worker through the authenticated list drawer", async ({ page }) 
     await page.getByRole("button", { name: "Filtrar colaboradores por status" }).click();
     await page.getByRole("menuitemradio", { name: "Em onboarding" }).click();
     await expect(page).toHaveURL(/q=.*status=onboarding/);
-    await expect(page.getByText(workerName)).toBeVisible();
+    await expect(page.getByRole("link", { name: workerName }).first()).toBeVisible();
     await page.getByRole("button", { name: "Limpar filtros" }).click();
     await expect(page).toHaveURL(/\/app\/workers$/);
 

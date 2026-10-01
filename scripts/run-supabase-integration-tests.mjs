@@ -18,6 +18,7 @@ const suites = new Map([
   ["worker-access", "worker-access-real-validation.mjs"],
   ["worker-schedule", "worker-schedule-real-validation.mjs"],
   ["worker-presence", "worker-presence-real-validation.mjs"],
+  ["core-navigation", "core-navigation-real-validation.mjs"],
 ]);
 
 const fixtureTables = [
@@ -47,7 +48,7 @@ const tableList = fixtureTables.map((table) => "public." + table).join(", ");
 const selectedSuite = process.argv[2] ?? "all";
 const requestedSuites =
   selectedSuite === "all"
-    ? [...suites.entries()]
+    ? [...suites.entries()].filter(([name]) => name !== "core-navigation")
     : suites.has(selectedSuite)
       ? [[selectedSuite, suites.get(selectedSuite)]]
       : null;

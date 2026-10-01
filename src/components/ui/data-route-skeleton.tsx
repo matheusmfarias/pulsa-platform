@@ -195,7 +195,7 @@ export function DataRouteSkeleton({
   }
 
   return (
-    <PageShell className="py-7 sm:py-8">
+    <PageShell className="py-7 sm:py-8" data-no-entry-animation>
       <ContentContainer size={kind === "detail" ? "detail" : "list"}>
         <div aria-busy="true" aria-label={label} role="status">
           <span className="sr-only">{label}…</span>

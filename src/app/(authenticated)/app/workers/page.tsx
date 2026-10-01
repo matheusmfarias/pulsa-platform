@@ -1,9 +1,9 @@
 import {
   parseWorkerListSearchParams,
   parseWorkerListPage,
-  WorkersWorkspace,
   type WorkerListSearchParams,
-} from "@/modules/workers";
+} from "@/modules/workers/components/worker-list-filters";
+import { WorkersWorkspace } from "@/modules/workers/components/workers-workspace";
 
 export default async function WorkersPage({
   searchParams,

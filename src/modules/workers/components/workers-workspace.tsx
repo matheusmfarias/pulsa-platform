@@ -214,7 +214,7 @@ export function WorkersWorkspace({ filters, page = 1 }: { filters: WorkerListFil
   const filtersKey = `${filters.query}:${filters.status}:${page}`;
 
   return (
-    <PageShell className="py-6 sm:py-8">
+    <PageShell className="py-6 sm:py-8" data-no-entry-animation>
       <ContentContainer size="list">
         <PageHeader
           actions={<NewWorkerButton href={createHref} />}

@@ -1,9 +1,20 @@
+import { Suspense } from "react";
+
+import { DataRouteSkeleton } from "@/components/ui/data-route-skeleton";
 import { requireActiveOrganization } from "@/modules/organizations";
 import { toPublicErrorMessage } from "@/shared/errors";
 
-export default async function ClientsLayout({
+export default function ClientsLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <Suspense fallback={<DataRouteSkeleton kind="collection" label="Carregando clientes" />}>
+      <ClientsOrganizationGate>{children}</ClientsOrganizationGate>
+    </Suspense>
+  );
+}
+
+async function ClientsOrganizationGate({ children }: Readonly<{ children: React.ReactNode }>) {
   try {
     await requireActiveOrganization();
   } catch (error) {

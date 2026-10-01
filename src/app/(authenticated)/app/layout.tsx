@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
+import { DataRouteSkeleton } from "@/components/ui/data-route-skeleton";
 import {
   DesktopNavigation,
   MobileNavigation,
 } from "@/components/shared/authenticated-navigation";
+import { CoreRouteTransition } from "@/components/shared/core-route-transition";
 import { getAuthenticatedUser } from "@/modules/auth";
 import { can, getAuthorizationContext } from "@/modules/authorization";
 import { resolveOperationalContext } from "@/modules/operational-context";
@@ -12,9 +15,17 @@ import { isAppError } from "@/shared/errors";
 
 export const dynamic = "force-dynamic";
 
-export default async function AuthenticatedLayout({
+export default function AuthenticatedLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <Suspense fallback={<DataRouteSkeleton kind="dashboard" label="Carregando aplicação" />}>
+      <AuthenticatedFrame>{children}</AuthenticatedFrame>
+    </Suspense>
+  );
+}
+
+async function AuthenticatedFrame({ children }: Readonly<{ children: React.ReactNode }>) {
   const user = await getAuthenticatedUser();
 
   if (!user) redirect("/");
@@ -56,7 +67,7 @@ export default async function AuthenticatedLayout({
             showAdministration={showAdministration}
           />
         </div>
-        {children}
+        <CoreRouteTransition>{children}</CoreRouteTransition>
       </div>
     </div>
   );
