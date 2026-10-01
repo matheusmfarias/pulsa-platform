@@ -116,6 +116,134 @@ function TableRows({ columns, rows = 6, compact = false }: { columns: number; ro
   );
 }
 
+type CoreCollectionProfile = {
+  columns: number;
+  filter: "none" | "search" | "coverage" | "audit" | "presence";
+  pagination?: boolean;
+  mobileAt?: "md" | "xl";
+};
+
+function coreCollectionProfile(label: string): CoreCollectionProfile {
+  const name = label.toLocaleLowerCase("pt-BR");
+  if (name.includes("presença")) return { columns: 7, filter: "presence" };
+  if (name.includes("ausência")) return { columns: 8, filter: "coverage" };
+  if (name.includes("auditoria")) return { columns: 6, filter: "audit", pagination: true, mobileAt: "md" };
+  if (name.includes("usuário")) return { columns: 5, filter: "none", mobileAt: "md" };
+  if (name.includes("aloca")) return { columns: 6, filter: "search", pagination: true };
+  if (name.includes("posto")) return { columns: 7, filter: "search" };
+  if (name.includes("cargo") || name.includes("cliente")) return { columns: 5, filter: "search" };
+  if (name.includes("unidade")) return { columns: 8, filter: "none" };
+  if (name.includes("opera")) return { columns: 6, filter: "none" };
+  return { columns: 5, filter: "none" };
+}
+
+function CoreCollectionRows({ columns, mobileAt = "xl" }: Pick<CoreCollectionProfile, "columns" | "mobileAt">) {
+  const mobileClass = mobileAt === "md" ? "md:hidden" : "xl:hidden";
+  const desktopClass = mobileAt === "md" ? "md:block" : "xl:block";
+  return (
+    <>
+      <div aria-hidden="true" className={`mt-4 grid gap-3 ${mobileClass}`}>
+        {[0, 1, 2].map((row) => (
+          <div className="rounded-card bg-surface p-4 shadow-card" key={row}>
+            <div className="flex items-start justify-between gap-3"><Bone className="h-5 w-3/5" /><Bone className="h-6 w-16 rounded-full" /></div>
+            <Bone className="mt-3 h-4 w-4/5" />
+            <Bone className="mt-2 h-4 w-2/3" />
+            <div className="mt-4 border-t border-border-default pt-3"><Bone className="h-4 w-28" /></div>
+          </div>
+        ))}
+      </div>
+      <div aria-hidden="true" className={`mt-4 hidden overflow-hidden rounded-card bg-surface shadow-card ${desktopClass}`}>
+        <div className="grid min-h-10 items-center gap-4 bg-subtle/45 px-4" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+          {Array.from({ length: columns }, (_, index) => <Bone className={index === 0 ? "h-3 w-20 max-w-full" : "h-3 w-12 max-w-full"} key={index} />)}
+        </div>
+        <div className="divide-y divide-border-default/70">
+          {[0, 1, 2, 3].map((row) => (
+            <div className="grid min-h-14 items-center gap-4 px-4 py-2" key={row} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+              {Array.from({ length: columns }, (_, column) => <Bone className={`h-4 max-w-full ${column === 0 ? "w-4/5" : column === columns - 1 ? "w-8" : "w-3/4"}`} key={column} />)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function CoreCollectionData({ label }: { label: string }) {
+  const profile = coreCollectionProfile(label);
+  return (
+    <div className="mt-5 sm:mt-6">
+      {profile.filter === "search" ? (
+        <div aria-hidden="true" className="mb-5 flex flex-col gap-3 rounded-card bg-surface p-3 shadow-card sm:flex-row sm:p-4">
+          <Bone className="h-10 flex-1" /><Bone className="h-10 w-32 max-w-full" />
+        </div>
+      ) : profile.filter === "coverage" ? (
+        <div aria-hidden="true" className="mb-4 flex gap-2"><Bone className="h-10 w-28" /><Bone className="h-10 w-36" /></div>
+      ) : profile.filter === "audit" ? (
+        <div aria-hidden="true" className="mb-5 grid gap-3 rounded-card bg-surface p-4 shadow-card sm:grid-cols-2 xl:grid-cols-5">
+          {[0, 1, 2, 3, 4].map((item) => <Bone className="h-10 w-full" key={item} />)}
+        </div>
+      ) : profile.filter === "presence" ? (
+        <>
+          <div aria-hidden="true" className="mb-5 flex items-center justify-between rounded-card bg-surface p-4 shadow-card"><Bone className="h-10 w-10" /><Bone className="h-10 w-40" /><Bone className="h-10 w-10" /></div>
+          <div aria-hidden="true" className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-5">{[0, 1, 2, 3, 4].map((item) => <div className="rounded-card bg-surface p-4 shadow-card" key={item}><Bone className="h-3 w-20" /><Bone className="mt-2 h-6 w-10" /></div>)}</div>
+        </>
+      ) : null}
+      <Bone className="h-4 w-40" />
+      <CoreCollectionRows columns={profile.columns} mobileAt={profile.mobileAt} />
+      {profile.pagination ? <div className="mt-3 overflow-hidden rounded-card bg-surface shadow-card"><PaginationFooter /></div> : null}
+    </div>
+  );
+}
+
+function CoreDetailData({ label }: { label: string }) {
+  const name = label.toLocaleLowerCase("pt-BR");
+  const firstSectionFields = name.includes("cargo") ? 3 : name.includes("registro") ? 5 : 4;
+  return (
+    <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
+      {[firstSectionFields, 3].map((fields, section) => (
+        <section className="py-6" key={section}>
+          <Bone className={section === 0 ? "h-5 w-44" : "h-5 w-36"} />
+          {section === 0 ? <Bone className="mt-2 h-4 w-72 max-w-full" /> : null}
+          <div className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: fields }, (_, field) => <div className="space-y-2" key={field}><Bone className="h-3 w-20" /><Bone className="h-4 w-3/4" /></div>)}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function coreFormSections(label: string): number[] {
+  const name = label.toLocaleLowerCase("pt-BR");
+  if (name.includes("cliente")) return [3];
+  if (name.includes("cargo")) return [2];
+  if (name.includes("contrato")) return [2, 2, 1];
+  if (name.includes("operação")) return [2, 2, 2];
+  if (name.includes("unidade")) return [3, 3, 1];
+  if (name.includes("posto")) return [3, 1];
+  if (name.includes("alocação")) return [2, 2];
+  if (name.includes("escala")) return [2, 3, 1];
+  return [2, 2];
+}
+
+function CoreFormData({ label }: { label: string }) {
+  const sections = coreFormSections(label);
+  return (
+    <div className="mt-5 rounded-card bg-surface p-5 shadow-card sm:p-6">
+      {sections.map((fields, section) => (
+        <section className={section > 0 ? "mt-5 border-t border-border-default pt-5" : ""} key={section}>
+          <Bone className="h-5 w-36" />
+          {sections.length > 1 ? <Bone className="mt-2 h-4 w-64 max-w-full" /> : null}
+          <div className="mt-4 grid gap-5 sm:grid-cols-2">
+            {Array.from({ length: fields }, (_, field) => <div key={field}><Bone className="h-4 w-24" /><Bone className="mt-2 h-10 w-full" /></div>)}
+          </div>
+        </section>
+      ))}
+      <div className="mt-4 flex justify-end gap-2 border-t border-border-default pt-4"><Bone className="h-11 w-24" /><Bone className="h-11 w-36" /></div>
+    </div>
+  );
+}
+
 function CollectionData({ label }: { label: string }) {
   const normalized = label.toLocaleLowerCase("pt-BR");
   if (normalized.includes("presença")) {
@@ -254,10 +382,9 @@ function DashboardData() {
 
 function ScheduleData() {
   return (
-    <div className="mt-6 overflow-hidden rounded-card bg-surface shadow-card">
-      <section className="border-b border-border-default/70 px-5 py-6 sm:px-7"><Bone className="h-4 w-36" /><div className="mt-5 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((item) => <div className="space-y-2" key={item}><Bone className="h-3 w-20" /><Bone className="h-5 w-3/4" /></div>)}</div></section>
-      <section className="border-b border-border-default/70 px-5 py-6 sm:px-7"><Bone className="h-4 w-48" /><Bone className="mt-2 h-4 w-3/4" /><div className="mt-5 flex gap-3"><Bone className="h-9 w-28" /><Bone className="h-9 w-24" /><Bone className="h-9 w-28" /></div></section>
-      <section className="px-5 py-6 sm:px-7"><Bone className="h-4 w-40" /><div className="mt-4"><TableRows columns={6} rows={5} /></div></section>
+    <div className="mt-6 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
+      <section className="py-6"><Bone className="h-5 w-36" /><div className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((item) => <div className="space-y-2" key={item}><Bone className="h-3 w-20" /><Bone className="h-4 w-3/4" /></div>)}</div></section>
+      <section className="py-5"><div className="flex gap-2"><Bone className="h-9 w-24" /><Bone className="h-9 w-20" /><Bone className="h-9 w-28" /></div><div className="mt-5 flex items-center justify-between gap-4"><Bone className="h-5 w-40" /><Bone className="h-9 w-24" /></div><div className="mt-5 grid gap-3 sm:grid-cols-3">{[0, 1, 2].map((item) => <Bone className="h-16 w-full" key={item} />)}</div></section>
     </div>
   );
 }
@@ -286,7 +413,13 @@ function ClaimData() {
 }
 
 export function DataRouteSkeleton({ kind, label, scope = "core" }: { kind: SkeletonKind; label: string; scope?: SkeletonScope }) {
-  const content = scope === "worker" && kind === "schedule"
+  const content = scope === "core" && kind === "collection"
+    ? <CoreCollectionData label={label} />
+    : scope === "core" && kind === "detail"
+    ? <CoreDetailData label={label} />
+    : scope === "core" && kind === "form"
+    ? <CoreFormData label={label} />
+    : scope === "worker" && kind === "schedule"
     ? <WorkerScheduleData />
     : kind === "collection"
     ? <CollectionData label={label} />

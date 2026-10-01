@@ -66,7 +66,7 @@ export function ScheduleTable({ schedules }: { schedules: ScheduleOverview[] }) 
       </ul>
 
       <TableFrame className="mt-4 hidden xl:block">
-        <TableScrollArea bounded label="Tabela de escalas">
+        <TableScrollArea label="Tabela de escalas">
           <Table className="min-w-full xl:min-w-[880px]">
             <TableHeader className="lg:sticky lg:top-0 lg:z-10">
               <TableRow>

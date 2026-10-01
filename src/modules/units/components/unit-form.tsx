@@ -44,7 +44,7 @@ export function UnitForm({
   const [state, action, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(handler, initialState);
 
   return (
-    <form action={action} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+    <form action={action} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="unit-context-heading">
         <div>
           <h2 className="font-semibold" id="unit-context-heading">
@@ -121,7 +121,7 @@ export function UnitForm({
 
       <section
         aria-labelledby="unit-location-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="unit-location-heading">
@@ -182,7 +182,7 @@ export function UnitForm({
 
       <section
         aria-labelledby="unit-settings-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="unit-settings-heading">

@@ -69,7 +69,7 @@ export default async function NewPositionPage() {
         {canCreate ? (
           <section
             aria-label="Formulário de cadastro do posto"
-            className="mt-8 rounded-card bg-surface shadow-card p-6 sm:p-8"
+            className="mt-5 rounded-card bg-surface p-5 shadow-card sm:p-6"
           >
             <PositionForm
               cancelHref="/app/positions"

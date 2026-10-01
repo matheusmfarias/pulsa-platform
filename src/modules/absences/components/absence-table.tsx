@@ -97,7 +97,7 @@ export function AbsenceTable({ absences }: { absences: AbsenceListItem[] }) {
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de ausências">
+      <TableScrollArea label="Tabela de ausências" shadow>
         <Table className="min-w-full table-fixed xl:min-w-[1120px] xl:table-auto">
           <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>

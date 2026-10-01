@@ -81,7 +81,7 @@ export function ContractTable({
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de contratos">
+      <TableScrollArea label="Tabela de contratos">
         <Table className="min-w-full table-fixed xl:min-w-[760px] xl:table-auto">
           <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>

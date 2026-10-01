@@ -106,7 +106,7 @@ export function OperationTable({
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de operações">
+      <TableScrollArea label="Tabela de operações">
         <Table className="min-w-full table-fixed xl:min-w-[900px] xl:table-auto">
           <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>

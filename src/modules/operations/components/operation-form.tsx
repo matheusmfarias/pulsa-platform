@@ -44,7 +44,7 @@ export function OperationForm({
   const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+    <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="operation-context-heading">
         <div>
           <h2 className="font-semibold" id="operation-context-heading">
@@ -106,7 +106,7 @@ export function OperationForm({
 
       <section
         aria-labelledby="operation-period-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="operation-period-heading">
@@ -149,7 +149,7 @@ export function OperationForm({
 
       <section
         aria-labelledby="operation-details-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="operation-details-heading">

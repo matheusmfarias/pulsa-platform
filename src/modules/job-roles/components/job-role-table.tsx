@@ -60,7 +60,7 @@ export function JobRoleTable({
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de cargos">
+      <TableScrollArea label="Tabela de cargos">
         <Table className="min-w-full table-fixed lg:min-w-[720px] lg:table-auto">
           <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>

@@ -176,6 +176,12 @@ table a:not([class*="text-"]) {
 }
 
 /* Create and edit routes become focused sheets on phone-sized viewports. */
+@media (min-width: 640px) {
+  .core-app .core-page:has(> .core-form-container) {
+    padding-block: 1.75rem;
+  }
+}
+
 @media (max-width: 639px) {
   .core-app .core-page:has(> .core-form-container) {
     position: fixed;

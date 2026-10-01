@@ -94,9 +94,17 @@ export function AssignmentTable({
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de alocações">
-        <Table className="min-w-full table-fixed xl:min-w-[920px] xl:table-auto">
-          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
+      <TableScrollArea label="Tabela de alocações" shadow>
+        <Table className="min-w-full table-fixed">
+          <colgroup>
+            <col className="w-[21%]" />
+            <col className="w-[18%]" />
+            <col className="w-[18%]" />
+            <col className="w-[22%]" />
+            <col className="w-[13%]" />
+            <col className="w-[8%]" />
+          </colgroup>
+          <TableHeader>
             <TableRow>
               <TableHead className="px-3 xl:px-4">
                 <span className="xl:hidden">Alocação</span>
@@ -109,11 +117,11 @@ export function AssignmentTable({
 
               <TableHead className="hidden xl:table-cell">Período</TableHead>
 
-              <TableHead className="w-28 px-2 xl:w-32 xl:px-4">
+              <TableHead className="px-3">
                 Status
               </TableHead>
 
-              <TableHead className="w-12 px-1 text-right xl:w-14 xl:px-4">
+              <TableHead className="px-2 text-right">
                 <span className="sr-only">Ações</span>
               </TableHead>
             </TableRow>
@@ -183,11 +191,11 @@ export function AssignmentTable({
                     {formatDate(assignment.end_date)}
                   </TableCell>
 
-                  <TableCell className="px-2 xl:px-4">
+                  <TableCell className="px-3">
                     <AssignmentStatusBadge status={assignment.status} />
                   </TableCell>
 
-                  <TableCell className="px-1 text-right xl:px-4">
+                  <TableCell className="px-2 text-right">
                     <Button asChild size="icon" variant="ghost">
                       <Link
                         aria-label={`Ver alocação de ${assignment.worker.full_name}`}
@@ -231,7 +239,7 @@ export function AssignmentTableSkeleton() {
       className="mt-4 overflow-hidden rounded-card bg-surface shadow-card"
       role="status"
     >
-      <TableScrollArea bounded label="Resultados de alocações">
+      <TableScrollArea label="Resultados de alocações" shadow>
         <Table className="min-w-full table-fixed xl:min-w-[920px] xl:table-auto">
           <TableHeader>
             <TableRow>

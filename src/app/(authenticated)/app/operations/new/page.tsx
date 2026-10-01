@@ -80,7 +80,7 @@ export default async function NewOperationPage({
         ) : (
           <section
             aria-label="Formulário de cadastro da operação"
-            className="mt-8 rounded-card bg-surface shadow-card p-6 sm:p-8"
+            className="mt-5 rounded-card bg-surface p-5 shadow-card sm:p-6"
           >
             <OperationForm
               cancelHref="/app/operations"

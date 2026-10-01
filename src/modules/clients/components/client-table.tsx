@@ -68,7 +68,7 @@ export function ClientTable({
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de clientes">
+      <TableScrollArea label="Tabela de clientes">
         <Table className="min-w-full table-fixed xl:min-w-[760px] xl:table-auto">
           <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>

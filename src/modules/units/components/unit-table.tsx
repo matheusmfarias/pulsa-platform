@@ -74,9 +74,19 @@ export function UnitTable({ units }: { units: UnitOperationalSummary[] }) {
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de unidades">
-        <Table className="min-w-full table-fixed xl:min-w-[980px] xl:table-auto">
-          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
+      <TableScrollArea label="Tabela de unidades" shadow>
+        <Table className="min-w-full table-fixed">
+          <colgroup>
+            <col className="w-[19%]" />
+            <col className="w-[9%]" />
+            <col className="w-[21%]" />
+            <col className="w-[14%]" />
+            <col className="w-[7%]" />
+            <col className="w-[9%]" />
+            <col className="w-[13%]" />
+            <col className="w-[8%]" />
+          </colgroup>
+          <TableHeader>
             <TableRow>
               <TableHead className="px-3 xl:px-4">
                 <span className="xl:hidden">Unidade</span>
@@ -89,11 +99,11 @@ export function UnitTable({ units }: { units: UnitOperationalSummary[] }) {
               <TableHead className="hidden xl:table-cell">Postos</TableHead>
               <TableHead className="hidden xl:table-cell">Efetivo</TableHead>
 
-              <TableHead className="w-28 px-2 xl:w-32 xl:px-4">
+              <TableHead className="px-3">
                 Status
               </TableHead>
 
-              <TableHead className="w-12 px-1 text-right xl:w-14 xl:px-4">
+              <TableHead className="px-2 text-right">
                 <span className="sr-only">Ações</span>
               </TableHead>
             </TableRow>
@@ -181,11 +191,11 @@ export function UnitTable({ units }: { units: UnitOperationalSummary[] }) {
                   de {unit.baseRequiredHeadcount}
                 </TableCell>
 
-                <TableCell className="px-2 xl:px-4">
+                <TableCell className="px-3">
                   <UnitStatusBadge status={unit.status} />
                 </TableCell>
 
-                <TableCell className="px-1 text-right xl:px-4">
+                <TableCell className="px-2 text-right">
                   <Button asChild size="icon" variant="ghost">
                     <Link
                       aria-label={`Ver detalhes da unidade ${unit.name}`}

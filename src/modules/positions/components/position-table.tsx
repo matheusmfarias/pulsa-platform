@@ -80,9 +80,18 @@ export function PositionTable({
         ))}
       </ul>
       <TableFrame className="mt-4 hidden xl:block">
-      <TableScrollArea bounded label="Tabela de postos">
-        <Table className="min-w-full table-fixed xl:min-w-[980px] xl:table-auto">
-          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
+      <TableScrollArea label="Tabela de postos" shadow>
+        <Table className="min-w-full table-fixed">
+          <colgroup>
+            <col className="w-[19%]" />
+            <col className="w-[18%]" />
+            <col className="w-[20%]" />
+            <col className="w-[14%]" />
+            <col className="w-[9%]" />
+            <col className="w-[12%]" />
+            <col className="w-[8%]" />
+          </colgroup>
+          <TableHeader>
             <TableRow>
               <TableHead className="px-3 xl:px-4">
                 <span className="xl:hidden">Posto</span>
@@ -94,11 +103,11 @@ export function PositionTable({
               <TableHead className="hidden xl:table-cell">Cliente</TableHead>
               <TableHead className="hidden xl:table-cell">Efetivo</TableHead>
 
-              <TableHead className="w-28 px-2 xl:w-32 xl:px-4">
+              <TableHead className="px-3">
                 Status
               </TableHead>
 
-              <TableHead className="w-12 px-1 text-right xl:w-14 xl:px-4">
+              <TableHead className="px-2 text-right">
                 <span className="sr-only">Ações</span>
               </TableHead>
             </TableRow>
@@ -180,11 +189,11 @@ export function PositionTable({
                     de {position.base_required_headcount}
                   </TableCell>
 
-                  <TableCell className="px-2 xl:px-4">
+                <TableCell className="px-3">
                     <PositionStatusBadge status={position.status} />
                   </TableCell>
 
-                  <TableCell className="px-1 text-right xl:px-4">
+                <TableCell className="px-2 text-right">
                     <Button asChild size="icon" variant="ghost">
                       <Link
                         aria-label={`Ver detalhes do posto ${position.job_role.name}`}

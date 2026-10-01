@@ -32,7 +32,7 @@ export function ClientForm({
   const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+    <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="client-identification-heading">
         <div>
           <h2 className="font-semibold" id="client-identification-heading">

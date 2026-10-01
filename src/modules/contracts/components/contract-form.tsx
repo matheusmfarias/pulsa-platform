@@ -37,7 +37,7 @@ export function ContractForm({
   const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+    <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="contract-context-heading">
         <div>
           <h2 className="font-semibold" id="contract-context-heading">
@@ -101,7 +101,7 @@ export function ContractForm({
 
       <section
         aria-labelledby="contract-period-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="contract-period-heading">
@@ -144,7 +144,7 @@ export function ContractForm({
 
       <section
         aria-labelledby="contract-reference-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="contract-reference-heading">

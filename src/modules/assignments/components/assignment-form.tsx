@@ -52,7 +52,7 @@ export function AssignmentForm({
   const changeEndDate = (value: string) => { setEndDate(value); markEdited("end_date"); };
 
   return (
-    <form action={formAction} className="space-y-8" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+    <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <section aria-labelledby="assignment-relation-heading">
         <div>
           <h2 className="font-semibold" id="assignment-relation-heading">
@@ -137,7 +137,7 @@ export function AssignmentForm({
 
       <section
         aria-labelledby="assignment-period-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="assignment-period-heading">

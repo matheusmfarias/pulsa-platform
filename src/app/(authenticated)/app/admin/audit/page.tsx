@@ -160,7 +160,7 @@ export default async function AdministrationAuditPage({
               ))}
             </ul>
             <div className="hidden md:block">
-            <TableScrollArea bounded label="Tabela de auditoria">
+            <TableScrollArea label="Tabela de auditoria" shadow>
               <Table className="min-w-full table-fixed xl:min-w-[1050px] xl:table-auto">
                 <TableHeader className="lg:sticky lg:top-0 lg:z-10">
                   <TableRow>

@@ -69,7 +69,7 @@ export default async function NewAssignmentPage({
 
         <section
           aria-label="Formulário de cadastro da alocação"
-          className="mt-8 rounded-card bg-surface shadow-card p-6 sm:p-8"
+          className="mt-5 rounded-card bg-surface p-5 shadow-card sm:p-6"
         >
           <AssignmentForm
             cancelHref={cancelHref}

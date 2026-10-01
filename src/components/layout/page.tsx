@@ -8,7 +8,7 @@ const containerWidths = {
   list: "max-w-none",
   detail: "max-w-6xl",
   "detail-wide": "max-w-6xl",
-  form: "max-w-5xl",
+  form: "max-w-4xl",
 } as const;
 
 const outerContainerWidths = {
