@@ -1,4 +1,3 @@
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -6,17 +5,16 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { ListPagination } from "@/components/layout/list-pagination";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { AuditListFilterBar } from "./audit-list-filter-bar";
 import {
   Table,
   TableBody,
   TableCell,
-  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
@@ -24,9 +22,8 @@ import {
 } from "@/components/ui/table";
 import {
   AUDIT_ACTION_LABELS,
-  AUDIT_ACTIONS,
   AUDIT_ENTITY_LABELS,
-  AUDIT_ENTITY_TYPES,
+  auditFieldLabel,
   auditListFiltersSchema,
   listAuditEvents,
   listOrganizationMembers,
@@ -37,6 +34,7 @@ import { toPublicErrorMessage } from "@/shared/errors";
 
 type SearchParams = Promise<{
   page?: string | string[];
+  size?: string | string[];
   from?: string | string[];
   to?: string | string[];
   entityType?: string | string[];
@@ -51,14 +49,15 @@ function formatDateTime(value: string): string {
     timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
-function paginationHref(filters: AuditListFilters, page: number): string {
+function paginationHref(filters: AuditListFilters, page: number, pageSize = filters.pageSize): string {
   const params = new URLSearchParams();
   if (filters.from) params.set("from", filters.from);
   if (filters.to) params.set("to", filters.to);
   if (filters.entityType) params.set("entityType", filters.entityType);
   if (filters.action) params.set("action", filters.action);
   if (filters.actorId) params.set("actorId", filters.actorId);
-  params.set("page", String(page));
+  if (page > 1) params.set("page", String(page));
+  if (pageSize !== 10) params.set("size", String(pageSize));
   return `/app/admin/audit?${params.toString()}`;
 }
 
@@ -94,7 +93,16 @@ export default async function AdministrationAuditPage({
       </PageShell>
     );
   }
+  const events = result.items.map((event) => {
+    const metadata = readAuditMetadata(event.metadata);
+    const labels = metadata.changes.map(auditFieldLabel);
+    const summary = labels.length > 0
+      ? `${labels.slice(0, 3).join(" · ")}${labels.length > 3 ? ` · +${labels.length - 3} ${labels.length === 4 ? "campo" : "campos"}` : ""}`
+      : "Sem campos resumidos";
+    return { event, summary };
+  });
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -106,71 +114,51 @@ export default async function AdministrationAuditPage({
           description="Registro operacional de mudanças da organização, do evento mais recente ao mais antigo."
           title="Auditoria"
         />
-        <form
-          className="mt-6 grid gap-3 rounded-surface border border-border-default bg-surface p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.2fr_1.2fr_1.4fr_auto]"
-          method="get"
+        <AuditListFilterBar
+          actorOptions={members.map((member) => ({
+            label: member.profile?.display_name ?? member.profile_id,
+            value: member.profile_id,
+          }))}
+          filters={filters}
         >
-          <Field id="audit-from" label="De">
-            <Input defaultValue={filters.from} name="from" type="date" />
-          </Field>
-          <Field id="audit-to" label="Até">
-            <Input defaultValue={filters.to} name="to" type="date" />
-          </Field>
-          <Field id="audit-entity" label="Entidade">
-            <Select defaultValue={filters.entityType ?? ""} name="entityType">
-              <option value="">Todas</option>
-              {AUDIT_ENTITY_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {AUDIT_ENTITY_LABELS[type]}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field id="audit-action" label="Ação">
-            <Select defaultValue={filters.action ?? ""} name="action">
-              <option value="">Todas</option>
-              {AUDIT_ACTIONS.map((action) => (
-                <option key={action} value={action}>
-                  {AUDIT_ACTION_LABELS[action]}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field id="audit-actor" label="Ator">
-            <Select defaultValue={filters.actorId ?? ""} name="actorId">
-              <option value="">Todos</option>
-              {members.map((member) => (
-                <option key={member.profile_id} value={member.profile_id}>
-                  {member.profile?.display_name ?? member.profile_id}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Button className="self-end" type="submit" variant="outline">
-            <Search aria-hidden="true" className="size-4" />
-            Filtrar
-          </Button>
-        </form>
-        <div className="mt-5 flex items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="mt-0 flex items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>
             {result.total} {result.total === 1 ? "evento" : "eventos"}
           </p>
-          <p>
-            Página {result.page} de {result.pageCount}
-          </p>
         </div>
-        {result.items.length === 0 ? (
-          <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+        {events.length === 0 ? (
+          <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
             <h2 className="font-medium">Nenhum evento encontrado</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Ajuste os filtros ou consulte outro período.
             </p>
           </section>
         ) : (
-          <TableFrame className="mt-4">
-            <TableScrollArea label="Tabela de auditoria">
+          <ListPendingSurface>
+          <section className="mt-4 overflow-hidden rounded-card bg-surface shadow-card">
+            <ul className="divide-y divide-border-default md:hidden">
+              {events.map(({ event, summary }) => (
+                <li className="space-y-2 p-4" key={event.id}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                    <p className="font-semibold">
+                      {AUDIT_ACTION_LABELS[event.action]} · {AUDIT_ENTITY_LABELS[event.entity_type]}
+                    </p>
+                    <time className="text-xs tabular-nums text-muted-foreground" dateTime={event.created_at}>
+                      {formatDateTime(event.created_at)}
+                    </time>
+                  </div>
+                  <p className="text-sm">Por {event.actor?.display_name ?? "Ator sem nome"}</p>
+                  <p className="text-sm text-muted-foreground">{summary}</p>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={`/app/admin/audit/${event.id}`}>Ver evento</Link>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden md:block">
+            <TableScrollArea label="Tabela de auditoria" shadow>
               <Table className="min-w-full table-fixed xl:min-w-[1050px] xl:table-auto">
-                <TableHeader>
+                <TableHeader className="lg:sticky lg:top-0 lg:z-10">
                   <TableRow>
                     <TableHead>Data/hora</TableHead>
                     <TableHead>Ator</TableHead>
@@ -181,24 +169,8 @@ export default async function AdministrationAuditPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {result.items.map((event) => {
-                    const metadata = readAuditMetadata(event.metadata);
-                    const summary =
-                      metadata.changes.length > 0
-                        ? metadata.changes
-                            .map(
-                              (field) =>
-                                ({
-                                  description: "Descrição",
-                                  name: "Nome",
-                                  status: "Status",
-                                  role: "Papel",
-                                })[field] ?? field,
-                            )
-                            .join(", ")
-                        : "Sem campos resumidos";
-                    return (
-                      <TableRow key={event.id} className="align-top">
+                  {events.map(({ event, summary }) => (
+                    <TableRow key={event.id} className="align-top">
                         <TableCell className="whitespace-nowrap tabular-nums">
                           {formatDateTime(event.created_at)}
                         </TableCell>
@@ -229,38 +201,27 @@ export default async function AdministrationAuditPage({
                             </Link>
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableScrollArea>
-          </TableFrame>
+            </div>
+            <ListPagination
+              currentPage={result.page}
+              getHref={(targetPage) => paginationHref(filters, targetPage)}
+              getPageSizeHref={(targetSize) => paginationHref(filters, 1, targetSize)}
+              label="auditoria"
+              pageCount={result.pageCount}
+              pageSize={result.pageSize}
+              total={result.total}
+            />
+          </section>
+          </ListPendingSurface>
         )}
-        <nav
-          aria-label="Paginação da auditoria"
-          className="mt-6 flex items-center justify-between"
-        >
-          {result.page > 1 ? (
-            <Button asChild variant="outline">
-              <Link href={paginationHref(filters, result.page - 1)}>
-                <ArrowLeft aria-hidden="true" className="size-4" />
-                Anterior
-              </Link>
-            </Button>
-          ) : (
-            <span />
-          )}
-          {result.page < result.pageCount ? (
-            <Button asChild variant="outline">
-              <Link href={paginationHref(filters, result.page + 1)}>
-                Próxima
-                <ArrowRight aria-hidden="true" className="size-4" />
-              </Link>
-            </Button>
-          ) : null}
-        </nav>
+        </AuditListFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

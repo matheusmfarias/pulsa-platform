@@ -7,6 +7,7 @@ import type {
   CorrectPresenceInput,
   StartPresenceInput,
 } from "../schemas/presence-schemas";
+import { measureServerStage } from "@/shared/logging";
 
 export async function startPresenceRecord(
   organizationId: string,
@@ -100,14 +101,16 @@ export async function findPresenceOperationalDay(
   operationalContext: OperationalContext,
 ) {
   const supabase = await createServerSupabaseClient();
-  return supabase.rpc("list_presence_operational_day", {
-    target_organization_id: organizationId,
-    target_date: date,
-    target_client_id:
-      operationalContext.type === "all" ? undefined : operationalContext.clientId,
-    target_contract_id:
-      operationalContext.type === "contract"
-        ? operationalContext.contractId
-        : undefined,
-  });
+  return measureServerStage("presences.operational_day", () =>
+    supabase.rpc("list_presence_operational_day", {
+      target_organization_id: organizationId,
+      target_date: date,
+      target_client_id:
+        operationalContext.type === "all" ? undefined : operationalContext.clientId,
+      target_contract_id:
+        operationalContext.type === "contract"
+          ? operationalContext.contractId
+          : undefined,
+    }),
+  );
 }

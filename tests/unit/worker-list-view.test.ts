@@ -1,27 +1,56 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const navigation = vi.hoisted(() => ({ replace: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: navigation.replace, push: vi.fn() }),
+  usePathname: () => "/app/workers",
+  useSearchParams: () => new URLSearchParams("q=Maria&status=active"),
+}));
+
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 
 import {
   hasActiveWorkerFilters,
+  WORKER_SEARCH_DEBOUNCE_MS,
   WorkerFilterBar,
   WorkerTable,
   type WorkerWithCurrentAssignment,
 } from "@/modules/workers";
 
 describe("Workers list view", () => {
-  it("describes active filters and provides an accessible clear action", () => {
+  it("renders removable filter chips and an accessible clear action", () => {
     const html = renderToStaticMarkup(
-      createElement(WorkerFilterBar, {
-        filters: { query: "Maria", status: "active" },
-      }),
+      createElement(
+        ListNavigationProvider,
+        null,
+        createElement(
+          WorkerFilterBar,
+          null,
+          createElement(ListPendingSurface, null, "Resultados"),
+        ),
+      ),
     );
 
+    expect(html).toContain('role="search"');
     expect(html).toContain('aria-label="Filtros de colaboradores"');
-    expect(html).toContain("Filtros ativos:");
-    expect(html).toContain("Busca por “Maria”");
+    expect(html).toContain('type="search"');
+    expect(html).toContain('value="Maria"');
+    expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain("Status: Ativo");
-    expect(html).toContain('aria-label="Limpar filtros de colaboradores"');
+    expect(html).not.toContain("Aplicar");
+    expect(html).not.toContain("<form");
+    expect(html).toContain('aria-label="Filtros ativos"');
+    expect(html).toContain("Busca: Maria");
+    expect(html).toContain("Ativo");
+    expect(html).toContain("Limpar filtros");
+    expect(html).toContain('aria-label="Remover filtro de busca"');
+    expect(html).toContain('aria-label="Remover filtro de status"');
+    expect(html).toContain('aria-busy="false"');
+    expect(html).toContain("Resultados");
+    expect(WORKER_SEARCH_DEBOUNCE_MS).toBe(350);
   });
 
   it("recognizes search and status as optional refinements", () => {
@@ -45,14 +74,18 @@ describe("Workers list view", () => {
       createElement(WorkerTable, { workers: [worker] }),
     );
 
+    expect(html).toContain('aria-label="Lista de colaboradores"');
     expect(html).toContain('aria-label="Tabela de colaboradores"');
     expect(html).toContain('tabindex="0"');
     expect(html).toContain("Maria da Silva");
-    expect(html).toContain("CPF 123.456.789-09");
+    expect(html).toContain("123.456.789-09");
     expect(html).toContain("maria@example.invalid");
     expect(html).toContain("Sem alocação");
     expect(html).toContain("Ativo");
     expect(html).toContain('aria-label="Ver detalhes de Maria da Silva"');
+    expect(html).toContain('title="Ver colaborador"');
+    expect(html).toContain("lucide-chevron-right");
     expect(html).toContain("xl:hidden");
+    expect(html).toContain("xl:block");
   });
 });

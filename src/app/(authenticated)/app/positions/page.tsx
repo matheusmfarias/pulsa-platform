@@ -6,6 +6,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Button } from "@/components/ui/button";
 import { PermissionGate } from "@/modules/authorization";
@@ -16,7 +17,7 @@ import {
   positionGlobalListFiltersSchema,
   PositionTable,
 } from "@/modules/positions";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { toPublicErrorMessage } from "@/shared/errors";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
@@ -33,7 +34,7 @@ export default async function PositionsPage({
   let positions;
 
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
 
     positions = await listPositionsForGlobalView(filters, context);
   } catch (error) {
@@ -61,6 +62,7 @@ export default async function PositionsPage({
   const hasActiveFilters = hasActivePositionFilters(filters);
 
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -81,9 +83,8 @@ export default async function PositionsPage({
           title="Postos"
         />
 
-        <PositionFilterBar filters={filters} />
-
-        <div className="mt-6">
+        <PositionFilterBar filters={filters}>
+        <div>
           {positions.length > 0 ? (
             <p className="text-sm text-muted-foreground">
               <span className="font-medium tabular-nums text-foreground">
@@ -101,7 +102,7 @@ export default async function PositionsPage({
           ) : null}
 
           {positions.length === 0 ? (
-            <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+            <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
               <h2 className="font-medium">
                 {hasActiveFilters
                   ? "Nenhum posto corresponde aos filtros"
@@ -115,10 +116,14 @@ export default async function PositionsPage({
               </p>
             </section>
           ) : (
-            <PositionTable positions={positions} />
+            <ListPendingSurface>
+              <PositionTable positions={positions} />
+            </ListPendingSurface>
           )}
         </div>
+        </PositionFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

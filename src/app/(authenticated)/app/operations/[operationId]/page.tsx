@@ -1,4 +1,4 @@
-import { ArrowRight, Pencil, Plus } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -7,6 +7,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { CoreDetailEditLink, CoreDetailTabs } from "@/components/layout/core-detail-tabs";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
@@ -100,12 +101,7 @@ export default async function OperationDetailsPage({
         <PageHeader
           actions={
             <PermissionGate permission="operation:update">
-              <Button asChild variant="outline">
-                <Link href={`/app/operations/${operation.id}/edit`}>
-                  <Pencil aria-hidden="true" className="size-4" />
-                  Editar
-                </Link>
-              </Button>
+              <CoreDetailEditLink href={`/app/operations/${operation.id}/edit`} tabs={["overview", "units", "status"]} />
             </PermissionGate>
           }
           breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Operações", href: "/app/operations" }, { label: operation.name }]} />}
@@ -128,7 +124,8 @@ export default async function OperationDetailsPage({
           title={operation.name}
         />
 
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <CoreDetailTabs label="Informações da operação" tabs={[
+          { id: "overview", label: "Visão geral", content: <>
           <DetailSection
             description="Informações que vinculam esta operação ao cliente e ao contrato de origem."
             id="operation-context"
@@ -212,6 +209,8 @@ export default async function OperationDetailsPage({
             </dl>
           </DetailSection>
 
+          </> },
+          { id: "units", label: `Unidades (${operation.units.length})`, content: <>
           <DetailSection
             actions={
               operation.status !== "closed" ? (
@@ -234,7 +233,32 @@ export default async function OperationDetailsPage({
                 Esta operação ainda não possui unidades cadastradas.
               </p>
             ) : (
-              <TableFrame>
+              <>
+                <ul aria-label="Unidades da operação" className="divide-y divide-border-default lg:hidden">
+                  {operation.units.map((unit) => {
+                    const location = [unit.city, unit.state].filter(Boolean).join(" / ") || unit.code || "Localização não informada";
+                    return (
+                      <li className="py-4 first:pt-0 last:pb-0" key={unit.id}>
+                        <div className="flex items-start justify-between gap-3">
+                          <Link
+                            className={relationLinkClass + " min-w-0 break-words font-semibold"}
+                            href={`/app/units/${unit.id}`}
+                          >
+                            {unit.name}
+                          </Link>
+                          <UnitStatusBadge status={unit.status} />
+                        </div>
+                        <p className="mt-1 break-words text-xs text-muted-foreground">{location}</p>
+                        <dl className="mt-3 grid grid-cols-3 gap-2 text-sm tabular-nums">
+                          <div><dt className="text-xs text-muted-foreground">Postos</dt><dd className="mt-1 font-semibold">{unit.activePositions}</dd></div>
+                          <div><dt className="text-xs text-muted-foreground">Efetivo base</dt><dd className="mt-1 font-semibold">{unit.baseRequiredHeadcount}</dd></div>
+                          <div><dt className="text-xs text-muted-foreground">Alocados</dt><dd className="mt-1 font-semibold">{unit.activeAssignments}</dd></div>
+                        </dl>
+                      </li>
+                    );
+                  })}
+                </ul>
+              <TableFrame className="hidden lg:block">
                 <TableScrollArea label="Unidades da operação">
                   <Table className="min-w-full table-fixed lg:min-w-[760px] lg:table-auto">
                     <TableHeader>
@@ -350,10 +374,12 @@ export default async function OperationDetailsPage({
                   </Table>
                 </TableScrollArea>
               </TableFrame>
+              </>
             )}
           </DetailSection>
 
-          <PermissionGate permission="operation:update">
+          </> },
+          { id: "status", label: "Situação", content: <>
             <DetailSection
               description="Altere somente a situação da operação. As relações operacionais existentes são preservadas."
               id="operation-status-actions"
@@ -368,14 +394,13 @@ export default async function OperationDetailsPage({
                   <OperationStatusBadge status={operation.status} />
                 </div>
 
-                <OperationStatusAction
-                  currentStatus={operation.status}
-                  operationId={operation.id}
-                />
+                <PermissionGate permission="operation:update">
+                  <OperationStatusAction currentStatus={operation.status} operationId={operation.id} />
+                </PermissionGate>
               </div>
             </DetailSection>
-          </PermissionGate>
-        </div>
+          </> },
+        ]} />
       </ContentContainer>
     </PageShell>
   );

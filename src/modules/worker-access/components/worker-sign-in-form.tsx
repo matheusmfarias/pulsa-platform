@@ -38,7 +38,7 @@ export function WorkerSignInForm({
 
   if (invitationToken || otpMode) {
     return (
-      <form action={verifyAction} className="mt-7 space-y-5" noValidate>
+      <form action={verifyAction} className="mt-7 space-y-5" noValidate onReset={(event) => event.preventDefault()}>
         <input name="invitation" type="hidden" value={invitationToken ?? ""} />
         <div className="space-y-2">
           <Label htmlFor="worker-code-email">
@@ -102,7 +102,7 @@ export function WorkerSignInForm({
   }
 
   return (
-    <form action={passwordAction} className="mt-7 space-y-5" noValidate>
+    <form action={passwordAction} className="mt-7 space-y-5" noValidate onReset={(event) => event.preventDefault()}>
       <div className="space-y-2">
         <Label htmlFor="worker-password-email">E-mail</Label>
         <Input

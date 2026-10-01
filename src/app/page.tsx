@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { getAuthenticatedUser, LoginForm } from "@/modules/auth";
@@ -50,6 +51,7 @@ export default async function LoginPage() {
             </p>
           </div>
           <LoginForm />
+          <Link className="mt-5 inline-flex min-h-11 items-center text-sm text-action-primary hover:underline" href="/activate">Recebeu um convite? Ative seu acesso</Link>
         </div>
       </section>
     </main>

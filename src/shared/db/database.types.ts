@@ -710,6 +710,7 @@ export type Database = {
           created_by: string
           ends_at: string
           id: string
+          inherited_absence_id: string | null
           schedule_revision_id: string
           starts_at: string
         }
@@ -721,6 +722,7 @@ export type Database = {
           created_by: string
           ends_at: string
           id?: string
+          inherited_absence_id?: string | null
           schedule_revision_id: string
           starts_at: string
         }
@@ -732,6 +734,7 @@ export type Database = {
           created_by?: string
           ends_at?: string
           id?: string
+          inherited_absence_id?: string | null
           schedule_revision_id?: string
           starts_at?: string
         }
@@ -748,6 +751,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_entries_inherited_absence_id_fkey"
+            columns: ["inherited_absence_id"]
+            isOneToOne: false
+            referencedRelation: "absences"
             referencedColumns: ["id"]
           },
           {
@@ -1190,6 +1200,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_operational_overview: {
+        Args: {
+          target_client_id?: string | null
+          target_context_type: string
+          target_contract_id?: string | null
+          target_organization_id: string
+        }
+        Returns: Json
+      }
       approve_schedule_revision: {
         Args: { schedule_revision_id: string }
         Returns: {
@@ -1307,6 +1326,28 @@ export type Database = {
           target_profile_id: string
           target_role: string
           target_status: string
+        }
+        Returns: {
+          created_at: string
+          organization_id: string
+          profile_id: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "organization_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_organization_member_with_audit: {
+        Args: {
+          organization_id: string
+          target_profile_id: string
+          target_display_name: string
+          target_role: string
         }
         Returns: {
           created_at: string

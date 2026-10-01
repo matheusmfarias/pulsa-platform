@@ -2,11 +2,20 @@ import * as React from "react";
 
 import { cn } from "@/shared/utils";
 
+import { MobileFormExit } from "./mobile-form-exit";
+
 const containerWidths = {
   list: "max-w-none",
   detail: "max-w-6xl",
   "detail-wide": "max-w-6xl",
-  form: "max-w-5xl",
+  form: "max-w-4xl",
+} as const;
+
+const outerContainerWidths = {
+  list: "max-w-[84rem]",
+  detail: "max-w-7xl",
+  "detail-wide": "max-w-7xl",
+  form: "max-w-7xl",
 } as const;
 
 export type ContentContainerSize = keyof typeof containerWidths;
@@ -15,7 +24,7 @@ export function PageShell({
   className,
   ...props
 }: React.ComponentProps<"main">) {
-  return <main className={cn("py-10", className)} {...props} />;
+  return <main className={cn("core-page py-6 sm:py-10", className)} {...props} />;
 }
 
 export interface ContentContainerProps extends React.ComponentProps<"div"> {
@@ -28,9 +37,16 @@ export function ContentContainer({
   ...props
 }: ContentContainerProps) {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div
+      className={cn(
+        "mx-auto w-full px-4 sm:px-6 lg:px-8",
+        outerContainerWidths[size],
+        size === "form" && "core-form-container",
+      )}
+    >
+      {size === "form" ? <MobileFormExit /> : null}
       <div
-        className={cn("w-full", containerWidths[size], className)}
+        className={cn("core-content w-full", containerWidths[size], size === "form" && "core-form-content", className)}
         {...props}
       />
     </div>
@@ -74,7 +90,7 @@ export function PageHeader({
         ) : eyebrow ? (
           <p className="text-sm font-medium text-primary">{eyebrow}</p>
         ) : null}
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-[1.75rem] leading-tight font-semibold tracking-[-0.025em] sm:text-3xl">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
             {description}
@@ -85,7 +101,7 @@ export function PageHeader({
         ) : null}
       </div>
       {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 [&>*]:w-full [&>a]:min-h-11 [&>button]:min-h-11 sm:w-auto sm:shrink-0 sm:[&>*]:w-auto sm:[&>a]:min-h-0 sm:[&>button]:min-h-0">
           {actions}
         </div>
       ) : null}

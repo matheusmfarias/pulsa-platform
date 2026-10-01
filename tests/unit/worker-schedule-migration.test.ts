@@ -7,7 +7,7 @@ const migration = readFileSync(
     import.meta.url,
   ),
   "utf8",
-);
+).replace(/\r\n/g, "\n");
 
 describe("Worker Schedule read model migration", () => {
   it("exposes only narrow RPCs without caller-selected principal IDs", () => {

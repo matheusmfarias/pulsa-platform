@@ -1,140 +1,59 @@
+import { z } from "zod";
+
 import { requirePermission } from "@/modules/authorization";
 import {
   ALL_OPERATIONAL_CONTEXT,
   type OperationalContext,
 } from "@/modules/operational-context";
-import { listOperations, type OperationWithContext } from "@/modules/operations";
-import { listUnits, type UnitWithContext } from "@/modules/units";
-import { listWorkers, type Worker } from "@/modules/workers";
+import { AppError } from "@/shared/errors";
+import { logger } from "@/shared/logging";
 
-import {
-  findActiveAssignmentOverviewItems,
-  findActivePositionOverviewItems,
-  type ActiveAssignmentOverviewItem,
-  type ActivePositionOverviewItem,
-} from "./overview-repository";
+import { findOperationalOverview } from "./overview-repository";
 
-type OverviewSource = {
-  activeAssignments: ActiveAssignmentOverviewItem[];
-  activeOperations: OperationWithContext[];
-  activePositions: ActivePositionOverviewItem[];
-  activeUnits: UnitWithContext[];
-  activeWorkers: Worker[];
-};
-
-export type OperationalOverview = {
-  kpis: {
-    activeAssignments: number;
-    activeOperations: number;
-    activePositions: number;
-    activeUnits: number;
-    activeWorkers: number;
-    totalRequiredHeadcount: number;
-  };
-  attention: {
-    activeWorkersWithoutAssignment: number;
-    underfilledPositions: number;
-  };
-  operations: Array<{
-    allocatedWorkers: number;
-    clientName: string;
-    id: string;
-    name: string;
-    positions: number;
-    units: number;
-  }>;
-};
-
-export function buildOperationalOverview({
-  activeAssignments,
-  activeOperations,
-  activePositions,
-  activeUnits,
-  activeWorkers,
-}: OverviewSource): OperationalOverview {
-  const occupancyByPosition = new Map<string, number>();
-  const assignedWorkerIds = new Set<string>();
-
-  for (const assignment of activeAssignments) {
-    assignedWorkerIds.add(assignment.worker_id);
-    occupancyByPosition.set(
-      assignment.position_id,
-      (occupancyByPosition.get(assignment.position_id) ?? 0) + 1,
-    );
-  }
-
-  const positionOperationIds = new Map(
-    activePositions.map((position) => [position.id, position.unit.operation.id]),
-  );
-
-  return {
-    kpis: {
-      activeOperations: activeOperations.length,
-      activeUnits: activeUnits.length,
-      activeWorkers: activeWorkers.length,
-      activeAssignments: activeAssignments.length,
-      activePositions: activePositions.length,
-      totalRequiredHeadcount: activePositions.reduce(
-        (total, position) => total + position.base_required_headcount,
-        0,
-      ),
-    },
-    attention: {
-      activeWorkersWithoutAssignment: activeWorkers.filter(
-        (worker) => !assignedWorkerIds.has(worker.id),
-      ).length,
-      underfilledPositions: activePositions.filter(
-        (position) =>
-          (occupancyByPosition.get(position.id) ?? 0) <
-          position.base_required_headcount,
-      ).length,
-    },
-    operations: activeOperations.map((operation) => {
-      const operationAssignments = activeAssignments.filter(
-        (assignment) => positionOperationIds.get(assignment.position_id) === operation.id,
-      );
-      return {
-        id: operation.id,
-        name: operation.name,
-        clientName: operation.contract.client.trade_name,
-        units: activeUnits.filter((unit) => unit.operation.id === operation.id)
-          .length,
-        positions: activePositions.filter(
-          (position) => position.unit.operation.id === operation.id,
-        ).length,
-        allocatedWorkers: new Set(
-          operationAssignments.map((assignment) => assignment.worker_id),
-        ).size,
-      };
+export const operationalOverviewSchema = z.object({
+  kpis: z.object({
+    activeAssignments: z.number().int().nonnegative(),
+    activeOperations: z.number().int().nonnegative(),
+    activePositions: z.number().int().nonnegative(),
+    activeUnits: z.number().int().nonnegative(),
+    activeWorkers: z.number().int().nonnegative(),
+    totalRequiredHeadcount: z.number().int().nonnegative(),
+  }),
+  attention: z.object({
+    activeWorkersWithoutAssignment: z.number().int().nonnegative(),
+    underfilledPositions: z.number().int().nonnegative(),
+  }),
+  operations: z.array(
+    z.object({
+      allocatedWorkers: z.number().int().nonnegative(),
+      clientName: z.string(),
+      id: z.string().uuid(),
+      name: z.string(),
+      positions: z.number().int().nonnegative(),
+      units: z.number().int().nonnegative(),
     }),
-  };
-}
+  ),
+});
+
+export type OperationalOverview = z.infer<typeof operationalOverviewSchema>;
 
 export async function getOperationalOverview(
   operationalContext: OperationalContext = ALL_OPERATIONAL_CONTEXT,
 ): Promise<OperationalOverview> {
-  const [activeOperations, activeUnits, activeWorkers, assignmentResult, positionResult] =
-    await Promise.all([
-      listOperations({ status: "active" }, operationalContext),
-      listUnits({ status: "active" }, operationalContext),
-      listWorkers({ query: "", status: "active" }, operationalContext),
-      requirePermission("assignment:read").then(() =>
-        findActiveAssignmentOverviewItems(operationalContext),
-      ),
-      requirePermission("position:read").then(() =>
-        findActivePositionOverviewItems(operationalContext),
-      ),
-    ]);
+  const { organizationId } = await requirePermission("operation:read");
+  const { data, error } = await findOperationalOverview(
+    organizationId,
+    operationalContext,
+  );
 
-  if (positionResult.error || assignmentResult.error) {
-    throw positionResult.error ?? assignmentResult.error;
+  if (error) {
+    logger.error({
+      errorCode: error.code,
+      event: "overview.operational_aggregate_failed",
+      operation: "get_operational_overview",
+    });
+    throw new AppError("INFRASTRUCTURE", "Falha ao carregar a visão geral.");
   }
 
-  return buildOperationalOverview({
-    activeOperations,
-    activeUnits,
-    activeWorkers,
-    activeAssignments: (assignmentResult.data ?? []) as ActiveAssignmentOverviewItem[],
-    activePositions: (positionResult.data ?? []) as ActivePositionOverviewItem[],
-  });
+  return operationalOverviewSchema.parse(data);
 }

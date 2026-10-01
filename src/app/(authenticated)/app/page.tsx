@@ -3,7 +3,10 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   Building2,
+  CalendarDays,
+  CalendarX2,
   CheckCircle2,
+  ClipboardCheck,
   Gauge,
   Link2,
   MapPin,
@@ -11,13 +14,17 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import {
   ContentContainer,
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { DataRouteSkeleton } from "@/components/ui/data-route-skeleton";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { Card, interactiveCardClassName } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -28,24 +35,24 @@ import {
   TableRow,
   TableScrollArea,
 } from "@/components/ui/table";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import { listAbsences } from "@/modules/absences";
 import { getOperationalOverview } from "@/modules/overview/operational-overview";
 import { toPublicErrorMessage } from "@/shared/errors";
 
-export default async function InternalHomePage() {
+async function InternalHomeContent() {
   let overview;
   let uncoveredAbsences;
 
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
     [overview, uncoveredAbsences] = await Promise.all([getOperationalOverview(context), listAbsences(context, { withoutCoverage: true, limit: 3 })]);
   } catch (error) {
     return (
       <PageShell>
         <ContentContainer size="list">
           <PageHeader
-            description="Resumo da estrutura e das principais pendências operacionais."
+            description="Veja o que precisa de atenção e acesse as tarefas do dia."
             title="Visão geral"
           />
 
@@ -116,23 +123,30 @@ export default async function InternalHomePage() {
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
-          description="Resumo da estrutura e das principais pendências operacionais."
+          className="rounded-card bg-surface px-5 py-5 shadow-card sm:px-7 sm:py-6"
+          description="Veja o que precisa de atenção e acesse as tarefas do dia."
+          eyebrow="Panorama operacional"
           title="Visão geral"
         />
 
-        <section
+        <Card
           aria-labelledby="attention-heading"
-          className="mt-6 overflow-hidden rounded-surface border border-border-default bg-surface"
+          className="mt-5 overflow-hidden"
         >
-          <header className="flex items-center gap-2 border-b border-border-default px-4 py-3">
-            <AlertTriangle
-              aria-hidden="true"
+          <header className="flex items-center gap-3 border-b border-border-default/70 px-5 py-4 sm:px-6">
+            <span
               className={
                 hasAttention
-                  ? "size-4 text-warning"
-                  : "size-4 text-muted-foreground"
+                  ? "flex size-9 shrink-0 items-center justify-center rounded-xl bg-status-warning-background text-warning"
+                  : "flex size-9 shrink-0 items-center justify-center rounded-xl bg-status-success-background text-success"
               }
-            />
+            >
+              {hasAttention ? (
+                <AlertTriangle aria-hidden="true" className="size-4.5" />
+              ) : (
+                <CheckCircle2 aria-hidden="true" className="size-4.5" />
+              )}
+            </span>
 
             <div>
               <h2
@@ -142,24 +156,24 @@ export default async function InternalHomePage() {
                 Requer atenção
               </h2>
 
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Pendências que podem exigir ação operacional.
               </p>
             </div>
           </header>
 
           {hasAttention ? (
-            <div className="divide-y divide-border-default px-4">
+            <div className="divide-y divide-border-default/70 px-5 sm:px-6">
               {uncoveredAbsences.slice(0, 3).map((absence) => {
                 const entry = absence.schedule_entry;
                 const position = entry.assignment.position;
                 const timeZone = position.unit.timezone;
                 const when = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone }).format(new Date(entry.starts_at));
-                return <Link className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm transition-colors hover:bg-hover" href={`/app/absences/${absence.id}`} key={absence.id}><span className="font-medium">Ausência sem cobertura · {entry.assignment.worker.full_name}</span><span className="text-xs text-muted-foreground">{when} · {position.unit.operation.name} · {position.unit.name} · {position.job_role.name}</span></Link>;
+                return <Link className="group -mx-2 flex flex-col gap-1.5 rounded-xl px-2 py-3.5 text-sm transition-colors hover:bg-hover/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring" href={`/app/absences/${absence.id}`} key={absence.id}><span className="font-medium">Ausência sem cobertura · {entry.assignment.worker.full_name}</span><span className="text-xs leading-5 text-muted-foreground">{when} · {position.unit.operation.name} · {position.unit.name} · {position.job_role.name}</span></Link>;
               })}
               {overview.attention.underfilledPositions > 0 ? (
                 <Link
-                  className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm font-medium transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                  className="group -mx-2 flex flex-col gap-1.5 rounded-xl px-2 py-3.5 text-sm font-medium transition-colors hover:bg-hover/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   href="/app/positions"
                 >
                   <span className="flex items-center gap-2.5">
@@ -188,7 +202,7 @@ export default async function InternalHomePage() {
               {overview.attention.activeWorkersWithoutAssignment >
               0 ? (
                 <Link
-                  className="group -mx-2 flex flex-col gap-1.5 rounded-md px-2 py-3 text-sm font-medium transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                  className="group -mx-2 flex flex-col gap-1.5 rounded-xl px-2 py-3.5 text-sm font-medium transition-colors hover:bg-hover/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   href="/app/workers"
                 >
                   <span className="flex items-center gap-2.5">
@@ -219,7 +233,7 @@ export default async function InternalHomePage() {
               ) : null}
             </div>
           ) : (
-            <p className="flex items-center gap-2 px-4 py-4 text-sm text-muted-foreground">
+            <p className="flex items-center gap-2 px-5 py-5 text-sm text-muted-foreground sm:px-6">
               <CheckCircle2
                 aria-hidden="true"
                 className="size-4 text-success"
@@ -228,13 +242,44 @@ export default async function InternalHomePage() {
               Nenhuma pendência operacional identificada.
             </p>
           )}
+        </Card>
+
+        <section aria-labelledby="work-shortcuts-heading" className="mt-8">
+          <header>
+            <h2 className="font-semibold" id="work-shortcuts-heading">Ir direto ao trabalho</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Acesse as rotinas mais usadas sem percorrer os cadastros.
+            </p>
+          </header>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { href: "/app/presences", label: "Acompanhar presença", description: "Veja quem chegou e quem é esperado.", icon: ClipboardCheck },
+              { href: "/app/absences", label: "Resolver ausências", description: "Consulte faltas e coberturas.", icon: CalendarX2 },
+              { href: "/app/scheduling", label: "Organizar escalas", description: "Planeje e consulte publicações.", icon: CalendarDays },
+              { href: "/app/workers", label: "Ver colaboradores", description: "Encontre pessoas e seus vínculos.", icon: Users },
+            ].map(({ href, label, description, icon: Icon }) => (
+              <Link
+                className={`${interactiveCardClassName} group flex min-h-36 flex-col justify-between gap-5 rounded-card bg-surface p-5 shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring`}
+                href={href}
+                key={href}
+              >
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-action-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <Icon aria-hidden="true" className="size-5" />
+                </span>
+                <span>
+                  <span className="flex items-center justify-between gap-2 text-sm font-semibold">
+                    {label}<ArrowRight aria-hidden="true" className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                  <span className="mt-1.5 block text-xs leading-5 text-muted-foreground">{description}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
         </section>
 
-        <section
-          aria-labelledby="indicators-heading"
-          className="mt-8"
-        >
-          <header>
+        <Disclosure open className="mt-8 overflow-hidden rounded-card bg-surface shadow-card">
+          <DisclosureTrigger className="items-start rounded-card px-5 py-4 sm:items-center sm:px-6">
+            <span className="min-w-0 flex-1">
             <h2
               className="font-semibold"
               id="indicators-heading"
@@ -243,37 +288,44 @@ export default async function InternalHomePage() {
             </h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Estrutura ativa dentro do contexto selecionado.
+              Estrutura e alocação no contexto operacional selecionado.
             </p>
-          </header>
+            </span>
+            <span className="hidden shrink-0 text-sm font-medium text-primary sm:block">
+              <span className="group-open:hidden">Ver indicadores</span>
+              <span className="hidden group-open:inline">Ocultar indicadores</span>
+            </span>
+          </DisclosureTrigger>
 
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {kpis.map(({ label, value, icon: Icon }) => (
-              <article
-                className="flex min-h-24 flex-col justify-between rounded-surface border border-border-default bg-surface px-4 py-3.5"
+          <DisclosureContent className="grid gap-3 bg-canvas/65 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
+            {kpis.map(({ label, value, icon: Icon }) => {
+              const featured = label === "Colaboradores ativos";
+
+              return <article
+                className={`flex min-h-28 flex-col justify-between rounded-card px-5 py-4 shadow-card ${featured ? "bg-action-primary text-primary-foreground" : "bg-surface"}`}
                 key={label}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className={`text-xs font-medium ${featured ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                     {label}
                   </p>
 
                   <Icon
                     aria-hidden="true"
-                    className="size-4 text-primary"
+                    className={`size-4.5 ${featured ? "text-primary-foreground/80" : "text-primary"}`}
                   />
                 </div>
 
-                <p className="mt-2 text-2xl font-semibold tabular-nums">
+                <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
                   {value}
                 </p>
-              </article>
-            ))}
+              </article>;
+            })}
 
-            <article className="flex min-h-24 flex-col justify-between rounded-surface border border-border-default bg-surface px-4 py-3.5 sm:col-span-2 lg:col-span-2">
+            <article className="flex min-h-28 flex-col justify-between rounded-card bg-surface px-5 py-4 shadow-card sm:col-span-2 lg:col-span-2">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                  <p className="flex items-center gap-2 text-xs font-medium text-primary-foreground/80">
                     <Gauge
                       aria-hidden="true"
                       className="size-4 text-primary"
@@ -282,7 +334,7 @@ export default async function InternalHomePage() {
                     Alocação sobre efetivo base
                   </p>
 
-                  <p className="mt-2 text-2xl font-semibold tabular-nums">
+                  <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
                     {activeAssignments} de{" "}
                     {totalRequiredHeadcount}
                   </p>
@@ -299,7 +351,7 @@ export default async function InternalHomePage() {
                 aria-valuemin={0}
                 aria-valuenow={progressValue}
                 aria-valuetext={`${activeAssignments} de ${totalRequiredHeadcount}, ${rawOccupancyPercent}%`}
-                className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"
+                className="mt-4 h-2 overflow-hidden rounded-full bg-muted"
                 role="progressbar"
               >
                 <div
@@ -310,8 +362,8 @@ export default async function InternalHomePage() {
                 />
               </div>
             </article>
-          </div>
-        </section>
+          </DisclosureContent>
+        </Disclosure>
 
         <section
           aria-labelledby="operations-heading"
@@ -345,7 +397,7 @@ export default async function InternalHomePage() {
           </header>
 
           {overview.operations.length === 0 ? (
-            <section className="mt-4 border-y border-dashed border-border-strong px-4 py-8 text-center">
+            <section className="mt-4 rounded-card bg-surface px-4 py-8 text-center shadow-card">
               <h3 className="font-medium">
                 Nenhuma operação ativa
               </h3>
@@ -356,7 +408,38 @@ export default async function InternalHomePage() {
               </p>
             </section>
           ) : (
-            <TableFrame className="mt-4">
+            <>
+              <ul aria-label="Resumo das operações" className="mt-4 grid gap-3 xl:hidden">
+                {overview.operations.map((operation) => (
+                  <li key={operation.id}>
+                    <article className="rounded-card bg-surface p-4 shadow-card">
+                      <Link
+                        className="flex items-start justify-between gap-3 rounded-sm font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                        href={`/app/operations/${operation.id}`}
+                      >
+                        <span className="min-w-0 break-words">{operation.name}</span>
+                        <ArrowRight aria-hidden="true" className="mt-1 size-4 shrink-0" />
+                      </Link>
+                      <p className="mt-1 break-words text-sm text-muted-foreground">{operation.clientName}</p>
+                      <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-border-default/70 pt-3">
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Unidades</dt>
+                          <dd className="mt-1 text-lg font-semibold tabular-nums">{operation.units}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Postos</dt>
+                          <dd className="mt-1 text-lg font-semibold tabular-nums">{operation.positions}</dd>
+                        </div>
+                        <div>
+                          <dt className="break-words text-xs text-muted-foreground">Colaboradores</dt>
+                          <dd className="mt-1 text-lg font-semibold tabular-nums">{operation.allocatedWorkers}</dd>
+                        </div>
+                      </dl>
+                    </article>
+                  </li>
+                ))}
+              </ul>
+              <TableFrame className="mt-4 hidden xl:block">
               <TableScrollArea label="Resumo das operações">
                 <Table className="min-w-[720px]">
                   <TableHeader>
@@ -403,10 +486,27 @@ export default async function InternalHomePage() {
                   </TableBody>
                 </Table>
               </TableScrollArea>
-            </TableFrame>
+              </TableFrame>
+            </>
           )}
         </section>
       </ContentContainer>
     </PageShell>
+  );
+}
+
+export default function InternalHomePage() {
+  return (
+    <Suspense
+      fallback={
+        <DataRouteSkeleton
+          kind="dashboard"
+          label="Carregando visão geral"
+          scope="core"
+        />
+      }
+    >
+      <InternalHomeContent />
+    </Suspense>
   );
 }

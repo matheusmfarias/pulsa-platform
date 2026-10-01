@@ -16,9 +16,9 @@ const clientId = "00000000-0000-4000-8000-000000000101";
 const contractId = "00000000-0000-4000-8000-000000000201";
 
 describe("Absence Backoffice", () => {
-  it("adds Ausências to Operação navigation", () => {
+  it("includes Ausências in Rotina navigation", () => {
     expect(
-      authenticatedNavigation.find((group) => group.label === "Operação")?.items,
+      authenticatedNavigation.find((group) => group.label === "Rotina")?.items,
     ).toContainEqual(
       expect.objectContaining({ href: "/app/absences", label: "Ausências" }),
     );
@@ -49,6 +49,11 @@ describe("Absence Backoffice", () => {
     );
   });
 
+  it("selects the original schedule entry relationship after absence inheritance was added", () => {
+    const repository = readFileSync(resolve("src/modules/absences/repositories/absence-repository.ts"), "utf8");
+    expect(repository).toContain("schedule_entry:schedule_entries!absences_schedule_entry_id_fkey!inner(");
+  });
+
   it("recognizes only a reported Absence as active on a ScheduleEntry", () => {
     const entry = {
       absences: [
@@ -62,6 +67,17 @@ describe("Absence Backoffice", () => {
         absences: [{ id: "cancelled", reason: "personal", status: "cancelled" }],
       } as never),
     ).toBeNull();
+  });
+
+  it("falls back to the inherited reported Absence on a republished entry", () => {
+    expect(activeAbsenceForScheduleEntry({
+      absences: [{ id: "cancelled", reason: "personal", status: "cancelled" }],
+      inherited_absence: { id: "inherited", reason: "sick", status: "reported" },
+    } as never)).toMatchObject({ id: "inherited" });
+    expect(activeAbsenceForScheduleEntry({
+      absences: [],
+      inherited_absence: { id: "cancelled", reason: "sick", status: "cancelled" },
+    } as never)).toBeNull();
   });
 
   it("exposes register and cancel actions only with their permissions", () => {

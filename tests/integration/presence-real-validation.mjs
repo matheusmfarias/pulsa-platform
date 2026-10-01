@@ -23,8 +23,9 @@ const primaryOrganizationId = "00000000-0000-4000-8000-000000000001";
 const primaryClientId = "00000000-0000-4000-8000-000000000101";
 const primaryContractId = "00000000-0000-4000-8000-000000000201";
 const operationId = "00000000-0000-4000-8000-000000000301";
-const originalAssignmentId = "00000000-0000-4000-8000-000000000701";
 const originalPositionId = "00000000-0000-4000-8000-000000000501";
+let originalAssignmentId;
+let originalWorkerId;
 const suffix = `${Date.now()}-${randomUUID().slice(0, 8)}`;
 const fixtureDayOffset = Number.parseInt(randomUUID().replaceAll("-", "").slice(0, 8), 16) % 1_000_000;
 const originalDate = new Date(Date.UTC(2200, 0, fixtureDayOffset + 1))
@@ -193,6 +194,32 @@ try {
   otherDirectorFixture = await createActor("DIRECTOR", otherOrganizationId, "other-director");
   const director = directorFixture.client;
   const supervisor = supervisorFixture.client;
+
+  const originalWorker = await rpc(director, "mutate_worker_with_audit", {
+    operation: "create",
+    organization_id: primaryOrganizationId,
+    full_name: `Presence Original ${suffix}`,
+    document_number: `${Date.now()}${randomUUID().replaceAll("-", "")}`.replace(/\D/g, "").slice(-11),
+    engagement_start_date: "2090-01-01",
+  }, "create original Worker");
+  originalWorkerId = originalWorker.id;
+  await rpc(director, "mutate_worker_with_audit", {
+    operation: "status_change",
+    entity_id: originalWorkerId,
+    target_status: "active",
+  }, "activate original Worker");
+  const originalAssignment = await rpc(director, "mutate_assignment_with_audit", {
+    operation: "create",
+    worker_id: originalWorkerId,
+    position_id: originalPositionId,
+    start_date: "2090-01-01",
+  }, "create original Assignment");
+  originalAssignmentId = originalAssignment.id;
+  await rpc(director, "mutate_assignment_with_audit", {
+    operation: "status_change",
+    entity_id: originalAssignmentId,
+    target_status: "active",
+  }, "activate original Assignment");
 
   const timezoneFlow = await createScheduleEntry(director, timezoneDate, true, {
     startsAt: `${timezoneUtcDateString}T02:00:00Z`,
@@ -651,6 +678,9 @@ try {
       admin.from("workers").delete().eq("id", replacementWorkerId),
     );
   }
+  // Published ScheduleEntries retain their original Assignment. Keep that
+  // historical Worker, Assignment and their audit trail together with the
+  // published schedule; only mutable operational fixtures are removed.
   if (userIds.length > 0) {
     await cleanup("delete Organization memberships", () =>
       admin.from("organization_members").delete().in("profile_id", userIds),

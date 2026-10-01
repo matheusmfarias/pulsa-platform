@@ -14,6 +14,15 @@ import { findOperationalContextOptions } from "../repositories/operational-conte
 
 export const OPERATIONAL_CONTEXT_COOKIE = "pulsa-operational-context";
 
+export async function getOperationalContextSelection(): Promise<
+  OperationalContextState["context"]
+> {
+  const cookieStore = await cookies();
+  return parseOperationalContextCookie(
+    cookieStore.get(OPERATIONAL_CONTEXT_COOKIE)?.value,
+  );
+}
+
 export async function listOperationalContextOptions(): Promise<
   OperationalContextOption[]
 > {
@@ -44,13 +53,13 @@ export async function listOperationalContextOptions(): Promise<
 }
 
 async function resolveOperationalContextUncached(): Promise<OperationalContextState> {
-  const [cookieStore, options] = await Promise.all([
-    cookies(),
-    listOperationalContextOptions(),
-  ]);
+  const cookieStore = await cookies();
   const requested = parseOperationalContextCookie(
     cookieStore.get(OPERATIONAL_CONTEXT_COOKIE)?.value,
   );
+  const options =
+    requested.type === "all" ? [] : await listOperationalContextOptions();
+
   return {
     context: resolveOperationalContextSelection(requested, options),
     options,

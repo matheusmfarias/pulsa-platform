@@ -1,77 +1,51 @@
 import { describe, expect, it } from "vitest";
 
-import { buildOperationalOverview } from "@/modules/overview/operational-overview";
+import { operationalOverviewSchema } from "@/modules/overview/operational-overview";
 
-const worker = (id: string) => ({ id }) as never;
-const position = (id: string, headcount: number, operationId = "operation-1") =>
-  ({
-    id,
-    base_required_headcount: headcount,
-    unit: { operation: { id: operationId } },
-  }) as never;
-const assignment = (workerId: string, positionId: string, operationId = "operation-1") =>
-  ({
-    worker_id: workerId,
-    position_id: positionId,
-    position: { unit: { operation: { id: operationId } } },
-  }) as never;
-
-describe("operational overview", () => {
-  it("identifies active workers without an active assignment and underfilled positions", () => {
-    const overview = buildOperationalOverview({
-      activeOperations: [{ id: "operation-1", name: "Centro", contract: { client: { trade_name: "Cliente" } } }] as never,
-      activeUnits: [{ id: "unit-1", operation: { id: "operation-1" } }] as never,
-      activeWorkers: [worker("worker-1"), worker("worker-2")],
-      activePositions: [position("position-1", 2)],
-      activeAssignments: [assignment("worker-1", "position-1")],
-    });
-
-    expect(overview.attention).toEqual({
-      activeWorkersWithoutAssignment: 1,
-      underfilledPositions: 1,
-    });
-    expect(overview.kpis).toMatchObject({
-      activeAssignments: 1,
-      activePositions: 1,
-      totalRequiredHeadcount: 2,
-    });
+describe("operational overview result", () => {
+  it("accepts aggregate metrics and per-operation rows from the database", () => {
+    expect(
+      operationalOverviewSchema.parse({
+        kpis: {
+          activeAssignments: 120,
+          activeOperations: 2,
+          activePositions: 12,
+          activeUnits: 4,
+          activeWorkers: 150,
+          totalRequiredHeadcount: 180,
+        },
+        attention: {
+          activeWorkersWithoutAssignment: 30,
+          underfilledPositions: 3,
+        },
+        operations: [
+          {
+            id: "00000000-0000-4000-8000-000000000301",
+            name: "Apoio de loja",
+            clientName: "Vértice Varejo",
+            units: 2,
+            positions: 7,
+            allocatedWorkers: 80,
+          },
+        ],
+      }),
+    ).toMatchObject({ kpis: { activeWorkers: 150 }, operations: [{ allocatedWorkers: 80 }] });
   });
 
-  it("does not flag a position at or above its required headcount", () => {
-    const overview = buildOperationalOverview({
-      activeOperations: [],
-      activeUnits: [],
-      activeWorkers: [worker("worker-1"), worker("worker-2")],
-      activePositions: [position("position-1", 1)],
-      activeAssignments: [
-        assignment("worker-1", "position-1"),
-        assignment("worker-2", "position-1"),
-      ],
-    });
-
-    expect(overview.attention.underfilledPositions).toBe(0);
-  });
-
-  it("returns zero values for an empty organization", () => {
-    const overview = buildOperationalOverview({
-      activeOperations: [],
-      activeUnits: [],
-      activeWorkers: [],
-      activePositions: [],
-      activeAssignments: [],
-    });
-
-    expect(overview.kpis).toEqual({
-      activeAssignments: 0,
-      activeOperations: 0,
-      activePositions: 0,
-      activeUnits: 0,
-      activeWorkers: 0,
-      totalRequiredHeadcount: 0,
-    });
-    expect(overview.attention).toEqual({
-      activeWorkersWithoutAssignment: 0,
-      underfilledPositions: 0,
-    });
+  it("rejects invalid counts instead of rendering malformed database results", () => {
+    expect(() =>
+      operationalOverviewSchema.parse({
+        kpis: {
+          activeAssignments: -1,
+          activeOperations: 0,
+          activePositions: 0,
+          activeUnits: 0,
+          activeWorkers: 0,
+          totalRequiredHeadcount: 0,
+        },
+        attention: { activeWorkersWithoutAssignment: 0, underfilledPositions: 0 },
+        operations: [],
+      }),
+    ).toThrow();
   });
 });

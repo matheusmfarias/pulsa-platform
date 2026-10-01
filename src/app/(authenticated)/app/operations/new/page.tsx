@@ -7,6 +7,8 @@ import {
 } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { listOrganizationMembers } from "@/modules/administration";
+import { getAuthorizationContext } from "@/modules/authorization";
 import { contractIdSchema, listContracts } from "@/modules/contracts";
 import { OperationForm } from "@/modules/operations";
 import { toPublicErrorMessage } from "@/shared/errors";
@@ -24,9 +26,16 @@ export default async function NewOperationPage({
   );
 
   let contracts;
+  let managers;
 
   try {
-    contracts = await listContracts({ status: "active" });
+    const authorization = await getAuthorizationContext();
+    [contracts, managers] = await Promise.all([
+      listContracts({ status: "active" }),
+      authorization.role === "DIRECTOR"
+        ? listOrganizationMembers()
+        : Promise.resolve(undefined),
+    ]);
   } catch (error) {
     return (
       <PageShell>
@@ -55,7 +64,7 @@ export default async function NewOperationPage({
         />
 
         {contracts.length === 0 ? (
-          <section className="mt-8 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+          <section className="mt-8 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
             <h2 className="font-medium">
               Nenhum contrato ativo disponível
             </h2>
@@ -71,11 +80,12 @@ export default async function NewOperationPage({
         ) : (
           <section
             aria-label="Formulário de cadastro da operação"
-            className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8"
+            className="mt-5 rounded-card bg-surface p-5 shadow-card sm:p-6"
           >
             <OperationForm
               cancelHref="/app/operations"
               contracts={contracts}
+              managers={managers}
               defaultContractId={
                 requestedContract.success
                   ? requestedContract.data

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -40,10 +40,10 @@ export function PositionForm({
     ? updatePositionAction.bind(null, position.id)
     : createPositionAction;
 
-  const [state, action, pending] = useActionState(handler, initialState);
+  const [state, action, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(handler, initialState);
 
   return (
-    <form action={action} className="space-y-8" noValidate>
+    <form action={action} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       {unitId ? <input type="hidden" name="unit_id" value={unitId} /> : null}
       {redirectToPosition ? (
         <input type="hidden" name="redirect_to" value="position" />
@@ -124,7 +124,7 @@ export function PositionForm({
 
       <section
         aria-labelledby="position-details-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="position-details-heading">

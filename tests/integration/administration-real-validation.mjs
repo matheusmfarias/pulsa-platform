@@ -27,9 +27,10 @@ async function createOrganization(label) {
 
 async function createActor(organizationId, role, status, label) {
   const email = `admin-${label}-${Date.now()}-${randomUUID()}@example.invalid`;
+  const password = randomUUID();
   const { data: userData, error: userError } = await admin.auth.admin.createUser({
     email,
-    password: randomUUID(),
+    password,
     email_confirm: true,
   });
   if (userError) throw userError;
@@ -48,17 +49,9 @@ async function createActor(organizationId, role, status, label) {
   });
   if (membershipError) throw membershipError;
 
-  const { data: link, error: linkError } = await admin.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-  });
-  if (linkError) throw linkError;
   const client = createClient(supabaseUrl, publishableKey, options);
-  const { error: verifyError } = await client.auth.verifyOtp({
-    type: "magiclink",
-    token_hash: link.properties.hashed_token,
-  });
-  if (verifyError) throw verifyError;
+  const { error: signInError } = await client.auth.signInWithPassword({ email, password });
+  if (signInError) throw signInError;
   return { client, userId };
 }
 

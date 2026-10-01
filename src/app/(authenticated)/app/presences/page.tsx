@@ -1,18 +1,26 @@
 import { connection } from "next/server";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { can, getAuthorizationContext } from "@/modules/authorization";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import {
   listPresenceOperationalDay,
   presenceOperationalDateSchema,
   summarizeOperationalPresences,
 } from "@/modules/presences";
 import { PresenceDayNavigation } from "@/modules/presences/components/presence-day-navigation";
+import {
+  PresenceDateTransitionProvider,
+  PresenceDayLoadingRegion,
+} from "@/modules/presences/components/presence-date-transition";
 import { PresenceOperationalTable } from "@/modules/presences/components/presence-operational-table";
 import { toPublicErrorMessage } from "@/shared/errors";
+import { RoutePerformanceDiagnostics } from "@/shared/performance/route-performance-diagnostics";
+import type { RouteServerStage } from "@/shared/performance/layout-performance-stages";
 
 function currentDate() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -27,8 +35,13 @@ export default async function PresencesPage({
   searchParams,
 }: PageProps<"/app/presences">) {
   await connection();
+  const params = await searchParams;
+  const serverStages: RouteServerStage[] = [];
+  // Server Components use request-local elapsed time to expose data-stage timings.
+  // eslint-disable-next-line react-hooks/purity
+  const preparationStartedAt = performance.now();
   const today = currentDate();
-  const requestedDate = (await searchParams).date;
+  const requestedDate = params.date;
   const parsedDate = presenceOperationalDateSchema.safeParse(
     typeof requestedDate === "string" ? requestedDate : today,
   );
@@ -42,11 +55,17 @@ export default async function PresencesPage({
   let rows;
   let authorization;
   try {
-    const [{ context }, resolvedAuthorization] = await Promise.all([
-      resolveOperationalContext(),
+    const [context, resolvedAuthorization] = await Promise.all([
+      getOperationalContextSelection(),
       getAuthorizationContext(),
     ]);
+    // eslint-disable-next-line react-hooks/purity
+    serverStages.push({ label: "Contexto e permissões", durationMs: Math.round(performance.now() - preparationStartedAt) });
+    // eslint-disable-next-line react-hooks/purity
+    const queryStartedAt = performance.now();
     rows = await listPresenceOperationalDay(parsedDate.data, context);
+    // eslint-disable-next-line react-hooks/purity
+    serverStages.push({ label: "Consulta de jornadas e presenças", durationMs: Math.round(performance.now() - queryStartedAt) });
     authorization = resolvedAuthorization;
   } catch (error) {
     return (
@@ -60,26 +79,47 @@ export default async function PresencesPage({
     update: can(authorization, "presence:update"),
     cancel: can(authorization, "presence:cancel"),
   };
-  const cards = [
-    ["Programados", summary.scheduled],
-    ["Aguardando confirmação", summary.awaiting],
-    ["Presentes", summary.present],
-    ["Concluídos", summary.completed],
-    ["Ausências sem cobertura", summary.uncovered],
+  const counts = [
+    ["Jornadas programadas", summary.scheduled],
+    ["Aguardando chegada", summary.awaiting],
+    ["Em andamento", summary.present],
+    ["Concluídas", summary.completed],
+    ["Sem cobertura", summary.uncovered],
   ] as const;
 
   return (
     <PageShell>
       <ContentContainer size="list">
         <PageHeader breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Presença" }]} />} description="Acompanhe quem era esperado, quem compareceu e o que exige ação no dia." title="Presença" />
-        <section className="mt-6" aria-label="Navegação por dia"><PresenceDayNavigation date={parsedDate.data} today={today} /></section>
-        <section aria-label="Resumo operacional" className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
-          {cards.map(([label, value]) => <article className="rounded-surface border border-border-default bg-surface p-4" key={label}><p className="text-xs font-medium text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p></article>)}
-        </section>
-        <section className="mt-6" aria-labelledby="presence-list-title">
-          <div><h2 className="font-semibold" id="presence-list-title">Acompanhamento do dia</h2><p className="mt-1 text-sm text-muted-foreground">Estados são derivados da escala oficial, ausências, coberturas e presenças válidas.</p></div>
-          {rows.length ? <PresenceOperationalTable capabilities={capabilities} rows={rows} /> : <div className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-10 text-center"><h3 className="font-medium">Nenhuma entrada programada</h3><p className="mt-2 text-sm text-muted-foreground">Não há trabalho planejado para esta data e contexto operacional.</p></div>}
-        </section>
+        <PresenceDateTransitionProvider date={parsedDate.data} preserveDiagnostics={params.perf === "1"}>
+          <section className="mt-6" aria-label="Navegação por dia"><PresenceDayNavigation date={parsedDate.data} key={parsedDate.data} today={today} /></section>
+          <PresenceDayLoadingRegion>
+            <section aria-label="Resumo do dia">
+              <dl className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                {counts.map(([label, value]) => (
+                  <div className="rounded-card bg-surface px-4 py-3 shadow-card last:col-span-2 md:last:col-span-1" key={label}>
+                    <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+                    <dd className="mt-1 text-xl font-semibold tabular-nums">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+            {summary.uncovered > 0 ? (
+              <Link
+                className="mt-5 flex flex-wrap items-center justify-between gap-2 rounded-control border border-status-warning-border bg-status-warning-background px-4 py-3 text-sm text-status-warning-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                href="/app/absences?coverage=uncovered"
+              >
+                <span className="font-medium">{summary.uncovered} {summary.uncovered === 1 ? "jornada precisa" : "jornadas precisam"} de cobertura.</span>
+                <span className="inline-flex items-center gap-1 font-semibold">Ver ausências <ArrowRight aria-hidden="true" className="size-4" /></span>
+              </Link>
+            ) : null}
+            <section className="mt-6" aria-labelledby="presence-list-title">
+              <div><h2 className="font-semibold" id="presence-list-title">Acompanhamento do dia</h2><p className="mt-1 text-sm text-muted-foreground">Confira quem é esperado em cada jornada e acompanhe chegada e saída.</p></div>
+              {rows.length ? <PresenceOperationalTable capabilities={capabilities} rows={rows} /> : <div className="mt-4 rounded-card bg-surface px-6 py-10 text-center shadow-card"><h3 className="font-medium">Nenhuma entrada programada</h3><p className="mt-2 text-sm text-muted-foreground">Não há trabalho planejado para esta data e contexto operacional.</p></div>}
+            </section>
+            <RoutePerformanceDiagnostics enabledByQuery={params.perf === "1"} resultCount={rows.length} route="Presença" serverStages={serverStages} />
+          </PresenceDayLoadingRegion>
+        </PresenceDateTransitionProvider>
       </ContentContainer>
     </PageShell>
   );

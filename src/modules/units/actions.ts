@@ -85,7 +85,9 @@ export async function updateUnitAction(
   revalidatePath("/app/units");
   revalidatePath(`/app/units/${id.data}`);
   revalidatePath(`/app/operations/${unit.operation_id}`);
-  redirect(`/app/units/${id.data}`);
+  const returnTab = formData.get("return_tab");
+  const tabSuffix = typeof returnTab === "string" && ["positions", "workers", "status"].includes(returnTab) ? `?tab=${returnTab}` : "";
+  redirect(`/app/units/${id.data}${tabSuffix}`);
 }
 
 export async function changeUnitStatusAction(

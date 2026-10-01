@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
 
 import type { AuditListFilters } from "../schemas/administration-schemas";
-import { AUDIT_PAGE_SIZE } from "../schemas/administration-schemas";
 
 const MEMBER_SELECT =
   "organization_id, profile_id, role, status, created_at, updated_at, profile:profiles!organization_members_profile_id_fkey(id, display_name)";
@@ -45,19 +44,34 @@ export async function mutateOrganizationMembership(
   });
 }
 
+export async function createOrganizationMembership(
+  organizationId: string,
+  profileId: string,
+  displayName: string,
+  role: string,
+) {
+  const supabase = await createServerSupabaseClient();
+  return supabase.rpc("create_organization_member_with_audit", {
+    organization_id: organizationId,
+    target_profile_id: profileId,
+    target_display_name: displayName,
+    target_role: role,
+  });
+}
+
 export async function findAuditEvents(
   organizationId: string,
   filters: AuditListFilters,
 ) {
   const supabase = await createServerSupabaseClient();
-  const start = (filters.page - 1) * AUDIT_PAGE_SIZE;
+  const start = (filters.page - 1) * filters.pageSize;
   let query = supabase
     .from("audit_events")
     .select(AUDIT_LIST_SELECT, { count: "exact" })
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
-    .range(start, start + AUDIT_PAGE_SIZE - 1);
+    .range(start, start + filters.pageSize - 1);
 
   if (filters.from) query = query.gte("created_at", `${filters.from}T00:00:00.000Z`);
   if (filters.to) query = query.lte("created_at", `${filters.to}T23:59:59.999Z`);

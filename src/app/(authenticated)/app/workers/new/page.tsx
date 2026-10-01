@@ -1,20 +1,28 @@
-import { ContentContainer, PageHeader, PageShell } from "@/components/layout/page";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { WorkerForm } from "@/modules/workers";
+import {
+  NewWorkerDrawer,
+  parseWorkerListSearchParams,
+  parseWorkerListPage,
+  parseWorkerListPageSize,
+  workerListHref,
+  WorkersWorkspace,
+  type WorkerListSearchParams,
+} from "@/modules/workers";
 
-export default function NewWorkerPage() {
+export default async function NewWorkerPage({
+  searchParams,
+}: {
+  searchParams: Promise<WorkerListSearchParams>;
+}) {
+  const params = await searchParams;
+  const filters = parseWorkerListSearchParams(params);
+  const page = parseWorkerListPage(params);
+  const pageSize = parseWorkerListPageSize(params);
+  const returnHref = workerListHref("/app/workers", filters, page, pageSize);
+
   return (
-    <PageShell>
-      <ContentContainer size="form">
-        <PageHeader
-          breadcrumb={<Breadcrumb items={[{ label: "Pessoas" }, { label: "Colaboradores", href: "/app/workers" }, { label: "Novo colaborador" }]} />}
-          title="Novo colaborador"
-          description="Cadastre os dados operacionais mínimos da pessoa."
-        />
-        <section className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8">
-          <WorkerForm />
-        </section>
-      </ContentContainer>
-    </PageShell>
+    <>
+      <WorkersWorkspace filters={filters} page={page} pageSize={pageSize} />
+      <NewWorkerDrawer returnHref={returnHref} />
+    </>
   );
 }

@@ -9,6 +9,13 @@ const migration = readFileSync(
   ),
   "utf8",
 );
+const boundedLookupMigration = readFileSync(
+  new URL(
+    "../../supabase/migrations/20260925174800_bound_presence_lookup_to_schedule_period.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
 
 describe("Presence operational read model migration", () => {
   it("selects only the current official published revision", () => {
@@ -55,5 +62,19 @@ describe("Presence operational read model migration", () => {
     expect(migration).toContain("'presence:read'");
     expect(migration).toContain("security definer");
     expect(migration).toContain("to authenticated");
+  });
+
+  it("limits the operational-day lookup to schedules covering the requested day", () => {
+    expect(boundedLookupMigration).toContain(
+      "schedule_item.period_start <= list_presence_operational_day.target_date",
+    );
+    expect(boundedLookupMigration).toContain(
+      "schedule_item.period_end >= list_presence_operational_day.target_date",
+    );
+    expect(boundedLookupMigration).toContain(
+      "(entry.starts_at at time zone unit.timezone)::date = list_presence_operational_day.target_date",
+    );
+    expect(boundedLookupMigration).toContain("'presence:read'");
+    expect(boundedLookupMigration).toContain("security definer");
   });
 });

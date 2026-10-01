@@ -42,32 +42,32 @@ export const scheduleEntrySchema = z.object({
   ends_at: z.string(),
   break_starts_at: z.string().nullable(),
   break_ends_at: z.string().nullable(),
+  inherited_absence_id: z.uuid().nullable().optional(),
   created_at: z.string(),
   created_by: z.uuid(),
 });
 
+const scheduleAbsenceContextSchema = z.object({
+  id: z.uuid(),
+  reason: z.enum([
+    "sick",
+    "medical_certificate",
+    "personal",
+    "no_show",
+    "other",
+  ]),
+  status: z.enum(["reported", "cancelled"]),
+  replacements: z.array(z.object({
+    id: z.uuid(),
+    status: z.enum(["active", "cancelled"]),
+    replacement_assignment_id: z.uuid(),
+    replacement_assignment: z.object({ worker: z.object({ id: z.uuid(), full_name: z.string() }) }),
+  })).optional(),
+});
+
 export const scheduleEntryWithContextSchema = scheduleEntrySchema.extend({
-  absences: z
-    .array(
-      z.object({
-        id: z.uuid(),
-        reason: z.enum([
-          "sick",
-          "medical_certificate",
-          "personal",
-          "no_show",
-          "other",
-        ]),
-        status: z.enum(["reported", "cancelled"]),
-        replacements: z.array(z.object({
-          id: z.uuid(),
-          status: z.enum(["active", "cancelled"]),
-          replacement_assignment_id: z.uuid(),
-          replacement_assignment: z.object({ worker: z.object({ id: z.uuid(), full_name: z.string() }) }),
-        })).optional(),
-      }),
-    )
-    .optional(),
+  absences: z.array(scheduleAbsenceContextSchema).optional(),
+  inherited_absence: scheduleAbsenceContextSchema.nullable().optional(),
   assignment: z.object({
     id: z.uuid(),
     worker_id: z.uuid(),
@@ -101,7 +101,8 @@ export type ScheduleEntry = z.infer<typeof scheduleEntrySchema>;
 export type ScheduleEntryWithContext = z.infer<typeof scheduleEntryWithContextSchema>;
 
 export function activeAbsenceForScheduleEntry(entry: ScheduleEntryWithContext) {
-  return entry.absences?.find((absence) => absence.status === "reported") ?? null;
+  return entry.absences?.find((absence) => absence.status === "reported") ??
+    (entry.inherited_absence?.status === "reported" ? entry.inherited_absence : null);
 }
 
 export function activeReplacementForAbsence(

@@ -124,7 +124,7 @@ export default async function ContractDetailsPage({
           title={contract.name}
         />
 
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <DetailSection
             description="Informações comerciais que identificam este contrato e seu período de vigência."
             id="contract-data"

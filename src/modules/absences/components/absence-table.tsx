@@ -16,34 +16,97 @@ import {
 import {
   ABSENCE_REASON_LABELS,
   isAbsenceWithoutCoverage,
-  type AbsenceWithContext,
+  type AbsenceListItem,
 } from "../domain/absence";
+import { formatAbsenceJourney } from "./absence-date-format";
 import { AbsenceStatusBadge } from "./absence-status-badge";
 
-function formatEntryDateTime(absence: AbsenceWithContext) {
+function formatEntryDateTime(absence: AbsenceListItem) {
   const entry = absence.schedule_entry;
   const timeZone = entry.assignment.position.unit.timezone;
-  const format = new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone,
-  });
-  return `${format.format(new Date(entry.starts_at))} — ${format.format(new Date(entry.ends_at))}`;
+  return formatAbsenceJourney(entry.starts_at, entry.ends_at, timeZone);
 }
 
-export function AbsenceTable({ absences }: { absences: AbsenceWithContext[] }) {
+function MobileAbsenceCard({ absence }: { absence: AbsenceListItem }) {
+  const entry = absence.schedule_entry;
+  const position = entry.assignment.position;
+  const operation = position.unit.operation;
+  const href = `/app/absences/${absence.id}`;
+  const activeReplacement = absence.replacements?.find((replacement) => replacement.status === "active");
+  const withoutCoverage = isAbsenceWithoutCoverage(absence);
+
   return (
-    <TableFrame className="mt-4">
-      <TableScrollArea label="Tabela de ausências">
+    <li>
+      <article className="rounded-surface border border-border-default/80 bg-surface p-4">
+        <header className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <Link
+              className="block break-words rounded-sm text-base font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+              href={href}
+            >
+              {entry.assignment.worker.full_name}
+            </Link>
+            {withoutCoverage ? (
+              <p className="mt-1 text-xs font-medium text-status-warning-foreground">Precisa de cobertura</p>
+            ) : null}
+          </div>
+          <AbsenceStatusBadge status={absence.status} />
+        </header>
+
+        <p className="mt-3 font-medium tabular-nums">{formatEntryDateTime(absence)}</p>
+        <p className="mt-1 break-words text-sm leading-5 text-muted-foreground">
+          {position.unit.name} · {position.job_role.name}
+        </p>
+        <p className="break-words text-xs leading-5 text-muted-foreground">{operation.name}</p>
+
+        <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border-default/70 pt-3 text-sm">
+          <div className="min-w-0">
+            <dt className="text-xs font-medium text-muted-foreground">Motivo</dt>
+            <dd className="mt-0.5 break-words">{ABSENCE_REASON_LABELS[absence.reason]}</dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="text-xs font-medium text-muted-foreground">Substituição</dt>
+            <dd className="mt-0.5 break-words">
+              {activeReplacement?.replacement_assignment
+                ? activeReplacement.replacement_assignment.worker.full_name
+                : withoutCoverage
+                  ? "Pendente"
+                  : "Sem substituto"}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="mt-3 border-t border-border-default/70 pt-3">
+          <Button asChild className="h-11 w-full sm:h-9 sm:w-auto" size="sm" variant="outline">
+            <Link href={href}>
+              Ver detalhes <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </article>
+    </li>
+  );
+}
+
+export function AbsenceTable({ absences }: { absences: AbsenceListItem[] }) {
+  return (
+    <>
+      <ul aria-label="Lista de ausências" className="mt-4 grid gap-3 xl:hidden">
+        {absences.map((absence) => (
+          <MobileAbsenceCard absence={absence} key={absence.id} />
+        ))}
+      </ul>
+      <TableFrame className="mt-4 hidden xl:block">
+      <TableScrollArea label="Tabela de ausências" shadow>
         <Table className="min-w-full table-fixed xl:min-w-[1120px] xl:table-auto">
-          <TableHeader>
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10">
             <TableRow>
               <TableHead className="px-3 xl:px-4">Colaborador</TableHead>
               <TableHead className="hidden xl:table-cell">Data e horário</TableHead>
               <TableHead className="hidden xl:table-cell">Operação</TableHead>
               <TableHead className="hidden xl:table-cell">Unidade / Posto</TableHead>
               <TableHead className="w-32 px-2 xl:w-auto xl:px-4">Motivo</TableHead>
-              <TableHead className="w-28 px-2 xl:w-32 xl:px-4">Status</TableHead>
+              <TableHead className="w-44 px-2 xl:w-32 xl:px-4">Situação</TableHead>
               <TableHead className="hidden xl:table-cell">Substituição</TableHead>
               <TableHead className="w-12 px-1 text-right xl:px-4">
                 <span className="sr-only">Ações</span>
@@ -87,6 +150,11 @@ export function AbsenceTable({ absences }: { absences: AbsenceWithContext[] }) {
                   <TableCell className="px-2 xl:px-4">
                     <AbsenceStatusBadge status={absence.status} />
                     {withoutCoverage ? <p className="mt-1 text-xs font-medium text-status-warning-foreground">Sem cobertura</p> : null}
+                    {activeReplacement?.replacement_assignment ? (
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground xl:hidden">
+                        Coberta por {activeReplacement.replacement_assignment.worker.full_name}
+                      </p>
+                    ) : null}
                   </TableCell>
                   <TableCell className="hidden text-sm text-muted-foreground xl:table-cell">
                     {activeReplacement?.replacement_assignment
@@ -106,6 +174,7 @@ export function AbsenceTable({ absences }: { absences: AbsenceWithContext[] }) {
           </TableBody>
         </Table>
       </TableScrollArea>
-    </TableFrame>
+      </TableFrame>
+    </>
   );
 }

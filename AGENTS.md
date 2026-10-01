@@ -23,3 +23,15 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Do not add scheduling, shifts, coverage or vacancies without an explicit requirement.
 - Real integration tests require explicit `SUPABASE_TEST_*` variables plus
   `SUPABASE_TEST_CONFIRMATION=integration-test`; never infer the linked Supabase project.
+
+## Pulsa Core UI/UX
+
+For Pulsa Core UI work, read the relevant files under `docs/product-design/`.
+
+`ui-06-application-foundation.md` defines the shared application UX foundation.
+Approved module patterns complement that foundation.
+
+Do not change business rules during UI-only tasks.
+Do not redesign Pulsa Worker unless explicitly requested.
+Do not import HeroUI directly from feature modules or route pages.
+Pulsa semantic tokens remain the source of truth.

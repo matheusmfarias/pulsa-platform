@@ -16,11 +16,19 @@ const table = readFileSync(
   resolve("src/modules/presences/components/presence-operational-table.tsx"),
   "utf8",
 );
+const dayNavigation = readFileSync(
+  resolve("src/modules/presences/components/presence-day-navigation.tsx"),
+  "utf8",
+);
+const dateTransition = readFileSync(
+  resolve("src/modules/presences/components/presence-date-transition.tsx"),
+  "utf8",
+);
 
 describe("Supervisor operational Presence UI", () => {
   it("adds Presença to operational navigation and keeps context navigation safe", () => {
     expect(
-      authenticatedNavigation.find((group) => group.label === "Operação")?.items,
+      authenticatedNavigation.find((group) => group.label === "Rotina")?.items,
     ).toContainEqual(
       expect.objectContaining({ href: "/app/presences", label: "Presença" }),
     );
@@ -30,10 +38,31 @@ describe("Supervisor operational Presence UI", () => {
   });
 
   it("requests the selected date and supports previous, today and next navigation", () => {
-    expect(page).toContain("(await searchParams).date");
+    expect(page).toContain("const requestedDate = params.date");
     expect(page).toContain("listPresenceOperationalDay(parsedDate.data, context)");
     expect(shiftPresenceDate("2026-09-08", -1)).toBe("2026-09-07");
     expect(shiftPresenceDate("2026-09-08", 1)).toBe("2026-09-09");
+    expect(shiftPresenceDate("2024-03-01", -1)).toBe("2024-02-29");
+    expect(shiftPresenceDate("2026-12-31", 1)).toBe("2027-01-01");
+  });
+
+  it("offers a calendar grid with direct month and year selection", () => {
+    expect(dayNavigation).toContain('aria-label="Escolher data da presença"');
+    expect(dayNavigation).toContain('aria-label="Mês"');
+    expect(dayNavigation).toContain('aria-label="Ano"');
+    expect(dayNavigation).toContain('role="grid"');
+    expect(dayNavigation).toContain('aria-current={isToday ? "date" : undefined}');
+    expect(dayNavigation).toContain('event.key === "ArrowDown"');
+  });
+
+  it("shows date-specific loading feedback only for the data region while navigating", () => {
+    expect(page).toContain("<PresenceDateTransitionProvider");
+    expect(page).toContain("<PresenceDayLoadingRegion>");
+    expect(dateTransition).toContain("Carregando presença de");
+    expect(dateTransition).toContain("aria-busy={isPending}");
+    expect(dateTransition).toContain("PresenceDaySkeleton");
+    expect(dayNavigation).toContain("<PresenceDateLoadingStatus />");
+    expect(dayNavigation).toContain("disabled={isPending}");
   });
 
   it("does not offer arrival for an uncovered Absence", () => {

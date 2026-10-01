@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -19,25 +19,35 @@ import type { Unit } from "../domain/unit";
 
 const initialState: UnitActionState = { error: null };
 
+const BRAZIL_TIME_ZONES = [
+  { value: "America/Noronha", label: "Fernando de Noronha e ilhas (UTC−02:00)" },
+  { value: "America/Sao_Paulo", label: "Brasília e maior parte do Brasil (UTC−03:00)" },
+  { value: "America/Manaus", label: "Manaus e parte da região Norte (UTC−04:00)" },
+  { value: "America/Rio_Branco", label: "Acre e sudoeste da Amazônia (UTC−05:00)" },
+] as const;
+
 export function UnitForm({
   operations,
   unit,
   defaultOperationId,
   cancelHref,
+  returnTab,
 }: {
   operations: OperationWithContext[];
   unit?: Unit;
   defaultOperationId?: string;
   cancelHref: string;
+  returnTab?: string;
 }) {
   const handler = unit
     ? updateUnitAction.bind(null, unit.id)
     : createUnitAction;
 
-  const [state, action, pending] = useActionState(handler, initialState);
+  const [state, action, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(handler, initialState);
 
   return (
-    <form action={action} className="space-y-8" noValidate>
+    <form action={action} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+      {unit && returnTab ? <input name="return_tab" type="hidden" value={returnTab} /> : null}
       <section aria-labelledby="unit-context-heading">
         <div>
           <h2 className="font-semibold" id="unit-context-heading">
@@ -114,7 +124,7 @@ export function UnitForm({
 
       <section
         aria-labelledby="unit-location-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="unit-location-heading">
@@ -175,7 +185,7 @@ export function UnitForm({
 
       <section
         aria-labelledby="unit-settings-heading"
-        className="border-t border-border-default pt-8"
+        className="border-t border-border-default pt-6"
       >
         <div>
           <h2 className="font-semibold" id="unit-settings-heading">
@@ -189,17 +199,28 @@ export function UnitForm({
 
         <div className="mt-5">
           <Field
-            description="Use um identificador IANA, como America/Sao_Paulo."
+            description="Escolha o horário local usado nesta unidade para escalas e presenças."
             error={state.fieldErrors?.timezone}
             id="timezone"
             label="Fuso horário"
             required
           >
-            <Input
+            <Select
               defaultValue={unit?.timezone ?? "America/Sao_Paulo"}
-              maxLength={100}
               name="timezone"
-            />
+            >
+              {!BRAZIL_TIME_ZONES.some((zone) => zone.value === unit?.timezone) &&
+              unit?.timezone ? (
+                <option value={unit.timezone}>
+                  Fuso já configurado ({unit.timezone.split("/").pop()?.replace(/_/g, " ") ?? "personalizado"})
+                </option>
+              ) : null}
+              {BRAZIL_TIME_ZONES.map((zone) => (
+                <option key={zone.value} value={zone.value}>
+                  {zone.label}
+                </option>
+              ))}
+            </Select>
           </Field>
         </div>
       </section>

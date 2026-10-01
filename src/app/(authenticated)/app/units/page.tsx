@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
-import { resolveOperationalContext } from "@/modules/operational-context";
+import { getOperationalContextSelection } from "@/modules/operational-context";
 import {
   listUnitOperationalSummaries,
   UnitTable,
@@ -21,7 +21,7 @@ export default async function UnitsPage() {
   let units;
 
   try {
-    const { context } = await resolveOperationalContext();
+    const context = await getOperationalContextSelection();
     units = await listUnitOperationalSummaries(context);
   } catch (error) {
     return (
@@ -73,7 +73,7 @@ export default async function UnitsPage() {
           ) : null}
 
           {units.length === 0 ? (
-            <section className="rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:mt-4 sm:py-10">
+            <section className="rounded-card bg-surface shadow-card px-6 py-8 text-center sm:mt-4 sm:py-10">
               <h2 className="font-medium">Nenhuma unidade cadastrada</h2>
 
               <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">

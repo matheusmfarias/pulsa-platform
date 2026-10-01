@@ -61,6 +61,9 @@ async function createUserWithMembership(role, organizationIds, label) {
 
 const primaryOrganizationId = "00000000-0000-4000-8000-000000000001";
 const suffix = String(Date.now()).slice(-6);
+const fixtureDate = new Date(Date.UTC(2200, 0, Number.parseInt(randomUUID().slice(0, 8), 16) % 100_000 + 1))
+  .toISOString().slice(0, 10);
+const fixtureWorkerName = `Absence Worker ${suffix}`;
 const { data: otherOrganization, error: otherOrganizationError } = await admin
   .from("organizations")
   .insert({
@@ -89,15 +92,42 @@ let schedule;
 let revision;
 let entry;
 let absence;
+let fixtureWorker;
+let fixtureAssignment;
 
 try {
+  const { data: worker, error: workerError } = await director.rpc("mutate_worker_with_audit", {
+    operation: "create",
+    organization_id: primaryOrganizationId,
+    full_name: fixtureWorkerName,
+    document_number: `${Date.now()}${randomUUID().replaceAll("-", "")}`.replace(/\D/g, "").slice(-11),
+  });
+  if (workerError) failAt("create Worker fixture", workerError);
+  fixtureWorker = worker;
+  const { error: activateWorkerError } = await director.rpc("mutate_worker_with_audit", {
+    operation: "status_change", entity_id: worker.id, target_status: "active",
+  });
+  if (activateWorkerError) failAt("activate Worker fixture", activateWorkerError);
+  const { data: assignment, error: assignmentError } = await director.rpc("mutate_assignment_with_audit", {
+    operation: "create",
+    worker_id: worker.id,
+    position_id: "00000000-0000-4000-8000-000000000501",
+    start_date: "2199-01-01",
+  });
+  if (assignmentError) failAt("create Assignment fixture", assignmentError);
+  fixtureAssignment = assignment;
+  const { error: activateAssignmentError } = await director.rpc("mutate_assignment_with_audit", {
+    operation: "status_change", entity_id: assignment.id, target_status: "active",
+  });
+  if (activateAssignmentError) failAt("activate Assignment fixture", activateAssignmentError);
+
   const { data: createdSchedule, error: scheduleError } = await director.rpc(
     "create_schedule",
     {
       organization_id: primaryOrganizationId,
       operation_id: "00000000-0000-4000-8000-000000000301",
-      period_start: "2026-09-10",
-      period_end: "2026-09-10",
+      period_start: fixtureDate,
+      period_end: fixtureDate,
     },
   );
   if (scheduleError) failAt("create Schedule fixture", scheduleError);
@@ -115,9 +145,9 @@ try {
     "create_schedule_entry",
     {
       schedule_revision_id: revision.id,
-      assignment_id: "00000000-0000-4000-8000-000000000701",
-      starts_at: "2026-09-10T11:00:00Z",
-      ends_at: "2026-09-10T19:00:00Z",
+      assignment_id: assignment.id,
+      starts_at: `${fixtureDate}T11:00:00Z`,
+      ends_at: `${fixtureDate}T19:00:00Z`,
     },
   );
   if (entryError) failAt("create ScheduleEntry fixture", entryError);
@@ -202,7 +232,7 @@ try {
     "Absence reporter was not available to an absence reader",
   );
   assert(
-    readableAbsence.schedule_entry.assignment.worker.full_name === "Mariana Alves",
+    readableAbsence.schedule_entry.assignment.worker.full_name === fixtureWorkerName,
     "Absence read model did not include the Worker",
   );
 
@@ -258,13 +288,15 @@ try {
   console.log("Absence real validation passed.");
 } finally {
   if (absence) await admin.from("absences").delete().eq("id", absence.id);
-  const auditEntityIds = [absence?.id, entry?.id, revision?.id, schedule?.id].filter(Boolean);
+  const auditEntityIds = [absence?.id, entry?.id, revision?.id, schedule?.id, fixtureAssignment?.id, fixtureWorker?.id].filter(Boolean);
   if (auditEntityIds.length > 0) {
     await admin.from("audit_events").delete().in("entity_id", auditEntityIds);
   }
   if (entry) await admin.from("schedule_entries").delete().eq("id", entry.id);
   if (revision) await admin.from("schedule_revisions").delete().eq("id", revision.id);
   if (schedule) await admin.from("schedules").delete().eq("id", schedule.id);
+  if (fixtureAssignment) await admin.from("assignments").delete().eq("id", fixtureAssignment.id);
+  if (fixtureWorker) await admin.from("workers").delete().eq("id", fixtureWorker.id);
   await admin
     .from("organization_members")
     .delete()

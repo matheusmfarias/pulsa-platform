@@ -6,6 +6,7 @@ import {
   PageHeader,
   PageShell,
 } from "@/components/layout/page";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { PermissionGate } from "@/modules/authorization";
@@ -72,6 +73,7 @@ export default async function ClientsPage({
   const hasActiveFilters = hasActiveClientFilters(filters);
 
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -101,9 +103,8 @@ export default async function ClientsPage({
           title="Clientes"
         />
 
-        <ClientFilterBar filters={filters} />
-
-        <div className="mt-5 sm:mt-6">
+        <ClientFilterBar filters={filters}>
+        <div>
           {clients.length > 0 ? (
             <p className="text-sm text-muted-foreground">
               <span className="font-medium tabular-nums text-foreground">
@@ -121,7 +122,7 @@ export default async function ClientsPage({
           ) : null}
 
           {clients.length === 0 ? (
-            <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+            <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
               <h2 className="font-medium">
                 {hasActiveFilters
                   ? "Nenhum cliente corresponde aos filtros"
@@ -135,10 +136,14 @@ export default async function ClientsPage({
               </p>
             </section>
           ) : (
-            <ClientTable clients={clients} />
+            <ListPendingSurface>
+              <ClientTable clients={clients} />
+            </ListPendingSurface>
           )}
         </div>
+        </ClientFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

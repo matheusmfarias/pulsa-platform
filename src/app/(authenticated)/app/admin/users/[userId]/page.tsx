@@ -6,8 +6,10 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
+  ResendOrganizationInvitation,
   MembershipRoleForm,
   MembershipStatusAction,
   MembershipStatusBadge,
@@ -53,7 +55,7 @@ export default async function AdministrationUserDetailPage({
       </PageShell>
     );
   }
-  const displayName = member.profile?.display_name ?? "Sem nome de exibição";
+  const displayName = member.profile?.display_name ?? member.email ?? "Usuário sem nome cadastrado";
   return (
     <PageShell>
       <ContentContainer size="detail">
@@ -67,21 +69,17 @@ export default async function AdministrationUserDetailPage({
               ]}
             />
           }
-          description="Membership administrativa da organização atual."
+          description="Consulte e gerencie o papel e o acesso desta pessoa à organização."
           metadata={<MembershipStatusBadge status={member.status} />}
           title={displayName}
         />
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <section className="py-6">
-            <h2 className="font-semibold">Identidade e membership</h2>
+            <h2 className="font-semibold">Dados do usuário</h2>
             <dl className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
               <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Profile ID
-                </dt>
-                <dd className="mt-1 break-all font-mono text-sm">
-                  {member.profile_id}
-                </dd>
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">E-mail</dt>
+                <dd className="mt-1 break-all text-sm">{member.email ?? "Indisponível"}</dd>
               </div>
               <div>
                 <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -108,12 +106,24 @@ export default async function AdministrationUserDetailPage({
                 </dd>
               </div>
             </dl>
+            <Disclosure className="mt-5 text-sm text-muted-foreground">
+              <DisclosureTrigger className="w-fit">Identificador para suporte</DisclosureTrigger>
+              <DisclosureContent>
+                <p className="mt-2 break-all font-mono">{member.profile_id}</p>
+              </DisclosureContent>
+            </Disclosure>
           </section>
+          {member.invitationPending ? (
+            <section className="py-6">
+              <h2 className="font-semibold">Convite pendente</h2>
+              <p className="mt-1 max-w-xl text-sm text-muted-foreground">Esta pessoa ainda não entrou na conta. Ela pode ativar o acesso com o código recebido por e-mail.</p>
+              <div className="mt-4"><ResendOrganizationInvitation profileId={member.profile_id} /></div>
+            </section>
+          ) : null}
           <section className="py-6">
             <h2 className="font-semibold">Alterar papel</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Os papéis usam a matriz fixa do sistema; permissions individuais
-              não podem ser editadas.
+              O papel define as áreas e ações disponíveis para esta pessoa.
             </p>
             <div className="mt-4">
               <MembershipRoleForm
@@ -125,10 +135,10 @@ export default async function AdministrationUserDetailPage({
           <section className="py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="font-semibold">Status da membership</h2>
+                <h2 className="font-semibold">Acesso à organização</h2>
                 <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                  A inativação preserva o histórico e remove o contexto ativo da
-                  organização. O último Diretor ativo não pode ser inativado.
+                  Ao desativar o acesso, a pessoa deixa de entrar nesta organização.
+                  O histórico permanece disponível. O último Diretor ativo não pode ser desativado.
                 </p>
               </div>
               <MembershipStatusAction

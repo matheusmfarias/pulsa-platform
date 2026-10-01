@@ -1,7 +1,9 @@
 type LogEvent = {
+  durationMs?: number;
   event: string;
   errorCode?: string;
   operation?: string;
+  outcome?: "success" | "error";
 };
 
 function write(level: "info" | "error", details: LogEvent): void {

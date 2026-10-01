@@ -29,11 +29,22 @@ position_id: z.uuid("Selecione um posto válido."),
   );
 
 export const assignmentListFiltersSchema = z.object({
+  query: z.preprocess(
+    (value) => Array.isArray(value) ? value[0] : value,
+    z.string().trim().max(120).catch("").default(""),
+  ),
   workerId: z.uuid().optional(),
   positionId: z.uuid().optional(),
   status: z.preprocess(
     (value) => (value === "" || value === "all" ? undefined : value),
     assignmentStatusSchema.optional(),
+  ),
+  pageSize: z.preprocess(
+    (value) => {
+      const parsed = Array.isArray(value) ? value[0] : value;
+      return parsed == null ? undefined : String(parsed);
+    },
+    z.union([z.literal("10"), z.literal("25"), z.literal("50")]).transform(Number).catch(10).default(10),
   ),
 });
 

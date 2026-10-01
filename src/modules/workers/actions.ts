@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { z } from "zod";
 
 import { isAppError, toPublicErrorMessage } from "@/shared/errors";
@@ -12,6 +12,13 @@ import { workerIdSchema, workerInputSchema } from "./schemas/worker-schemas";
 import { changeWorkerStatus } from "./services/change-worker-status";
 import { createWorker } from "./services/create-worker";
 import { updateWorker } from "./services/update-worker";
+import {
+  parseWorkerListSearchParams,
+  parseWorkerListPage,
+  parseWorkerListPageSize,
+  WORKER_CREATED_FEEDBACK,
+  workerListHref,
+} from "./components/worker-list-filters";
 
 type WorkerField =
   | "full_name"
@@ -73,8 +80,66 @@ export async function createWorkerAction(
   redirect(`/app/workers/${workerId}`);
 }
 
+function safeWorkerListReturnHref(returnHref: string): string {
+  const baseUrl = new URL("https://pulsa.invalid");
+
+  try {
+    const destination = new URL(returnHref, baseUrl);
+    if (
+      destination.origin !== baseUrl.origin ||
+      destination.pathname !== "/app/workers"
+    ) {
+      return "/app/workers";
+    }
+
+    const filters = parseWorkerListSearchParams({
+      q: destination.searchParams.get("q") ?? undefined,
+      status: destination.searchParams.get("status") ?? undefined,
+      page: destination.searchParams.get("page") ?? undefined,
+      size: destination.searchParams.get("size") ?? undefined,
+    });
+    const page = parseWorkerListPage({
+      page: destination.searchParams.get("page") ?? undefined,
+    });
+    const pageSize = parseWorkerListPageSize({
+      size: destination.searchParams.get("size") ?? undefined,
+    });
+    return workerListHref("/app/workers", filters, page, pageSize);
+  } catch {
+    return "/app/workers";
+  }
+}
+
+function workerCreatedReturnHref(returnHref: string): string {
+  const destination = new URL(
+    safeWorkerListReturnHref(returnHref),
+    "https://pulsa.invalid",
+  );
+  destination.searchParams.set("feedback", WORKER_CREATED_FEEDBACK);
+  return `${destination.pathname}${destination.search}`;
+}
+
+export async function createWorkerInDrawerAction(
+  returnHref: string,
+  _previousState: WorkerActionState,
+  formData: FormData,
+): Promise<WorkerActionState> {
+  const input = readWorkerInput(formData);
+  if (!input.success) return invalidInputState(input.error);
+
+  try {
+    await createWorker(input.data);
+  } catch (error) {
+    return actionErrorState(error, "create_worker");
+  }
+
+  revalidatePath("/app/workers");
+  redirect(workerCreatedReturnHref(returnHref), RedirectType.replace);
+}
+
 export async function updateWorkerAction(
   workerId: string,
+  returnTab: string,
   _previousState: WorkerActionState,
   formData: FormData,
 ): Promise<WorkerActionState> {
@@ -91,7 +156,8 @@ export async function updateWorkerAction(
 
   revalidatePath("/app/workers");
   revalidatePath(`/app/workers/${id.data}`);
-  redirect(`/app/workers/${id.data}`);
+  const tab = returnTab === "record" || returnTab === "access" ? `?tab=${returnTab}` : "";
+  redirect(`/app/workers/${id.data}${tab}`);
 }
 
 export async function changeWorkerStatusAction(
@@ -111,5 +177,5 @@ export async function changeWorkerStatusAction(
 
   revalidatePath("/app/workers");
   revalidatePath(`/app/workers/${input.data.id}`);
-  redirect(`/app/workers/${input.data.id}`);
+  redirect(`/app/workers/${input.data.id}?tab=record`);
 }

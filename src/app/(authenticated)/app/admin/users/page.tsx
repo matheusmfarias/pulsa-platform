@@ -8,6 +8,7 @@ import {
 } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   Table,
@@ -20,6 +21,7 @@ import {
   TableScrollArea,
 } from "@/components/ui/table";
 import {
+  InviteOrganizationUser,
   MembershipStatusBadge,
   ORGANIZATION_ROLE_LABELS,
   listOrganizationMembers,
@@ -64,18 +66,46 @@ export default async function AdministrationUsersPage() {
               items={[{ label: "Administração" }, { label: "Usuários" }]}
             />
           }
-          description="Memberships existentes na organização. Usuários administrativos e colaboradores operacionais são identidades independentes."
+          description="Veja quem tem acesso à organização e qual é o papel de cada pessoa."
           title="Usuários"
+          actions={<InviteOrganizationUser />}
         />
-        <FeedbackMessage className="mt-6" variant="info">
-          Os e-mails dos usuários não estão disponíveis nesta área.
-        </FeedbackMessage>
+        <Disclosure className="mt-4 text-sm text-muted-foreground">
+          <DisclosureTrigger className="w-fit">Sobre os dados desta lista</DisclosureTrigger>
+          <DisclosureContent>
+            <p className="mt-2">Esta lista reúne usuários internos. Colaboradores operacionais são gerenciados na área Colaboradores.</p>
+          </DisclosureContent>
+        </Disclosure>
         {members.length === 0 ? (
-          <section className="mt-6 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
-            <h2 className="font-medium">Nenhuma membership encontrada</h2>
+          <section className="mt-6 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
+            <h2 className="font-medium">Nenhum usuário encontrado</h2>
           </section>
         ) : (
-          <TableFrame className="mt-6">
+          <>
+          <ul className="mt-6 divide-y divide-border-default overflow-hidden rounded-card bg-surface shadow-card md:hidden">
+            {members.map((member) => (
+              <li className="space-y-3 p-4" key={member.profile_id}>
+                <div className="flex items-start justify-between gap-3">
+                  <Link
+                    className="min-w-0 font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                    href={`/app/admin/users/${member.profile_id}`}
+                  >
+                    {member.profile?.display_name ?? member.email ?? "Usuário sem nome cadastrado"}
+                  </Link>
+                  <MembershipStatusBadge status={member.status} />
+                </div>
+                <p className="text-sm text-muted-foreground">{ORGANIZATION_ROLE_LABELS[member.role]} · Entrada em {formatDate(member.created_at)}</p>
+                <p className="break-all text-sm text-muted-foreground">{member.email ?? "E-mail indisponível"}</p>
+                {member.invitationPending ? <p className="text-xs font-medium text-status-warning-foreground">Convite pendente</p> : null}
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/app/admin/users/${member.profile_id}`}>
+                    Gerenciar acesso <ArrowRight aria-hidden="true" className="size-4" />
+                  </Link>
+                </Button>
+              </li>
+            ))}
+          </ul>
+          <TableFrame className="mt-6 hidden md:block">
             <TableScrollArea label="Tabela de usuários">
               <Table className="min-w-full table-fixed lg:min-w-[780px] lg:table-auto">
                 <TableHeader>
@@ -95,15 +125,13 @@ export default async function AdministrationUsersPage() {
                           className="block truncate font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                           href={`/app/admin/users/${member.profile_id}`}
                         >
-                          {member.profile?.display_name ??
-                            "Sem nome de exibição"}
+                          {member.profile?.display_name ?? member.email ??
+                            "Usuário sem nome cadastrado"}
                         </Link>
-                        <p
-                          className="mt-1 truncate font-mono text-xs text-muted-foreground"
-                          title={member.profile_id}
-                        >
-                          {member.profile_id}
+                        <p className="mt-1 truncate text-xs text-muted-foreground" title={member.email ?? undefined}>
+                          {member.email ?? "E-mail indisponível"}
                         </p>
+                        {member.invitationPending ? <p className="mt-1 text-xs font-medium text-status-warning-foreground">Convite pendente</p> : null}
                       </TableCell>
                       <TableCell>
                         {ORGANIZATION_ROLE_LABELS[member.role]}
@@ -128,6 +156,7 @@ export default async function AdministrationUsersPage() {
               </Table>
             </TableScrollArea>
           </TableFrame>
+          </>
         )}
       </ContentContainer>
     </PageShell>

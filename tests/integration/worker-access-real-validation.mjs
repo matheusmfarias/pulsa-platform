@@ -135,7 +135,8 @@ try {
     "Recurring Worker login created an arbitrary Auth User",
   );
 
-  const provisionedEmail = `worker-access-provisioned-${marker}@example.invalid`;
+  const provisionedEmail = process.env.SUPABASE_TEST_OTP_RECIPIENT
+    ?? `worker-access-provisioned-${marker}@example.invalid`;
   const { data: provisionedAuth, error: provisionedAuthError } =
     await admin.auth.admin.createUser({
       email: provisionedEmail,
@@ -143,16 +144,19 @@ try {
     });
   if (provisionedAuthError) throw provisionedAuthError;
   userIds.push(provisionedAuth.user.id);
-  const provisionedLoginClient = createClient(supabaseUrl, publishableKey, options);
-  const { error: provisionedOtpError } =
-    await provisionedLoginClient.auth.signInWithOtp({
-      email: provisionedEmail,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: "http://localhost:3000/worker/sign-in?invitation=test",
-      },
-    });
-  if (provisionedOtpError) throw provisionedOtpError;
+  const otpDeliverySkipped = process.env.SUPABASE_TEST_SKIP_EMAIL_DELIVERY === "1";
+  if (!otpDeliverySkipped) {
+    const provisionedLoginClient = createClient(supabaseUrl, publishableKey, options);
+    const { error: provisionedOtpError } =
+      await provisionedLoginClient.auth.signInWithOtp({
+        email: provisionedEmail,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: "http://localhost:3000/worker/sign-in?invitation=test",
+        },
+      });
+    if (provisionedOtpError) throw provisionedOtpError;
+  }
 
   const organizationA = await createOrganization(`Worker Access A ${marker}`);
   const organizationB = await createOrganization(`Worker Access B ${marker}`);
@@ -397,7 +401,7 @@ try {
     JSON.stringify({
       explicitProvisioning: true,
       recurringLoginDoesNotCreateUsers: true,
-      provisionedAccountReceivesOtp: true,
+      provisionedOtpSendAccepted: otpDeliverySkipped ? "not_tested" : true,
       organizationMemberIsolation: true,
       oneToOneCurrentLinks: true,
       claimOwnershipAndIdempotency: true,

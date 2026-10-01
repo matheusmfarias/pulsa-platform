@@ -76,12 +76,43 @@ export const absenceWithContextSchema = absenceSchema.extend({
   }),
 });
 
+export const absenceListItemSchema = z.object({
+  id: z.uuid(),
+  reason: absenceReasonSchema,
+  status: absenceStatusSchema,
+  replacements: z.array(z.object({
+    id: z.uuid(),
+    status: z.enum(["active", "cancelled"]),
+    replacement_assignment: z.object({
+      worker: z.object({ full_name: z.string() }),
+    }),
+  })).optional(),
+  schedule_entry: z.object({
+    starts_at: z.string(),
+    ends_at: z.string(),
+    assignment: z.object({
+      worker: z.object({ full_name: z.string() }),
+      position: z.object({
+        job_role: z.object({ name: z.string() }),
+        unit: z.object({
+          name: z.string(),
+          timezone: z.string(),
+          operation: z.object({ name: z.string() }),
+        }),
+      }),
+    }),
+  }),
+});
+
 export type AbsenceReason = z.infer<typeof absenceReasonSchema>;
 export type AbsenceStatus = z.infer<typeof absenceStatusSchema>;
 export type Absence = z.infer<typeof absenceSchema>;
 export type AbsenceWithContext = z.infer<typeof absenceWithContextSchema>;
+export type AbsenceListItem = z.infer<typeof absenceListItemSchema>;
 
-export function isAbsenceWithoutCoverage(absence: AbsenceWithContext) {
+export function isAbsenceWithoutCoverage(
+  absence: Pick<AbsenceListItem, "status" | "replacements">,
+) {
   return absence.status === "reported" && !absence.replacements?.some((replacement) => replacement.status === "active");
 }
 

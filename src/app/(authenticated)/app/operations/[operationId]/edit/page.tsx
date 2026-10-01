@@ -6,6 +6,8 @@ import {
   PageShell,
 } from "@/components/layout/page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { listOrganizationMembers } from "@/modules/administration";
+import { getAuthorizationContext } from "@/modules/authorization";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { listContracts } from "@/modules/contracts";
 import {
@@ -17,6 +19,7 @@ import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 
 export default async function EditOperationPage({
   params,
+  searchParams,
 }: PageProps<"/app/operations/[operationId]/edit">) {
   const route = operationIdSchema.safeParse((await params).operationId);
 
@@ -24,11 +27,16 @@ export default async function EditOperationPage({
 
   let operation;
   let contracts;
+  let managers;
 
   try {
-    [operation, contracts] = await Promise.all([
+    const authorization = await getAuthorizationContext();
+    [operation, contracts, managers] = await Promise.all([
       getOperationById(route.data),
       listContracts(),
+      authorization.role === "DIRECTOR"
+        ? listOrganizationMembers()
+        : Promise.resolve(undefined),
     ]);
   } catch (error) {
     if (isAppError(error) && error.code === "NOT_FOUND") {
@@ -52,7 +60,9 @@ export default async function EditOperationPage({
     );
   }
 
-  const detailHref = `/app/operations/${operation.id}`;
+  const requestedTab = (await searchParams).tab;
+  const returnTab = typeof requestedTab === "string" && ["units", "status"].includes(requestedTab) ? requestedTab : undefined;
+  const detailHref = `/app/operations/${operation.id}${returnTab ? `?tab=${returnTab}` : ""}`;
 
   return (
     <PageShell>
@@ -65,12 +75,14 @@ export default async function EditOperationPage({
 
         <section
           aria-label="Formulário de edição da operação"
-          className="mt-8 rounded-surface border border-border-default bg-surface p-6 sm:p-8"
+          className="mt-5 rounded-card bg-surface p-5 shadow-card sm:p-6"
         >
           <OperationForm
             cancelHref={detailHref}
             contracts={contracts}
+            managers={managers}
             operation={operation}
+            returnTab={returnTab}
           />
         </section>
       </ContentContainer>

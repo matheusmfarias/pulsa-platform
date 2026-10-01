@@ -1,84 +1,195 @@
-import { Search, X } from "lucide-react";
-import Link from "next/link";
+"use client";
 
+import { Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import * as React from "react";
+
+import { ActiveFilters } from "@/components/layout/list";
+import { useListNavigation } from "@/components/layout/list-navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-
+import { FilterChip } from "@/components/ui/filter-chip";
 import {
-  ActiveFiltersSummary,
-  ListFilterActions,
-  ListFilterBar,
-} from "@/components/layout/list";
+  FilterSelect,
+  type FilterSelectOption,
+} from "@/components/ui/filter-select";
+import { Input } from "@/components/ui/input";
+import {
+  WORKER_STATUS_LABELS,
+  type WorkerStatus,
+} from "../domain/worker";
+import type { WorkerListPageSize } from "../domain/worker-list-pagination";
+import { parseWorkerListSearchParams, workerListHref } from "./worker-list-filters";
 
-import { WORKER_STATUS_LABELS } from "../domain/worker";
-import type { WorkerListFilters } from "../schemas/worker-schemas";
+type WorkerStatusFilter = WorkerStatus | "all";
 
-export function hasActiveWorkerFilters(filters: WorkerListFilters): boolean {
-  return Boolean(filters.query) || filters.status !== "all";
+export const WORKER_SEARCH_DEBOUNCE_MS = 350;
+
+const STATUS_OPTIONS: FilterSelectOption<WorkerStatusFilter>[] = [
+  { label: "Todos os status", value: "all" },
+  { label: WORKER_STATUS_LABELS.onboarding, value: "onboarding" },
+  { label: WORKER_STATUS_LABELS.active, value: "active" },
+  { label: WORKER_STATUS_LABELS.inactive, value: "inactive" },
+  { label: WORKER_STATUS_LABELS.terminated, value: "terminated" },
+];
+const STATUS_VALUES = new Set<WorkerStatusFilter>(
+  STATUS_OPTIONS.map((option) => option.value),
+);
+
+function readStatusFilter(value: string | null): WorkerStatusFilter {
+  return value && STATUS_VALUES.has(value as WorkerStatusFilter)
+    ? (value as WorkerStatusFilter)
+    : "all";
 }
 
-export function WorkerFilterBar({ filters }: { filters: WorkerListFilters }) {
-  const hasActiveFilters = hasActiveWorkerFilters(filters);
+export function WorkerFilterBar({ children, pageSize }: { children: React.ReactNode; pageSize: WorkerListPageSize }) {
+  const { navigate } = useListNavigation();
+  const searchParams = useSearchParams();
+  const suppressDebounceRef = React.useRef(false);
+  const debounceTimerRef = React.useRef<number | null>(null);
+  const appliedQuery = searchParams.get("q") ?? "";
+  const status = readStatusFilter(searchParams.get("status"));
+  const requestedStatusRef = React.useRef(status);
+  React.useEffect(() => {
+    requestedStatusRef.current = status;
+  }, [status]);
+  const [queryDraft, setQueryDraft] = React.useState({
+    source: appliedQuery,
+    value: appliedQuery,
+  });
+  const query =
+    queryDraft.source === appliedQuery ? queryDraft.value : appliedQuery;
+  const hasActiveFilters = Boolean(appliedQuery) || status !== "all";
+
+  const replaceFilters = React.useCallback(
+    (updates: { query?: string; status?: WorkerStatusFilter }) => {
+      const filters = parseWorkerListSearchParams({
+        q: updates.query ?? query,
+        status: updates.status ?? requestedStatusRef.current,
+      });
+      navigate(workerListHref("/app/workers", filters, 1, pageSize), "replace");
+    },
+    [navigate, pageSize, query],
+  );
+
+  function cancelPendingSearch() {
+    if (debounceTimerRef.current !== null) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }
+
+  React.useEffect(() => {
+    if (suppressDebounceRef.current) {
+      suppressDebounceRef.current = false;
+      return;
+    }
+
+    if (query.trim() === appliedQuery) return;
+
+    const timeout = window.setTimeout(() => {
+      debounceTimerRef.current = null;
+      replaceFilters({ query });
+    }, WORKER_SEARCH_DEBOUNCE_MS);
+    debounceTimerRef.current = timeout;
+
+    return () => {
+      window.clearTimeout(timeout);
+      if (debounceTimerRef.current === timeout) debounceTimerRef.current = null;
+    };
+  }, [appliedQuery, query, replaceFilters]);
+
+  function clearQuery() {
+    cancelPendingSearch();
+    suppressDebounceRef.current = true;
+    setQueryDraft({ source: appliedQuery, value: "" });
+    replaceFilters({ query: "" });
+  }
+
+  function clearAllFilters() {
+    cancelPendingSearch();
+    suppressDebounceRef.current = true;
+    setQueryDraft({ source: appliedQuery, value: "" });
+    navigate("/app/workers", "replace");
+  }
 
   return (
-    <ListFilterBar
-      action="/app/workers"
-      aria-label="Filtros de colaboradores"
-      className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
+    <section
+      aria-label="Lista de colaboradores"
+      className="mt-6 overflow-hidden rounded-card bg-surface shadow-card"
     >
-      <div className="relative">
-        <Search
-          aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground"
-        />
-        <Input
-          aria-label="Buscar colaboradores por nome ou CPF"
-          className="pl-9"
-          defaultValue={filters.query}
-          name="q"
-          placeholder="Buscar por nome ou CPF"
-        />
+      <div
+        aria-label="Filtros de colaboradores"
+        className="p-3 sm:p-4"
+        role="search"
+      >
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              aria-label="Buscar colaboradores por nome ou CPF"
+              className="border-border-strong bg-background pl-9 shadow-[0_1px_0_rgb(0_0_0/0.02)]"
+              name="q"
+              onChange={(event) =>
+                setQueryDraft({ source: appliedQuery, value: event.target.value })
+              }
+              placeholder="Buscar por nome ou CPF"
+              type="search"
+              value={query}
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
+            <FilterSelect
+              ariaLabel="Filtrar colaboradores por status"
+              label="Status"
+              onValueChange={(value) => {
+                if (value !== status) {
+                  cancelPendingSearch();
+                  requestedStatusRef.current = value;
+                  suppressDebounceRef.current = true;
+                  replaceFilters({ status: value });
+                }
+              }}
+              options={STATUS_OPTIONS}
+              value={status}
+            />
+          </div>
+        </div>
+
+        {hasActiveFilters ? (
+          <ActiveFilters className="mt-3 min-w-0 gap-1.5 border-border-default/70 pt-2.5">
+            {appliedQuery ? (
+              <FilterChip
+                onRemove={clearQuery}
+                removeLabel="Remover filtro de busca"
+              >
+                Busca: {appliedQuery}
+              </FilterChip>
+            ) : null}
+            {status !== "all" ? (
+              <FilterChip
+                onRemove={() => replaceFilters({ status: "all" })}
+                removeLabel="Remover filtro de status"
+              >
+                Status: {WORKER_STATUS_LABELS[status]}
+              </FilterChip>
+            ) : null}
+            <Button
+              className="ml-auto h-7 shrink-0 px-2 text-xs"
+              onClick={clearAllFilters}
+              type="button"
+              variant="ghost"
+            >
+              Limpar filtros
+            </Button>
+          </ActiveFilters>
+        ) : null}
       </div>
 
-      <Select
-        aria-label="Filtrar colaboradores por status"
-        defaultValue={filters.status}
-        name="status"
-      >
-        <option value="all">Todos os status</option>
-        <option value="onboarding">Em onboarding</option>
-        <option value="active">Ativos</option>
-        <option value="inactive">Inativos</option>
-        <option value="terminated">Encerrados</option>
-      </Select>
-
-      <ListFilterActions>
-        <Button className="flex-1 sm:flex-none" type="submit" variant="outline">
-          Aplicar filtros
-        </Button>
-        {hasActiveFilters ? (
-          <Button asChild size="icon" variant="ghost">
-            <Link
-              aria-label="Limpar filtros de colaboradores"
-              href="/app/workers"
-            >
-              <X aria-hidden="true" className="size-4" />
-            </Link>
-          </Button>
-        ) : null}
-      </ListFilterActions>
-
-      {hasActiveFilters ? (
-        <ActiveFiltersSummary className="sm:col-span-3">
-          <span className="font-medium text-foreground">Filtros ativos:</span>{" "}
-          {filters.query ? <>Busca por “{filters.query}”</> : null}
-          {filters.query && filters.status !== "all" ? " · " : null}
-          {filters.status !== "all"
-            ? "Status: " + WORKER_STATUS_LABELS[filters.status]
-            : null}
-        </ActiveFiltersSummary>
-      ) : null}
-    </ListFilterBar>
+      <div className="border-t border-border-default/80">{children}</div>
+    </section>
   );
 }

@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/shared/db/supabase";
+import { measureServerStage } from "@/shared/logging";
 
 import type { LoginInput } from "../schemas/login-schema";
 import type { AuthenticatedUser } from "../types/authenticated-user";
@@ -18,16 +19,20 @@ export async function findAuthenticatedUser(): Promise<{
   errorCode?: string;
 }> {
   const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase.auth.getUser();
+  const { data, error } = await measureServerStage(
+    "auth.server.get_claims",
+    () => supabase.auth.getClaims(),
+  );
 
-  if (error || !data.user) {
+  const userId = data?.claims?.sub;
+  if (error || typeof userId !== "string" || !userId) {
     return { user: null, errorCode: error?.code };
   }
 
   return {
     user: {
-      id: data.user.id,
-      email: data.user.email ?? null,
+      id: userId,
+      email: typeof data.claims.email === "string" ? data.claims.email : null,
     },
   };
 }

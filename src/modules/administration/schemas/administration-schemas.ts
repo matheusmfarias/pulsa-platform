@@ -20,6 +20,11 @@ export const membershipStatusInputSchema = z.object({
   profileId: profileIdSchema,
   status: membershipStatusSchema,
 });
+export const inviteOrganizationUserSchema = z.object({
+  displayName: z.string().trim().min(2, "Informe o nome da pessoa.").max(120),
+  email: z.string().trim().toLowerCase().pipe(z.email("Informe um e-mail válido.")),
+  role: organizationRoleSchema,
+});
 
 const dateSchema = z
   .string()
@@ -37,6 +42,10 @@ export const auditListFiltersSchema = z
     page: z.preprocess(
       firstString,
       z.coerce.number().int().min(1).max(10_000).default(1),
+    ),
+    pageSize: z.preprocess(
+      firstString,
+      z.union([z.literal("10"), z.literal("25"), z.literal("50")]).transform(Number).catch(10).default(10),
     ),
     from: z.preprocess(firstString, dateSchema),
     to: z.preprocess(firstString, dateSchema),
@@ -66,4 +75,4 @@ export const auditListFiltersSchema = z
 
 export type AuditListFilters = z.infer<typeof auditListFiltersSchema>;
 
-export const AUDIT_PAGE_SIZE = 50;
+export const AUDIT_PAGE_SIZE = 10;

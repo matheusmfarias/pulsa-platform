@@ -99,7 +99,9 @@ export async function updateOperationAction(
   revalidatePath("/app/operations");
   revalidatePath(`/app/operations/${id.data}`);
   revalidatePath(`/app/contracts/${contractId}`);
-  redirect(`/app/operations/${id.data}`);
+  const returnTab = formData.get("return_tab");
+  const tabSuffix = typeof returnTab === "string" && ["units", "status"].includes(returnTab) ? `?tab=${returnTab}` : "";
+  redirect(`/app/operations/${id.data}${tabSuffix}`);
 }
 
 export async function changeOperationStatusAction(

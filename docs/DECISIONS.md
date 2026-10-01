@@ -315,3 +315,21 @@ RBAC e por lock transacional da Organization. A transação rejeita rebaixar ou 
 
 E-mails de outros usuários ficam fora da Foundation administrativa: não há acesso apropriado a
 `auth.users` com as credenciais normais do backend e nenhuma service-role foi adicionada.
+
+---
+
+## ADR-028 — Convite auditado para contas internas
+
+**Status:** Accepted
+
+A Direção pode convidar uma nova conta interna pela tela de Usuários, informando nome, e-mail e
+papel. O backend cria uma identidade Auth marcada para Pulsa Core e para a Organization atual;
+uma RPC protegida por `organization_member:update` cria Profile e Membership em uma transação
+auditada. O e-mail de ativação é enviado após o vínculo ser salvo. Se o envio falhar, a conta
+permanece visível para reenvio. A senha é definida pela pessoa convidada após confirmar o código.
+
+A service-role é usada apenas no servidor para provisionar e consultar identidades Auth; a lista
+mostra e-mails apenas depois de confirmar o escopo organizacional e a permissão de leitura.
+Contas Auth já existentes não são vinculadas automaticamente, pois isso poderia conceder acesso
+a uma identidade Worker ou de outra origem sem uma decisão explícita. O fluxo não altera a
+restrição do último Diretor ativo nem a matriz de papéis existente.

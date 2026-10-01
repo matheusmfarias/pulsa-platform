@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,10 @@ import { loginAction, type LoginActionState } from "../actions";
 const initialLoginState: LoginActionState = { error: null };
 
 export function LoginForm() {
-  const [state, formAction, pending] = useActionState(loginAction, initialLoginState);
+  const [state, formAction, pending, preservationRef, preservationSubmit, preservationReset] = usePreservedActionState(loginAction, initialLoginState);
 
   return (
-    <form action={formAction} className="mt-8 space-y-5" noValidate>
+    <form action={formAction} className="mt-8 space-y-5" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
       <div className="space-y-2">
         <Label htmlFor="email">E-mail</Label>
         <Input

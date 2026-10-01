@@ -6,9 +6,13 @@ import {
 } from "@/modules/operational-context";
 
 import type { AssignmentInput, AssignmentListFilters } from "../schemas/assignment-schemas";
+import { measureServerStage } from "@/shared/logging";
 
 const ASSIGNMENT_WITH_CONTEXT_SELECT =
   "*, worker:workers!inner(id, full_name, status, organization_id), position:positions!inner(id, status, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name, contract:contracts!inner(id, name, client:clients!inner(id, trade_name, organization_id)))))";
+
+const ASSIGNMENT_LIST_PAGE_SELECT =
+  "id, start_date, end_date, status, worker:workers!inner(id, full_name), position:positions!inner(id, job_role:job_roles!inner(name), unit:units!inner(id, name, operation:operations!inner(id, contract:contracts!inner(id, client_id, client:clients!inner(id)))))";
 
 export async function findAssignments(
   filters: AssignmentListFilters,
@@ -28,6 +32,33 @@ export async function findAssignments(
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
   );
+}
+
+export async function findAssignmentsPage(
+  filters: AssignmentListFilters,
+  operationalContext: OperationalContext,
+  page: number,
+  pageSize: number,
+) {
+  const supabase = await createServerSupabaseClient();
+  let query = supabase
+    .from("assignments")
+    .select(ASSIGNMENT_LIST_PAGE_SELECT, { count: "exact" })
+    .order("start_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range((page - 1) * pageSize, page * pageSize - 1);
+  if (filters.workerId) query = query.eq("worker_id", filters.workerId);
+  if (filters.positionId) query = query.eq("position_id", filters.positionId);
+  if (filters.status) query = query.eq("status", filters.status);
+  const searchTerm = filters.query.replace(/[%_*,().]/g, " ").replace(/\s+/g, " ").trim();
+  if (searchTerm) query = query.ilike("worker.full_name", `%${searchTerm}%`);
+  const filteredQuery = applyOperationalContextFilter(
+    query,
+    operationalContext,
+    OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
+  );
+  return measureServerStage("assignments.list_page_query", () => filteredQuery);
 }
 
 export async function findAssignmentsForOperation(operationId: string) {
@@ -52,18 +83,24 @@ export async function findAssignmentsForUnit(unitId: string) {
 
 export async function findActiveAssignmentsWithContext(
   operationalContext: OperationalContext,
+  workerIds?: string[],
 ) {
   const supabase = await createServerSupabaseClient();
-  const query = supabase
+  let query = supabase
     .from("assignments")
     .select(ASSIGNMENT_WITH_CONTEXT_SELECT)
     .eq("status", "active")
     .order("start_date", { ascending: false })
     .order("created_at", { ascending: false });
-  return applyOperationalContextFilter(
+  if (workerIds) query = query.in("worker_id", workerIds);
+  const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.assignments,
+  );
+  return measureServerStage(
+    workerIds ? "assignments.active_for_workers" : "assignments.active_with_context",
+    () => filteredQuery,
   );
 }
 

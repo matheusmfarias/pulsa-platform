@@ -155,7 +155,7 @@ export default async function AssignmentDetailsPage({
           title={assignment.worker.full_name}
         />
 
-        <div className="mt-8 divide-y divide-border-default border-y border-border-default">
+        <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
           <DetailSection
             description="Relação operacional estabelecida entre o colaborador e o posto."
             id="assignment-relation"

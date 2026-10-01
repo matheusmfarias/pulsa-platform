@@ -6,10 +6,11 @@ import {
 } from "@/modules/operational-context";
 
 import type { CreateScheduleInput, ScheduleEntryInput, UpdateScheduleEntryInput } from "../schemas/scheduling-schemas";
+import { measureServerStage } from "@/shared/logging";
 
 const SCHEDULE_SELECT = "*, operation:operations!inner(id, name)";
 const REVISION_SELECT = "*, schedule:schedules!inner(*)";
-const REVISION_WITH_ENTRIES_SELECT = "*, schedule:schedules!inner(*), entries:schedule_entries(*, absences(id, reason, status, replacements(id, status, replacement_assignment_id, replacement_assignment:assignments!replacements_replacement_assignment_id_fkey(worker:workers!inner(id, full_name)))), assignment:assignments!inner(id, worker_id, position_id, start_date, end_date, status, worker:workers!inner(id, full_name, status), position:positions!inner(id, status, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name)))))";
+const REVISION_WITH_ENTRIES_SELECT = "*, schedule:schedules!inner(*), entries:schedule_entries(*, absences:absences!absences_schedule_entry_id_fkey(id, reason, status, replacements(id, status, replacement_assignment_id, replacement_assignment:assignments!replacements_replacement_assignment_id_fkey(worker:workers!inner(id, full_name)))), inherited_absence:absences!schedule_entries_inherited_absence_id_fkey(id, reason, status, replacements(id, status, replacement_assignment_id, replacement_assignment:assignments!replacements_replacement_assignment_id_fkey(worker:workers!inner(id, full_name)))), assignment:assignments!inner(id, worker_id, position_id, start_date, end_date, status, worker:workers!inner(id, full_name, status), position:positions!inner(id, status, job_role:job_roles!inner(id, name), unit:units!inner(id, name, timezone, operation:operations!inner(id, name)))))";
 const SCHEDULE_OVERVIEW_SELECT = "*, operation:operations!inner(id, name, contract:contracts!inner(client_id, id)), revisions:schedule_revisions(id, schedule_id, version, status, based_on_revision_id, created_at, created_by, submitted_at, submitted_by, approved_at, approved_by, published_at, published_by)";
 const SCHEDULE_COPY_SOURCE_SELECT = "*, operation:operations!inner(id, name), revisions:schedule_revisions!inner(id, version, status)";
 
@@ -59,11 +60,12 @@ export async function findScheduleOverviews(operationalContext: OperationalConte
     .select(SCHEDULE_OVERVIEW_SELECT)
     .order("period_start", { ascending: false })
     .order("version", { ascending: false, referencedTable: "revisions" });
-  return applyOperationalContextFilter(
+  const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.schedules,
   );
+  return measureServerStage("schedules.list_overviews", () => filteredQuery);
 }
 
 export async function findPublishedScheduleCopySources(operationalContext: OperationalContext) {
@@ -73,11 +75,12 @@ export async function findPublishedScheduleCopySources(operationalContext: Opera
     .select(SCHEDULE_COPY_SOURCE_SELECT)
     .eq("revisions.status", "published")
     .order("period_start", { ascending: false });
-  return applyOperationalContextFilter(
+  const filteredQuery = applyOperationalContextFilter(
     query,
     operationalContext,
     OPERATIONAL_CONTEXT_QUERY_PATHS.schedules,
   );
+  return measureServerStage("schedules.copy_sources", () => filteredQuery);
 }
 
 export async function findScheduleById(scheduleId: string) {

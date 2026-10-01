@@ -1,12 +1,15 @@
 "use client";
 
-import { Eye, LogIn, LogOut, X } from "lucide-react";
+import { Eye, LogIn, LogOut } from "lucide-react";
 import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@/components/ui/disclosure";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { usePreservedActionState } from "@/shared/forms/use-preserved-action-state";
 
 import {
   cancelPresenceAction,
@@ -86,7 +89,7 @@ function QuickAction({ row }: { row: OperationalPresenceRow }) {
   return (
     <div>
       <form action={formAction}>
-        <Button disabled={pending} size="sm" type="submit">
+        <Button className="h-11 w-full sm:h-9 sm:w-auto" disabled={pending} size="sm" type="submit">
           {isStart ? <LogIn aria-hidden="true" className="size-4" /> : <LogOut aria-hidden="true" className="size-4" />}
           {pending ? "Registrando…" : isStart ? "Registrar chegada" : "Registrar saída"}
         </Button>
@@ -107,7 +110,7 @@ function PresenceDetails({
 }) {
   const [open, setOpen] = useState(false);
   const correctCommand = correctPresenceAction.bind(null, row.presence_id!);
-  const [correctionState, correctionAction, correctionPending] = useActionState(
+  const [correctionState, correctionAction, correctionPending, correctionPreservationRef, correctionPreservationSubmit, correctionPreservationReset] = usePreservedActionState(
     async (previousState: PresenceActionState, formData: FormData) => {
       const arrivedAt = String(formData.get("arrived_at") ?? "");
       const departedAt = String(formData.get("departed_at") ?? "");
@@ -121,7 +124,7 @@ function PresenceDetails({
     },
     initialState,
   );
-  const [cancellationState, cancellationAction, cancellationPending] = useActionState(
+  const [cancellationState, cancellationAction, cancellationPending, cancellationPreservationRef, cancellationPreservationSubmit, cancellationPreservationReset] = usePreservedActionState(
     cancelPresenceAction.bind(null, row.presence_id!),
     initialState,
   );
@@ -132,24 +135,18 @@ function PresenceDetails({
         <Eye aria-hidden="true" className="size-4" />
       </Button>
       {open ? (
-        <div aria-modal="true" className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-foreground/20 p-4" role="dialog">
-          <div className="my-6 w-full max-w-xl rounded-surface border border-border-default bg-surface p-5 shadow-lg">
-            <header className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="font-semibold">Planejado × realizado</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{row.actual_worker_name}</p>
-              </div>
-              <Button aria-label="Fechar" onClick={() => setOpen(false)} size="icon" type="button" variant="ghost"><X aria-hidden="true" className="size-4" /></Button>
-            </header>
-            <dl className="mt-5 grid gap-3 rounded-control bg-subtle p-4 text-sm sm:grid-cols-2">
+        <Dialog className="max-w-xl" description={row.actual_worker_name} onOpenChange={setOpen} open={open} title="Planejado × realizado">
+            <dl className="grid gap-3 rounded-control bg-subtle p-4 text-sm sm:grid-cols-2">
               <div><dt className="text-muted-foreground">Planejado</dt><dd className="mt-1 font-medium">{formatDateTime(row.starts_at, row.unit_timezone)} — {formatDateTime(row.ends_at, row.unit_timezone)}</dd></div>
               <div><dt className="text-muted-foreground">Realizado</dt><dd className="mt-1 font-medium">{formatDateTime(row.arrived_at, row.unit_timezone)} — {formatDateTime(row.departed_at, row.unit_timezone)}</dd></div>
               <div><dt className="text-muted-foreground">Contexto</dt><dd className="mt-1">{row.operation_name} · {row.unit_name}</dd></div>
               <div><dt className="text-muted-foreground">Posto</dt><dd className="mt-1">{row.job_role_name}</dd></div>
             </dl>
             {canCorrect ? (
-              <form action={correctionAction} className="mt-5 space-y-3">
-                <h3 className="text-sm font-semibold">Corrigir horários</h3>
+              <Disclosure className="mt-5 border-t border-border-default pt-4">
+                <DisclosureTrigger className="font-semibold">Corrigir horários</DisclosureTrigger>
+                <DisclosureContent>
+                <form action={correctionAction} className="mt-4 space-y-3" onReset={correctionPreservationReset} onSubmit={correctionPreservationSubmit} ref={correctionPreservationRef}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="grid gap-1.5 text-sm">Chegada<Input defaultValue={dateTimeLocalValue(row.arrived_at, row.unit_timezone)} name="arrived_at" required type="datetime-local" /></label>
                   <label className="grid gap-1.5 text-sm">Saída<Input defaultValue={dateTimeLocalValue(row.departed_at, row.unit_timezone)} disabled={row.presence_status !== "completed"} name="departed_at" required={row.presence_status === "completed"} type="datetime-local" /></label>
@@ -157,18 +154,23 @@ function PresenceDetails({
                 <label className="grid gap-1.5 text-sm">Justificativa<Textarea maxLength={1000} name="reason" required /></label>
                 {correctionState.error ? <FeedbackMessage variant="danger">{correctionState.error}</FeedbackMessage> : null}
                 <Button disabled={correctionPending} size="sm" type="submit">{correctionPending ? "Salvando…" : "Salvar correção"}</Button>
-              </form>
+                </form>
+                </DisclosureContent>
+              </Disclosure>
             ) : null}
             {canCancel ? (
-              <form action={cancellationAction} className="mt-6 space-y-3 border-t border-border-default pt-5">
-                <h3 className="text-sm font-semibold">Cancelar presença</h3>
+              <Disclosure className="mt-5 border-t border-border-default pt-4">
+                <DisclosureTrigger className="font-semibold text-status-danger-foreground hover:text-status-danger-foreground">Cancelar presença</DisclosureTrigger>
+                <DisclosureContent>
+                <form action={cancellationAction} className="mt-4 space-y-3" onReset={cancellationPreservationReset} onSubmit={cancellationPreservationSubmit} ref={cancellationPreservationRef}>
                 <label className="grid gap-1.5 text-sm">Justificativa<Textarea maxLength={1000} name="reason" required /></label>
                 {cancellationState.error ? <FeedbackMessage variant="danger">{cancellationState.error}</FeedbackMessage> : null}
                 <Button disabled={cancellationPending} size="sm" type="submit" variant="destructive">{cancellationPending ? "Cancelando…" : "Cancelar presença"}</Button>
-              </form>
+                </form>
+                </DisclosureContent>
+              </Disclosure>
             ) : null}
-          </div>
-        </div>
+        </Dialog>
       ) : null}
     </>
   );
@@ -190,8 +192,8 @@ export function PresenceControls({
   const startAvailable = canStart && ["awaiting_confirmation", "replacement_expected"].includes(row.operational_status);
   const completeAvailable = canComplete && row.operational_status === "present";
   return (
-    <div className="flex items-center justify-end gap-1">
-      {startAvailable || completeAvailable ? <QuickAction row={row} /> : null}
+    <div className={`flex w-full items-center gap-2 sm:w-auto sm:justify-end ${startAvailable || completeAvailable ? "justify-between" : "justify-end"}`}>
+      {startAvailable || completeAvailable ? <div className="w-full sm:w-auto"><QuickAction row={row} /></div> : null}
       {row.presence_id ? <PresenceDetails canCancel={canCancel} canCorrect={canCorrect} row={row} /> : null}
     </div>
   );

@@ -9,6 +9,7 @@ import {
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ListNavigationProvider, ListPendingSurface } from "@/components/layout/list-navigation";
 import { PermissionGate } from "@/modules/authorization";
 import {
   JobRoleFilterBar,
@@ -59,6 +60,7 @@ export default async function JobRolesPage({
   const hasActiveFilters = hasActiveJobRoleFilters(filters);
 
   return (
+    <ListNavigationProvider>
     <PageShell>
       <ContentContainer size="list">
         <PageHeader
@@ -78,8 +80,8 @@ export default async function JobRolesPage({
           description="Catálogo organizacional reutilizável de cargos e funções."
           title="Cargos"
         />
-        <JobRoleFilterBar filters={filters} />
-        <div className="mt-5 sm:mt-6">
+        <JobRoleFilterBar filters={filters}>
+        <div>
           {jobRoles.length > 0 ? (
             <p className="text-sm text-muted-foreground">
               <span className="font-medium tabular-nums text-foreground">
@@ -97,7 +99,7 @@ export default async function JobRolesPage({
           ) : null}
 
           {jobRoles.length === 0 ? (
-            <section className="mt-4 rounded-surface border border-dashed border-border-default px-6 py-8 text-center sm:py-10">
+            <section className="mt-4 rounded-card bg-surface shadow-card px-6 py-8 text-center sm:py-10">
               <h2 className="font-medium">
                 {hasActiveFilters
                   ? "Nenhum cargo corresponde aos filtros"
@@ -111,10 +113,14 @@ export default async function JobRolesPage({
               </p>
             </section>
           ) : (
-            <JobRoleTable jobRoles={jobRoles} />
+            <ListPendingSurface>
+              <JobRoleTable jobRoles={jobRoles} />
+            </ListPendingSurface>
           )}
         </div>
+        </JobRoleFilterBar>
       </ContentContainer>
     </PageShell>
+    </ListNavigationProvider>
   );
 }

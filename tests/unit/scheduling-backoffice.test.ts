@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it, vi } from "vitest";
 
 import { authenticatedNavigation } from "@/components/shared/authenticated-navigation";
@@ -21,8 +23,17 @@ const revision = (version: number, status: "draft" | "pending_approval" | "appro
 });
 
 describe("Scheduling Backoffice", () => {
-  it("includes Escalas in the Operação navigation group", () => {
-    expect(authenticatedNavigation.find((group) => group.label === "Operação")?.items).toContainEqual(expect.objectContaining({ href: "/app/scheduling", label: "Escalas" }));
+  it("disambiguates direct and inherited Absence relationships", () => {
+    const repository = readFileSync(
+      new URL("../../src/modules/scheduling/repositories/scheduling-repository.ts", import.meta.url),
+      "utf8",
+    );
+    expect(repository).toContain("absences:absences!absences_schedule_entry_id_fkey(");
+    expect(repository).toContain("inherited_absence:absences!schedule_entries_inherited_absence_id_fkey(");
+  });
+
+  it("includes Escalas in the Rotina navigation group", () => {
+    expect(authenticatedNavigation.find((group) => group.label === "Rotina")?.items).toContainEqual(expect.objectContaining({ href: "/app/scheduling", label: "Escalas" }));
   });
 
   it("applies OperationalContext to the Schedule query path", () => {
