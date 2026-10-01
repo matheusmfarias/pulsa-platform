@@ -87,7 +87,7 @@ export function WorkerDetailTabs({ tabs }: { tabs: WorkerDetailTab[] }) {
           role="tabpanel"
           tabIndex={0}
         >
-          {activeId === tab.id ? tab.content : null}
+          {tab.content}
         </div>
       ))}
     </div>
