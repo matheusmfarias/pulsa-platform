@@ -198,9 +198,11 @@ function CoreCollectionData({ label }: { label: string }) {
 function CoreDetailData({ label }: { label: string }) {
   const name = label.toLocaleLowerCase("pt-BR");
   const firstSectionFields = name.includes("cargo") ? 3 : name.includes("registro") ? 5 : 4;
+  const hasTabs = name.includes("unidade") || name.includes("operação");
   return (
     <div className="mt-8 divide-y divide-border-default rounded-card bg-surface px-5 shadow-card sm:px-7">
-      {[firstSectionFields, 3].map((fields, section) => (
+      {hasTabs ? <div className="flex gap-5 py-3" aria-hidden="true"><Bone className="h-5 w-24" /><Bone className="h-5 w-20" /><Bone className="h-5 w-28" /></div> : null}
+      {[firstSectionFields, name.includes("unidade") ? 5 : name.includes("operação") ? 4 : 3].map((fields, section) => (
         <section className="py-6" key={section}>
           <Bone className={section === 0 ? "h-5 w-44" : "h-5 w-36"} />
           {section === 0 ? <Bone className="mt-2 h-4 w-72 max-w-full" /> : null}

@@ -31,11 +31,13 @@ export function UnitForm({
   unit,
   defaultOperationId,
   cancelHref,
+  returnTab,
 }: {
   operations: OperationWithContext[];
   unit?: Unit;
   defaultOperationId?: string;
   cancelHref: string;
+  returnTab?: string;
 }) {
   const handler = unit
     ? updateUnitAction.bind(null, unit.id)
@@ -45,6 +47,7 @@ export function UnitForm({
 
   return (
     <form action={action} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+      {unit && returnTab ? <input name="return_tab" type="hidden" value={returnTab} /> : null}
       <section aria-labelledby="unit-context-heading">
         <div>
           <h2 className="font-semibold" id="unit-context-heading">

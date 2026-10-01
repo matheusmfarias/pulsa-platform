@@ -30,12 +30,14 @@ export function OperationForm({
   operation,
   defaultContractId,
   cancelHref,
+  returnTab,
 }: {
   contracts: ContractWithClient[];
   managers?: OrganizationMember[];
   operation?: Operation;
   defaultContractId?: string;
   cancelHref: string;
+  returnTab?: string;
 }) {
   const action = operation
     ? updateOperationAction.bind(null, operation.id)
@@ -45,6 +47,7 @@ export function OperationForm({
 
   return (
     <form action={formAction} className="space-y-6" noValidate onReset={preservationReset} onSubmit={preservationSubmit} ref={preservationRef}>
+      {operation && returnTab ? <input name="return_tab" type="hidden" value={returnTab} /> : null}
       <section aria-labelledby="operation-context-heading">
         <div>
           <h2 className="font-semibold" id="operation-context-heading">

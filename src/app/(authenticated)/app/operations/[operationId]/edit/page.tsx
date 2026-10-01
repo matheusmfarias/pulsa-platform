@@ -19,6 +19,7 @@ import { isAppError, toPublicErrorMessage } from "@/shared/errors";
 
 export default async function EditOperationPage({
   params,
+  searchParams,
 }: PageProps<"/app/operations/[operationId]/edit">) {
   const route = operationIdSchema.safeParse((await params).operationId);
 
@@ -59,7 +60,9 @@ export default async function EditOperationPage({
     );
   }
 
-  const detailHref = `/app/operations/${operation.id}`;
+  const requestedTab = (await searchParams).tab;
+  const returnTab = typeof requestedTab === "string" && ["units", "status"].includes(requestedTab) ? requestedTab : undefined;
+  const detailHref = `/app/operations/${operation.id}${returnTab ? `?tab=${returnTab}` : ""}`;
 
   return (
     <PageShell>
@@ -79,6 +82,7 @@ export default async function EditOperationPage({
             contracts={contracts}
             managers={managers}
             operation={operation}
+            returnTab={returnTab}
           />
         </section>
       </ContentContainer>

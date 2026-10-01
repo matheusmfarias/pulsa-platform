@@ -11,6 +11,7 @@ import { getUnitById, UnitForm, unitIdSchema } from "@/modules/units";
 
 export default async function EditUnitPage({
   params,
+  searchParams,
 }: PageProps<"/app/units/[unitId]/edit">) {
   const route = unitIdSchema.safeParse((await params).unitId);
 
@@ -20,12 +21,15 @@ export default async function EditUnitPage({
     getUnitById(route.data),
     listOperations(),
   ]);
+  const requestedTab = (await searchParams).tab;
+  const returnTab = typeof requestedTab === "string" && ["positions", "workers", "status"].includes(requestedTab) ? requestedTab : undefined;
+  const detailHref = `/app/units/${unit.id}${returnTab ? `?tab=${returnTab}` : ""}`;
 
   return (
     <PageShell>
       <ContentContainer size="form">
         <PageHeader
-          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Unidades", href: "/app/units" }, { label: unit.name, href: `/app/units/${unit.id}` }, { label: "Editar" }]} />}
+          breadcrumb={<Breadcrumb items={[{ label: "Operação" }, { label: "Unidades", href: "/app/units" }, { label: unit.name, href: detailHref }, { label: "Editar" }]} />}
           description="Atualize o contexto, a localização e as configurações desta unidade."
           title="Editar unidade"
         />
@@ -35,8 +39,9 @@ export default async function EditUnitPage({
           className="mt-5 rounded-card bg-surface p-5 shadow-card sm:p-6"
         >
           <UnitForm
-            cancelHref={`/app/units/${unit.id}`}
+            cancelHref={detailHref}
             operations={operations}
+            returnTab={returnTab}
             unit={unit}
           />
         </section>
